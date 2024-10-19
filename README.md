@@ -51,8 +51,15 @@ Last released version of **AUDIT** is hosted at https://audit.streamlitapp.com f
 
 ## Getting Started
 
-### 1. Installation
+### 1.1 Installation via PIP installer (Not available yet)
 
+```bash
+pip install audit
+```
+
+#### 1.2. Installation via AUDIT repository 
+
+#### 1.2.1. Without using Poetry
 **(Recommended) Create an isolated Anaconda environment:**
 
 ```bash
@@ -60,29 +67,37 @@ conda create -n audit_env python=3.10
 conda activate audit_env
 ```
 
-#### 1.1. (Not available yet) Via PIP installer
+Clone the repository:
+ ```bash
+ git clone https://github.com/caumente/AUDIT.git
+ cd AUDIT
+ ```
 
+Install the required packages:
+ ```bash
+ pip install -r requirements.txt
+ ```
 
-```bash
-pip install audit
+#### 1.2.2 Using Poetry
+
+The library _poetry_ must be installed in your environment to follow this via of installation.
+
+Clone the repository:
+ ```bash
+ git clone https://github.com/caumente/AUDIT.git
+ cd AUDIT
 ```
 
-#### 1.2. Via AUDIT repository
+Install the dependencies:
+```bash
+poetry install
+```
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/caumente/AUDIT.git
-    cd AUDIT
-    ```
-2. Install the required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-   
-3. Export path
-    ```bash
-    export PYTHONPATH=$PYTHONPATH:/home/user/AUDIT/src
-    ```
+Activate virtual environment:
+```bash
+poetry shell
+```
+
 
 ### 2. Configuration
 

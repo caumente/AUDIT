@@ -1,4 +1,8 @@
-[project]
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
 name = "audit"
 version = "0.1.0"
 description = "AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence"
@@ -6,7 +10,7 @@ authors = ["Carlos Aumente <carlosaumente@gmail.com>"]
 license = "Apache 2.0"
 readme = "README.md"
 
-[project.dependencies]
+[tool.poetry.dependencies]
 python = "^3.10"
 colorama = "0.4.6"
 matplotlib = "3.5.3"
@@ -26,9 +30,11 @@ streamlit-plotly-events = "0.0.6"
 tqdm = "4.64.0"
 loguru = "0.7.2"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dev-dependencies]
+pytest = "7.1"
+pylint = "2.9.6"
+black = "19.10b0"
+python-lsp-black = "1.0.0"
 
 [tool.black]
 line-length = 120

@@ -44,8 +44,6 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
             # updating progress bar
             pbar.set_postfix_str(f"{Fore.CYAN}Current patient: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
             pbar.update(1)
-            if n % 10 == 0 and n > 0:  # Every 10 patients
-                fancy_print(f"Processed {n} patients", Fore.CYAN, "🔹")
 
             # read sequences and segmentation
             sequences = read_sequences_dict(root=path_images, patient_id=subject_id)

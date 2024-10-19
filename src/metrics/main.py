@@ -55,8 +55,6 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
             for n, ID in enumerate(patients_list):
                 pbar.set_postfix_str(f"{Fore.CYAN}Current patient: {Fore.LIGHTBLUE_EX}{ID}{Fore.CYAN}")
                 pbar.update(1)
-                if n % 10 == 0 and n > 0:
-                    fancy_print(f"Processed {n} patients", Fore.CYAN, "🔹")
 
                 # read ground truth segmentation and prediction
                 gt = load_nii_by_id(root=path_ground_truth_dataset, patient_id=ID, as_array=True)

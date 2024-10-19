@@ -127,7 +127,7 @@ output_path: '/home/user/AUDIT/outputs/features'
 
 
 <details>
-  <summary>2.2. Metric extractor config</summary>
+  <summary><strong>2.2. Metric extractor config</strong></summary>
 
 ```yaml
 # Path to the raw dataset
@@ -169,7 +169,7 @@ filename: 'dataset_1'
 
 
 <details>
-  <summary>2.3. APP config</summary>
+  <summary><strong>2.3. APP config</strong></summary>
 
 ```yaml
 # Mapping of labels to their numeric values

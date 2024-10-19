@@ -121,7 +121,7 @@ class TumorFeatures:
         if label is not None and not np.any(self.segmentation == label):
             return np.array([np.nan] * len(self.segmentation.shape))
 
-        coordinates = np.argwhere(self.segmentation != 0) if label is None else np.argwhere(self.segmentation == label)
+        coordinates = np.argwhere(self.segmentation != 0) if label is 0 else np.argwhere(self.segmentation == label)
         center_of_mass_mean = np.mean(coordinates, axis=0)
         return center_of_mass_mean * self.spacing
 

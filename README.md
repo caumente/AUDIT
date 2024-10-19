@@ -90,7 +90,7 @@ Edit the config files in `./src/configs/` directory to set up the paths for data
 
 
 <details>
-  <summary>2.1. Feature extractor config</summary>
+  <summary><strong>2.1. Feature extractor config</strong></summary>
 
 ```yaml
 # Paths to all the datasets
@@ -172,6 +172,7 @@ filename: 'dataset_1'
   <summary>2.3. APP config</summary>
 
 ```yaml
+# Mapping of labels to their numeric values
 labels:
   BKG: 0
   EDE: 3
@@ -210,7 +211,9 @@ predictions:
 </details>
 
 
-### 3. Run the *Feature extractor* and *Metric extractor* scripts:
+### 3. Run AUDIT backend
+
+Use the following commands to run the *Feature extractor* and *Metric extractor* scripts:
 
 ```bash
 python src/feature_extractor.py
@@ -220,7 +223,20 @@ python src/feature_extractor.py
 python src/metric_extractor.py
 ```
 
-### 4. Run the APP
+A _logs_ folder will be created after running each of the scripts to keep track of the execution. All the output files 
+will be stored in the folder defined in the corresponding config file (by default in the _output_ folder).
+
+### 4. Run AUDIT app
+
+Use the following streamlit command to run the APP and start the data exploration:
+
+```bash
+streamlit run src/app/APP.py
+```
+
+### 5. Add-ons
+
+Use the following streamlit command to run the APP and start the data exploration:
 
 ```bash
 streamlit run src/app/APP.py

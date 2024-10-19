@@ -249,13 +249,29 @@ Use the following streamlit command to run the APP and start the data exploratio
 streamlit run src/app/APP.py
 ```
 
-### 5. Add-ons
+### 5. Additional configurations
 
-Use the following streamlit command to run the APP and start the data exploration:
+#### 5.1. ITK-Snap
+
+AUDIT is prepared for opening cases with ITK-Snap while exploring the data in the different dashboards. However, the 
+ITK-Snap tool must have been installed and preconfigured before. Here we provide a simple necessary configuration to 
+use it in each operative system:
+
+<details>
+  <summary><strong>5.1.1. On Mac OS</strong></summary>
 
 ```bash
-streamlit run src/app/APP.py
 ```
+</details>
+
+
+<details>
+  <summary><strong>5.1.2. On Linux OS</strong></summary>
+
+```bash
+```
+</details>
+
 
 
 ## Authors

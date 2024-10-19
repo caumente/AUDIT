@@ -57,10 +57,10 @@ Last released version of **AUDIT** is hosted at https://audit.streamlitapp.com f
 pip install audit
 ```
 
-#### 1.2. Installation via AUDIT repository 
+### 1.2. Installation via AUDIT repository 
 
-#### 1.2.1. Without using Poetry
-**(Recommended) Create an isolated Anaconda environment:**
+### 1.2.1. Using Anaconda
+(Recommended) Create an isolated Anaconda environment:
 
 ```bash
 conda create -n audit_env python=3.10
@@ -78,7 +78,7 @@ Install the required packages:
  pip install -r requirements.txt
  ```
 
-#### 1.2.2 Using Poetry
+### 1.2.2 Using Poetry
 
 The library _poetry_ must be installed in your environment to follow this via of installation.
 

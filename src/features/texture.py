@@ -21,7 +21,7 @@ class TextureFeatures:
         Extracts texture features from the MRI image.
     """
 
-    def __init__(self, sequence, remove_empty_planes=False):
+    def __init__(self, sequence: np.array, remove_empty_planes: bool = False):
         """
         Constructs all the necessary attributes for the TextureFeatures object.
 
@@ -33,7 +33,7 @@ class TextureFeatures:
         self.sequence = sequence
         self.remove_empty_planes = remove_empty_planes
 
-    def compute_texture_values(self, texture="contrast"):
+    def compute_texture_values(self, texture: str = None):
         """
         Computes texture values for each 2D plane in the 3D image array.
 
@@ -47,6 +47,12 @@ class TextureFeatures:
         np.ndarray
             An array of texture values for each 2D plane in the image.
         """
+        if texture is None:
+            texture = []
+
+        if np.all(self.sequence == 0):
+            return np.nan
+
         sequence = self.sequence.copy()
         if self.remove_empty_planes:
             sequence = fit_brain_boundaries(self.sequence)
@@ -76,7 +82,7 @@ class TextureFeatures:
 
         return np.array(texture_values)
 
-    def extract_features(self, textures=None) -> dict:
+    def extract_features(self, textures: list = None) -> dict:
         """
         Extracts texture features from the MRI image.
 

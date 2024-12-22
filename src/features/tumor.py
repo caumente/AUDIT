@@ -57,7 +57,7 @@ class TumorFeatures:
         self.tumor_slices = None
         self.position_tumor_slices = None
         self.segmentation = segmentation
-        self.spacing = spacing
+        self.spacing = np.array(spacing)
         self.mapping_names = mapping_names
         self.planes = planes if planes is not None else ["axial", "coronal", "sagittal"]
         self.tumor_centre_mass_per_label = {}
@@ -81,7 +81,7 @@ class TumorFeatures:
         pixels_dict = dict(zip(unique, counts))
 
         if self.mapping_names:
-            pixels_dict = {self.mapping_names.get(k, k).lower(): v for k, v in pixels_dict.items()}
+            pixels_dict = {str(self.mapping_names.get(k, k)).lower(): v for k, v in pixels_dict.items()}
 
         return pixels_dict
 
@@ -115,13 +115,18 @@ class TumorFeatures:
             The center of mass coordinates adjusted by the voxel spacing.
         """
         if self.segmentation is None:
-            logger.warning("An image is required to calculate the tumor center of mass. Assigning (nan, nan, nan)")
-            return np.array([np.nan]) * 3
+            logger.warning("Segmentation is required to calculate the tumor center of mass. Assigning (nan, nan, nan)")
+            return np.array([np.nan] * 3)
 
         if label is not None and not np.any(self.segmentation == label):
+            logger.warning(f"Label {label} not found in segmentation.")
             return np.array([np.nan] * len(self.segmentation.shape))
 
-        coordinates = np.argwhere(self.segmentation != 0) if label is 0 else np.argwhere(self.segmentation == label)
+        coordinates = np.argwhere(self.segmentation == label) if label != 0 else np.argwhere(self.segmentation != 0)
+        if coordinates.size == 0:
+            logger.warning("No tumor coordinates found. Assigning (nan, nan, nan)")
+            return np.array([np.nan] * len(self.segmentation.shape))
+
         center_of_mass_mean = np.mean(coordinates, axis=0)
         return center_of_mass_mean * self.spacing
 

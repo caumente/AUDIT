@@ -68,7 +68,7 @@ class SpatialFeatures:
             )
         )
 
-    def get_dimensions(self):
+    def get_shape(self):
         """
         Gets the dimensions of the sequence in axial, coronal, and sagittal planes.
 
@@ -99,7 +99,7 @@ class SpatialFeatures:
         """
 
         # Calculate the center of mass of the whole tumor and each label
-        self.dimensions = self.get_dimensions()
+        self.dimensions = self.get_shape()
 
         self.center_mass = self.calculate_brain_center_mass()
 

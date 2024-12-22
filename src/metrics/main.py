@@ -2,21 +2,18 @@ import os
 from pathlib import Path
 import SimpleITK as sitk
 import numpy as np
-import pandas as pd
-from loguru import logger
 from pymia.evaluation.writer import CSVStatisticsWriter
 from pymia.evaluation.metric import metric
 import pymia.evaluation.evaluator as eval_
-from datetime import datetime
+
 
 import pandas as pd
 from colorama import Fore
 from loguru import logger
-from pprint import pformat
 
-from src.metrics.custom_metrics import calculate_metrics
-from src.metrics.custom_metrics import one_hot_encoding
-from src.utils.operations.file_operations import load_config_file
+
+from src.metrics.segmentation_metrics import calculate_metrics
+from src.metrics.segmentation_metrics import one_hot_encoding
 from src.utils.operations.file_operations import ls_dirs
 from src.utils.operations.misc_operations import fancy_print
 from src.utils.operations.misc_operations import fancy_tqdm

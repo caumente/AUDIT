@@ -1,32 +1,7 @@
 import numpy as np
 
 
-# TODO: A bit isolated. May be ok, but if so, the filename should be changed. Other option could be to include it
-#  within the commons
-def mistakes_per_class(ground_truth, predicted, unique_classes):
-
-    # find all unique classes present in the ground truth data and predictions
-    num_classes = len(unique_classes)
-
-    # initialize a zero matrix with the maximum range of classes
-    errors = np.zeros((num_classes, num_classes), dtype=np.int32)
-
-    for i in range(num_classes):
-        # find indices where class i in ground_truth was misclassified in the prediction
-        indices_error = np.where(ground_truth == unique_classes[i], predicted, -1)
-        unique, counts = np.unique(indices_error, return_counts=True)
-
-        # count the number of errors made for each class
-        for j, count in zip(unique, counts):
-            if j != -1 and j != unique_classes[i]:
-                # find the index corresponding to class j in unique_classes
-                index_j = np.where(unique_classes == j)[0][0]
-                errors[i, index_j] = count
-
-    return errors
-
-
-def mistakes_per_class_optim(ground_truth, predicted, unique_classes):
+def errors_per_class(ground_truth, predicted, unique_classes):
     # Find all unique classes present in the ground truth data and predictions
     num_classes = len(unique_classes)
 

@@ -9,28 +9,6 @@ from scipy.stats import wilcoxon
 from statsmodels.stats.diagnostic import lilliefors
 
 
-# TODO: check whether all the functions in here are necessary now or in the future
-def kruskal_wallis_test(samples: list, alpha=0.05):
-    """
-    Compute the Kruskal-Wallis H-test for independent samples.
-
-    The Kruskal-Wallis H-test tests the null hypothesis that the population median of all the groups are equal. It is a
-    non-parametric version of ANOVA. The test works on 2 or more independent samples, which may have different sizes.
-    Note that rejecting the null hypothesis does not indicate which of the groups differs. Post hoc comparisons between
-    groups are required to determine which groups are different.
-    """
-
-    # all samples must have more than 5 elements
-    if all(len(sample) > 5 for sample in samples):
-        statistic, p_value = kruskal(*samples, nan_policy="omit")
-        if p_value <= alpha:
-            return round(p_value, 3), "rejected"
-        else:
-            return round(p_value, 3), "accepted"
-    else:
-        assert "Some of the samples do not contain more than 5 elements."
-
-
 def mann_whitney_test(samples, alpha=0.05):
     """
     Perform the Mann-Whitney U rank test on two independent samples.
@@ -39,84 +17,17 @@ def mann_whitney_test(samples, alpha=0.05):
     the same as the distribution underlying sample y. It is often used as a test of difference in location between
     distributions.
     """
+
     sample_a, sample_b = samples
+    if len(sample_a) < 5 or len(sample_b) < 5:
+        raise ValueError("Each sample must contain at least 5 elements to perform the Mann-Whitney test.")
+
     # all samples must have more than 5 elements
-    if all(len(sample) > 5 for sample in samples):
-        statistic, p_value = mannwhitneyu(sample_a, sample_b, nan_policy="omit")
-        if p_value <= alpha:
-            return round(p_value, 3), "rejected"
-        else:
-            return round(p_value, 3), "accepted"
+    statistic, p_value = mannwhitneyu(sample_a, sample_b, nan_policy="omit")
+    if p_value <= alpha:
+        return round(p_value, 3), "rejected"
     else:
-        assert "Some of the samples do not contain more than 5 elements."
-
-
-def mann_whitney_test_post_hoc(samples, alpha=0.05):
-    """
-    Perform the Mann-Whitney U rank test on pairs of independent samples.
-
-    The Mann-Whitney U test is a nonparametric test of the null hypothesis that the distribution underlying sample x is
-    the same as the distribution underlying sample y. It is often used as a test of difference in location between
-    distributions.
-
-    Parameters:
-    samples: List of samples to be compared.
-    alpha: Significance level for determining the rejection of the null hypothesis. Default is 0.05.
-
-    Returns:
-    tuple: A tuple containing:
-        - matrix: Matrix of p-values obtained from pairwise comparisons.
-        - rejected: Matrix indicating whether the null hypothesis is rejected based on the specified alpha.
-    """
-
-    def combine_matrices(matrix, rejected):
-        """
-        Combine the matrices of p-values and rejection decisions into a final matrix.
-
-        Parameters:
-        matrix: Matrix of p-values obtained from pairwise comparisons.
-        rejected: Matrix indicating whether the null hypothesis is rejected based on the specified alpha.
-
-        Returns:
-        numpy.ndarray: Combined matrix with lower values for numeric p-values and upper values for rejection decisions.
-        """
-        N = matrix.shape[0]
-        combined_matrix = np.empty((N, N), dtype=object)
-
-        # Fill lower triangular part with p-values
-        combined_matrix[np.tril_indices(N, k=-1)] = matrix[np.tril_indices(N, k=-1)]
-
-        # Fill upper triangular part with rejection decisions
-        combined_matrix[np.triu_indices(N, k=1)] = rejected[np.triu_indices(N, k=1)]
-
-        # Set diagonal elements to NaN
-        np.fill_diagonal(combined_matrix, np.nan)
-
-        return combined_matrix
-
-    N = len(samples)
-    matrix = np.zeros((N, N))
-    rejected = np.empty((N, N), dtype=object)
-
-    for i, j in combinations(range(N), 2):
-        sample_a, sample_b = samples[i], samples[j]
-        # all samples must have more than 5 elements
-        if all(len(sample) > 5 for sample in [sample_a, sample_b]):
-            statistic, p_value = mannwhitneyu(sample_a, sample_b, nan_policy="omit")
-            matrix[i, j] = matrix[j, i] = round(p_value, 3)
-            if p_value <= alpha:
-                rejected[i, j] = rejected[j, i] = "Statistical differences"
-            else:
-                rejected[i, j] = rejected[j, i] = "No statistical differences"
-        else:
-            assert "Some of the samples do not contain more than 5 elements."
-
-    return combine_matrices(matrix, rejected)
-
-
-"""
-SAMPLES COMPARISON TESTS
-"""
+        return round(p_value, 3), "accepted"
 
 
 def paired_ttest(sample1, sample2, alpha=0.05):
@@ -131,6 +42,14 @@ def paired_ttest(sample1, sample2, alpha=0.05):
     Returns:
     - dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
+
+    if len(sample1) < 5 or len(sample2) < 5:
+        raise ValueError("Each sample must contain at least 5 elements to perform the Paired T-test.")
+
+    # Check if the samples are identical
+    if sample1 == sample2:
+        return {"p-value": 1.0, "interpretation": f"Given the alpha {alpha}, fail to reject the null hypothesis. There "
+                                                  f"is no significant difference between the samples."}
 
     # Perform paired t-test if both samples are normal
     t_stat, p_value = ttest_rel(sample1, sample2, nan_policy="omit")
@@ -163,13 +82,27 @@ def wilcoxon_test(sample1, sample2, alpha=0.05):
     dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
 
+    # Check that both samples have at least 5 elements
+    if len(sample1) < 5 or len(sample2) < 5:
+        raise ValueError("Each sample must contain at least 5 elements to perform the Wilcoxon test.")
+
+    # Check if samples are identical (early exit with p-value = 1)
+    if sample1 == sample2:
+        return {"p-value": 1.0,
+                "interpretation": f"Given the significance level {alpha}, it fails to reject the null hypothesis. The differences between both samples are not statistically significant."}
+
     # Perform Wilcoxon signed-rank test
     w_stat, p_value = wilcoxon(sample1, sample2, nan_policy="omit")
+
+    # Handle cases with NaN p-values (invalid results)
+    if p_value != p_value:  # NaN check
+        raise ValueError(
+            "The Wilcoxon test returned an invalid p-value. This may be due to identical values or other issues with the input data.")
 
     # Interpret the result
     if p_value <= alpha:
         interpretation = (
-            f"Given the significance level {alpha}, it rejects the null hypothesis. The differences between both samples"
+            f"Given the significance level {alpha}, it rejects the null hypothesis. The differences between both samples "
             f"are statistically significant."
         )
     else:
@@ -180,11 +113,6 @@ def wilcoxon_test(sample1, sample2, alpha=0.05):
 
     # Return the test statistic, p-value, and interpretation
     return {"p-value": p_value, "interpretation": interpretation}
-
-
-"""
-NORMALITY TESTS
-"""
 
 
 def shapiro_wilk_test(sample, alpha=0.05):
@@ -198,6 +126,10 @@ def shapiro_wilk_test(sample, alpha=0.05):
     Returns:
     dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
+    # Ensure the sample has enough elements
+    if len(sample) < 3:
+        raise ValueError("Sample must have at least 3 elements to perform the Shapiro-Wilk test.")
+
     # Perform Shapiro-Wilk test
     test_statistic, p_value = shapiro(x=sample, nan_policy="omit")
 
@@ -233,6 +165,10 @@ def lilliefors_test(sample, alpha=0.05):
     Returns:
     dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
+    # Ensure the sample has enough elements
+    if len(sample) < 3:
+        raise ValueError("Sample must have at least 3 elements to perform the Lilliefors test.")
+
     # Perform Lilliefors test
     test_statistic, p_value = lilliefors(sample, dist="norm", pvalmethod="approx")
 

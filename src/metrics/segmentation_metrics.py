@@ -90,7 +90,6 @@ def calculate_metrics(
 
     metrics_list = []
     for n, r in enumerate(regions):
-
         output_metrics = dict(ID=patient, region=r)
 
         # Ground truth and segmentation for i-th region
@@ -235,9 +234,18 @@ def hausdorff_distance(gt: np.ndarray, seg: np.ndarray) -> float:
     Returns:
     - hd (float): Hausdorff distance.
     """
+    # Check if both ground truth and segmentation are empty
+    if np.sum(gt) == 0 and np.sum(seg) == 0:
+        return 0.0  # If both are empty, return 0 (perfect match)
+
+    # If ground truth is empty, return NaN
     if np.sum(gt) == 0:
-        hd = np.nan
-    else:
-        hd = directed_hausdorff(np.argwhere(seg), np.argwhere(gt))[0]
+        return np.nan
+
+    # If segmentation is empty, return NaN
+    if np.sum(seg) == 0:
+        return np.nan
+
+    hd = directed_hausdorff(np.argwhere(seg), np.argwhere(gt))[0]
 
     return hd

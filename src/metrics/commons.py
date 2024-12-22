@@ -47,7 +47,13 @@ def calculate_ratio_improvement(data, init, end):
     return (data[end]) / (data[init])
 
 
-def calculate_improvements(data, init, end, values=['relative', 'absolute', 'ratio']):
+def calculate_improvements(data, init, end, values=None):
+    if values is None:
+        values = ['relative', 'absolute', 'ratio']
+
+    if init not in data or end not in data:
+        raise ValueError(f"Columns '{init}' and '{end}' must exist in the DataFrame.")
+
     if 'relative' in values:
         data["relative"] = calculate_relative_error(data, init, end)
     if 'absolute' in values:

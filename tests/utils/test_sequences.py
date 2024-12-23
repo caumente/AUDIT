@@ -80,7 +80,7 @@ def test_load_nii_none_path():
 
 def test_read_sequences_dict_valid():
     root = "/mock/path"
-    patient_id = "patient_1"
+    subject_id = "subject_1"
     sequences = ["_t1", "_t1ce"]
 
     # Mock os.path.isfile to return True for the sequences
@@ -88,7 +88,7 @@ def test_read_sequences_dict_valid():
             mock.patch("src.utils.sequences.load_nii", return_value=mock_nii_image):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
-        result = read_sequences_dict(root, patient_id, sequences)
+        result = read_sequences_dict(root, subject_id, sequences)
 
     assert result["t1"] == mock_nii_image
     assert result["t1ce"] == mock_nii_image
@@ -96,17 +96,17 @@ def test_read_sequences_dict_valid():
 
 def test_read_sequences_dict_with_missing_sequences():
     root = "/mock/path"
-    patient_id = "patient_1"
+    subject_id = "subject_1"
     sequences = ["_t1", "_t2", "_flair"]
 
     # Mock os.path.isfile to simulate file existence
     with mock.patch("os.path.isfile") as mock_isfile, \
             mock.patch("src.utils.sequences.load_nii") as mock_load_nii:
         # Only mock _t1 as existing
-        mock_isfile.side_effect = lambda x: x == "/mock/path/patient_1/patient_1_t1.nii.gz"
+        mock_isfile.side_effect = lambda x: x == "/mock/path/subject_1/subject_1_t1.nii.gz"
         mock_load_nii.return_value = mock_nii_image
 
-        result = read_sequences_dict(root, patient_id, sequences)
+        result = read_sequences_dict(root, subject_id, sequences)
 
     # Validate the expected result: _t1 exists and others are None
     assert result["t1"] == mock_nii_image
@@ -116,7 +116,7 @@ def test_read_sequences_dict_with_missing_sequences():
 
 def test_read_sequences_dict_invalid_parameters():
     with pytest.raises(ValueError, match="Both 'root path' and 'subject id' must be non-empty strings."):
-        read_sequences_dict("", "patient_1")  # Empty root
+        read_sequences_dict("", "subject_1")  # Empty root
 
     with pytest.raises(ValueError, match="Both 'root path' and 'subject id' must be non-empty strings."):
         read_sequences_dict("/mock/path", "")  # Empty subject_id
@@ -124,7 +124,7 @@ def test_read_sequences_dict_invalid_parameters():
 
 def test_read_sequences_dict_with_load_nii_error():
     root = "/mock/path"
-    patient_id = "patient_1"
+    subject_id = "subject_1"
     sequences = ["_t1", "_t1ce"]
 
     # Mock os.path.isfile to simulate file existence
@@ -132,7 +132,7 @@ def test_read_sequences_dict_with_load_nii_error():
             mock.patch("src.utils.sequences.load_nii", side_effect=RuntimeError("NIfTI load error")):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
-        result = read_sequences_dict(root, patient_id, sequences)
+        result = read_sequences_dict(root, subject_id, sequences)
 
     # Both sequences should be None due to load_nii error
     assert result["t1"] is None
@@ -141,14 +141,14 @@ def test_read_sequences_dict_with_load_nii_error():
 
 def test_read_sequences_dict_files_missing():
     root = "/mock/path"
-    patient_id = "patient_1"
+    subject_id = "subject_1"
     sequences = ["_t1", "_t1ce"]
 
     # Mock os.path.isfile to simulate that the files do not exist
     with mock.patch("os.path.isfile") as mock_isfile:
         mock_isfile.side_effect = lambda x: False  # Simulate that no file exists
 
-        result = read_sequences_dict(root, patient_id, sequences)
+        result = read_sequences_dict(root, subject_id, sequences)
 
     # All sequences should be None as files are missing
     assert result["t1"] is None

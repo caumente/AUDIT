@@ -63,7 +63,7 @@ def calculate_confusion_matrix_elements(gt, seg):
 def calculate_metrics(
     ground_truth: np.ndarray,
     segmentation: np.ndarray,
-    patient: str,
+    subject: str,
     regions: list,
     metrics: list,
     skip_background=True,
@@ -76,7 +76,7 @@ def calculate_metrics(
      Parameters:
      - ground_truth (np.ndarray): Ground truth segmentation data. (R*Z*Y*X)
      - segmentation (np.ndarray): Predicted segmentation data. (R*Z*Y*X)
-     - patient (str): Identifier for the patient.
+     - subject (str): Identifier for the subject.
      - regions (list): List of regions to evaluate.
      - skip_background (bool): Flag to skip background region (default=True).
 
@@ -90,7 +90,7 @@ def calculate_metrics(
 
     metrics_list = []
     for n, r in enumerate(regions):
-        output_metrics = dict(ID=patient, region=r)
+        output_metrics = dict(ID=subject, region=r)
 
         # Ground truth and segmentation for i-th region
         gt = ground_truth[n]

@@ -4,7 +4,7 @@ class Features:
         self.categories = ['Statistical', 'Texture', 'Spatial', 'Tumor']
 
         self.common = {
-            'Patient ID': 'ID'
+            'subject ID': 'ID'
         }
 
         self.longitudinal = {

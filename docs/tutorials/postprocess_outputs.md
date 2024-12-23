@@ -20,19 +20,19 @@ modules to manipulate files and sequences.
 ```python
 import os
 from src.utils.operations.file_operations import (
-    ls_dirs, 
-    ls_files, 
-    rename_files, 
-    rename_directories, 
-    delete_files_by_extension, 
-    organize_files_into_folders, 
+    list_dirs,
+    list_files,
+    rename_files,
+    rename_directories,
+    delete_files_by_extension,
+    organize_files_into_folders,
     add_suffix_to_files
 )
 from src.utils.sequences import (
-    read_sequences_dict, 
-    iterative_labels_replacement, 
-    load_nii, 
-    load_nii_by_id, 
+    read_sequences_dict,
+    iterative_labels_replacement,
+    load_nii,
+    load_nii_by_subject_id,
     count_labels
 )
 ```
@@ -213,7 +213,7 @@ Pediatrics dataset.
 
 
 ```python
-pred = load_nii_by_id(root=root_path, patient_id='BraTS2024_PED-00001-000', seq="_pred", as_array=True)
+pred = load_nii_by_id(root=root_path, subject_id='BraTS2024_PED-00001-000', seq="_pred", as_array=True)
 count_labels(pred)
 ```
 
@@ -245,7 +245,7 @@ iterative_labels_replacement(
 Once we apply this function, we can confirm that the labels are now correct.
 
 ```python
-pred = load_nii_by_id(root=root_path, patient_id='BraTS2024_PED-00001-000', seq="_pred", as_array=True)
+pred = load_nii_by_id(root=root_path, subject_id='BraTS2024_PED-00001-000', seq="_pred", as_array=True)
 count_labels(pred)
 ```
 
@@ -260,7 +260,7 @@ both use the range from 0 to 3.
 ```python
 seg = load_nii_by_id(
     root="/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images/", 
-    patient_id='BraTS2024_PED-00001-000', 
+    subject_id='BraTS2024_PED-00001-000', 
     seq="_seg", 
     as_array=True
 )

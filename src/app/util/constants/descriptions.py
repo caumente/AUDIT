@@ -237,7 +237,7 @@ class ModelPerformanceAnalysisPage(ConstantsAPP):
         """
 
         self.description = """
-        Each data point represents a specific patient from one of the available datasets (distinguished by color). The
+        Each data point represents a specific subject from one of the available datasets (distinguished by color). The
         colors help in identifying patterns or trends specific to each dataset, potentially revealing variations in
         model performance across different data sources.
         """
@@ -250,14 +250,14 @@ class PairwiseModelPerformanceComparisonPage(ConstantsAPP):
         self.header = """Pairwise model performance comparison"""
         self.sub_header = """
         **Description**: The following figure illustrates the percentage difference in a selected
-        metric between two models across various regions for each patient. In this bar chart, each bar represents the
+        metric between two models across various regions for each subject. In this bar chart, each bar represents the
         difference in a selected metric for a specific brain region (Average, NEC, ENH, and EDE), comparing the baseline
         model with the benchmark model. The length of each bar indicates the magnitude of the improvement or decline in
         performance, with longer bars representing larger differences. The green color of the bars indicates the overall
         gain achieved by the benchmark model over the baseline model.
 
         Additionally, there is a checkbox labeled "Aggregated," which, when checked, aggregates the metric across all
-        patients, providing a summarized view of the model's performance differences.
+        subjects, providing a summarized view of the model's performance differences.
         """
 
         self.description = """
@@ -296,7 +296,7 @@ class MultiModelPerformanceComparisonsPage(ConstantsAPP):
         present the performance metrics along with their respective standard deviations.
 
         There is also a checkbox labeled "Aggregated," which, when checked, aggregates the performance metrics across
-        all patients, providing a summarized view of the model's performance.
+        all subjects, providing a summarized view of the model's performance.
         """
 
         self.description = """

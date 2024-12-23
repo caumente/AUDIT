@@ -123,14 +123,14 @@ def setup_sidebar_color(data, name, c_index=0, f_index=0, key=None):
     return select_color_axis
 
 
-def setup_highlight_patient(data):
+def setup_highlight_subject(data):
     with st.sidebar.expander(label="Highlight subject"):
         selected_sets = st.selectbox(
             label="Dataset:", options=data.set.unique(), index=0
         )
 
         highlight_subject = st.selectbox(
-            label="Enter patient ID to highlight",
+            label="Enter subject ID to highlight",
             options=[None] + list(data[data.set == selected_sets].ID.unique()),
             index=0
         )
@@ -221,14 +221,14 @@ def setup_filtering_options(df, feature):
 
 def setup_metrics_customization(baseline_model, benchmark_model, aggregated):
     mapping_performance = {
-                f"Patient ID": "ID",
+                f"subject ID": "ID",
                 f"Performance ({baseline_model})": f"{baseline_model}",
                 f"Performance ({benchmark_model})": f"{benchmark_model}",
                 }
-    num_max_patients, selected_sorted, selected_order = None, None, None
+    num_max_subjects, selected_sorted, selected_order = None, None, None
     if not aggregated:
         with st.sidebar.expander("Customization", expanded=True):
-            num_max_patients = st.number_input("Maximum patients to visualize", min_value=1, value=5, step=1)
+            num_max_subjects = st.number_input("Maximum subjects to visualize", min_value=1, value=5, step=1)
             mapping_buttons_columns_perf = {
                 **const_features.get_multiple_features(["common"]).copy(),
                 **mapping_performance,
@@ -236,7 +236,7 @@ def setup_metrics_customization(baseline_model, benchmark_model, aggregated):
             selected_sorted = st.selectbox("Sorted by:", options=mapping_buttons_columns_perf)
             selected_order = st.radio("Order by:", options=orderby_dict.keys())
 
-    return num_max_patients, mapping_performance.get(selected_sorted), orderby_dict.get(selected_order)
+    return num_max_subjects, mapping_performance.get(selected_sorted), orderby_dict.get(selected_order)
 
 
 def setup_improvement_button():
@@ -250,7 +250,7 @@ def setup_improvement_button():
 
 
 def setup_aggregation_button():
-    return st.checkbox("Aggregated.", value=True, help="It aggregates all the patients, if enabled.")
+    return st.checkbox("Aggregated.", value=True, help="It aggregates all the subjects, if enabled.")
 
 
 def setup_clip_sidebar(data, feature):

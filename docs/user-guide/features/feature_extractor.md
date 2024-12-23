@@ -12,7 +12,7 @@ The pipeline operates as follows:
 paths, features to extract, and output directories. A logging system is set up to monitor and record the progress of 
 the feature extraction.
 
-- **Dataset Processing**: For each dataset defined in the configuration, the pipeline iterates over all patient data, 
+- **Dataset Processing**: For each dataset defined in the configuration, the pipeline iterates over all subject data, 
 extracting features from MRI sequences and associated segmentations. This is handled by the extract_features function,
 which computes various features such as spatial dimensions, tumor characteristics, statistical metrics, and texture 
 properties of the images.
@@ -27,7 +27,7 @@ properties of the images.
 If longitudinal data is present, the pipeline also extracts and includes time-point and longitudinal 
 identifiers for further analysis.
 
-- **Data Output**: Once features are extracted for each patient, they are compiled into a DataFrame, which is saved as 
+- **Data Output**: Once features are extracted for each subject, they are compiled into a DataFrame, which is saved as 
 a CSV file. 
 
 This pipeline provides an automated and extensible framework for processing large-scale MRI datasets, ensuring that 

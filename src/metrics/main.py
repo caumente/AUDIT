@@ -14,11 +14,11 @@ from loguru import logger
 
 from src.metrics.segmentation_metrics import calculate_metrics
 from src.metrics.segmentation_metrics import one_hot_encoding
-from src.utils.operations.file_operations import ls_dirs
+from src.utils.operations.file_operations import list_dirs
 from src.utils.operations.misc_operations import fancy_print
 from src.utils.operations.misc_operations import fancy_tqdm
 from src.utils.sequences import get_spacing
-from src.utils.sequences import load_nii_by_id
+from src.utils.sequences import load_nii_by_subject_id
 
 
 """
@@ -36,7 +36,7 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
     # load paths to test data
     path_ground_truth_dataset = config_file["data_path"]
     metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
-    patients_list = ls_dirs(path_ground_truth_dataset)
+    subjects_list = list_dirs(path_ground_truth_dataset)
 
     # initializing output metrics
     raw_metrics = pd.DataFrame()
@@ -48,15 +48,15 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
         logger.info(f"Starting metric extraction for model {model_name}")
 
         # loop over all the elements in the root folder
-        with fancy_tqdm(total=len(patients_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-            for n, ID in enumerate(patients_list):
-                pbar.set_postfix_str(f"{Fore.CYAN}Current patient: {Fore.LIGHTBLUE_EX}{ID}{Fore.CYAN}")
+        with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+            for n, ID in enumerate(subjects_list):
+                pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{ID}{Fore.CYAN}")
                 pbar.update(1)
 
                 # read ground truth segmentation and prediction
-                gt = load_nii_by_id(root=path_ground_truth_dataset, patient_id=ID, as_array=True)
-                pred = load_nii_by_id(root=path_predictions, patient_id=ID, seq="_pred", as_array=True)
-                spacing = get_spacing(load_nii_by_id(path_predictions, ID, seq="_pred"))
+                gt = load_nii_by_subject_id(root=path_ground_truth_dataset, subject_id=ID, as_array=True)
+                pred = load_nii_by_subject_id(root=path_predictions, subject_id=ID, seq="_pred", as_array=True)
+                spacing = get_spacing(load_nii_by_subject_id(path_predictions, ID, seq="_pred"))
 
                 # making the segmentations binary (one hot encoding for each region)
                 gt = one_hot_encoding(gt, numeric_label)
@@ -66,20 +66,20 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
                 metrics = calculate_metrics(
                     ground_truth=gt,
                     segmentation=pred,
-                    patient=ID,
+                    subject=ID,
                     regions=label_names,
                     metrics=metrics_to_extract,
                     spacing=spacing
                 )
 
                 # from list of dict to dataframe
-                patient_info_df = pd.DataFrame(metrics)
+                subject_info_df = pd.DataFrame(metrics)
 
                 # add model info
-                patient_info_df["model"] = model_name
+                subject_info_df["model"] = model_name
 
                 # Add info to the main df
-                raw_metrics = pd.concat([raw_metrics, patient_info_df], ignore_index=True)
+                raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
 
         logger.info(f"Finishing metric extraction for model {model_name}")
 
@@ -194,7 +194,7 @@ def extract_pymia_metrics(config_file):
     # load paths to the datasets
     path_ground_truth_dataset = config_file["data_path"]
     metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
-    patients_list = ls_dirs(path_ground_truth_dataset)
+    subjects_list = list_dirs(path_ground_truth_dataset)
 
     # metrics to extract
     metrics = instantiate_pymia_metrics(metrics_to_extract)
@@ -209,13 +209,13 @@ def extract_pymia_metrics(config_file):
         logger.info(f"Starting metric extraction for model {model_name}")
 
         # loop over all the elements in the root folder
-        with fancy_tqdm(total=len(patients_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-            for n, subject_id in enumerate(patients_list):
+        with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+            for n, subject_id in enumerate(subjects_list):
 
-                pbar.set_postfix_str(f"{Fore.CYAN}Current patient: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
+                pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
                 pbar.update(1)
                 if n % 10 == 0 and n > 0:
-                    fancy_print(f"Processed {n} patients", Fore.CYAN, "🔹")
+                    fancy_print(f"Processed {n} subjects", Fore.CYAN, "🔹")
 
                 logger.info(f"Processing subject: {subject_id}")
                 evaluator = perform_evaluation(evaluator, path_ground_truth_dataset, path_predictions, subject_id)

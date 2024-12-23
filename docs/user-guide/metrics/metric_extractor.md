@@ -16,14 +16,14 @@ defined in the project) or Pymia metrics (using the Pymia library for medical im
   
   - Custom Metrics: This approach calculates specific metrics like Dice coefficient, sensitivity, or others based on 
   custom implementations. It involves one-hot encoding the ground truth and predicted segmentations and then computing 
-  the defined metrics for each patient.
+  the defined metrics for each subject.
   
   - Pymia Metrics: The pipeline can leverage Pymia's built-in metrics (e.g., Hausdorff distance, Dice coefficient, 
   Jaccard index) for segmentation evaluation. Pymia's evaluator processes the segmentation files and accumulates the 
   results across different models and regions.
 
 
-- **Data Processing**: For each dataset and model, metrics are computed for all patients. The results are collected 
+- **Data Processing**: For each dataset and model, metrics are computed for all subjects. The results are collected 
 into a DataFrame, and if longitudinal data is involved, it can further organize the results by time points.
 
 - **Output and Statistics**: The extracted metrics are stored as CSV files, and additional statistical analyses (e.g., 

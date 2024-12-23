@@ -61,9 +61,9 @@ def merge_features_and_metrics(features: pd.DataFrame, metrics: pd.DataFrame, ag
 
 def visualize_data(data, x_axis, y_axis, aggregated):
 
-    # Initialize session state for highlighted patients
-    if "highlighted_patients" not in st.session_state:
-        st.session_state.highlighted_patients = []
+    # Initialize session state for highlighted subjects
+    if "highlighted_subjects" not in st.session_state:
+        st.session_state.highlighted_subjects = []
         st.session_state.dict_cases = {}
 
     # Visualize scatter plot
@@ -75,7 +75,7 @@ def visualize_data(data, x_axis, y_axis, aggregated):
         y_label=y_axis,
         color="Dataset",
         facet_col="region" if not aggregated else None,
-        highlighted_patients=st.session_state.highlighted_patients,
+        highlighted_subjects=st.session_state.highlighted_subjects,
     )
     if not aggregated:
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -99,12 +99,12 @@ def process_selected_points(selected_points, data, aggregated):
             selected_case = filtered_set_data.iloc[point["pointIndex"]]["ID"]
 
             # Add or remove the selected case
-            if selected_case not in st.session_state.highlighted_patients:
+            if selected_case not in st.session_state.highlighted_subjects:
                 st.session_state.dict_cases[(f"{point['x']}", f"{point['y']}")] = selected_case
-                st.session_state.highlighted_patients.append(selected_case)
+                st.session_state.highlighted_subjects.append(selected_case)
         else:
             selected_case = st.session_state.dict_cases[(f"{point['x']}", f"{point['y']}")]
-            st.session_state.highlighted_patients.remove(selected_case)
+            st.session_state.highlighted_subjects.remove(selected_case)
     if selected_points and not aggregated:
         st.markdown(
             ":red[Please, return to the aggregated view to highlight more cases and/or discard them or click on the "
@@ -116,7 +116,7 @@ def reset_highlighted_cases():
     """
     Reset the highlighted cases.
     """
-    st.session_state.highlighted_patients = []
+    st.session_state.highlighted_subjects = []
     st.session_state.dict_cases = {}
     st.rerun()
 

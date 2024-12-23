@@ -41,14 +41,14 @@ def load_nii(path_folder: str, as_array: bool = False) -> SimpleITK.Image:
 def load_nii_by_subject_id(root: str, subject_id: str, seq: str = "_seg", as_array: bool = False) -> SimpleITK.Image:
     """  This function loads a specific sequence from a NIfTI file by subject ID."""
 
-    # Check if root or patient_id is None or empty
+    # Check if root or subject_id is None or empty
     if not root or not subject_id:
-        raise ValueError("Invalid path or patient ID provided. Both must be non-empty strings.")
+        raise ValueError("Invalid path or subject ID provided. Both must be non-empty strings.")
 
     nii_path = os.path.join(root, subject_id, f"{subject_id}{seq}.nii.gz")
 
     if not os.path.exists(nii_path):
-        logger.warning(f"Sequence '{seq}' for patient '{subject_id}' not found at {nii_path}.")
+        logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
         return None
 
     return load_nii(nii_path, as_array=as_array)
@@ -56,11 +56,11 @@ def load_nii_by_subject_id(root: str, subject_id: str, seq: str = "_seg", as_arr
 
 def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str]] = None) -> dict:
     """
-    Reads a dictionary of NIfTI sequences for a given patient from the specified root directory.
+    Reads a dictionary of NIfTI sequences for a given subject from the specified root directory.
 
     Parameters:
-        root (str): The root directory where patient data is stored.
-        subject_id (str): The patient's ID used to locate the NIfTI files.
+        root (str): The root directory where subject data is stored.
+        subject_id (str): The subject's ID used to locate the NIfTI files.
         sequences (List[str], optional): A list of sequences to load. Defaults to ["_t1", "_t1ce", "_t2", "_flair"].
 
     Returns:
@@ -71,7 +71,7 @@ def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str
     if sequences is None:
         sequences = ["_t1", "_t1ce", "_t2", "_flair"]
 
-    # Ensure root and patient_id are valid
+    # Ensure root and subject_id are valid
     if not root or not subject_id:
         raise ValueError("Both 'root path' and 'subject id' must be non-empty strings.")
 
@@ -82,7 +82,7 @@ def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str
         # Check if the NIfTI file exists
         if not os.path.isfile(nii_path):
             out[seq.replace("_", "")] = None
-            logger.warning(f"Sequence '{seq}' for patient '{subject_id}' not found at {nii_path}.")
+            logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
         else:
             try:
                 # Attempt to load the sequence using load_nii
@@ -90,7 +90,7 @@ def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str
             except Exception as e:
                 # Handle errors in loading the NIfTI file (e.g., corrupted file)
                 out[seq.replace("_", "")] = None
-                logger.error(f"Error loading sequence '{seq}' for patient '{subject_id}': {e}")
+                logger.error(f"Error loading sequence '{seq}' for subject '{subject_id}': {e}")
 
     return out
 

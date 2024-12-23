@@ -111,7 +111,7 @@ def subjects():
     subject_data = processing_data(df, sets=selected_set, subjects=selected_subject)
     rest_data = df[(df.set == selected_set) & (df.ID != selected_subject)]
 
-    # show main information for the selected patient
+    # show main information for the selected subject
     show_subject_information(subject_data)
 
     # check whether the subject is an outlier or not

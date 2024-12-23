@@ -115,6 +115,22 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
                     name=n,
                     jitter=0.3,
                     pointpos=-1.8,
+                    boxpoints=False,  # represent all points
+                    marker_color=c,
+                    line_color=c,
+                    hovertemplate="ID: %{customdata}<br>"
+                    + pretty_string(x_axis)
+                    + ": %{x:,.2f}",  # Customize hover information
+                )
+            )
+        elif plot_type == "Box + Points":
+            fig.add_trace(
+                go.Box(
+                    x=x,
+                    customdata=id,
+                    name=n,
+                    jitter=0.3,
+                    pointpos=-1.8,
                     boxpoints="all",  # represent all points
                     marker_color=c,
                     line_color=c,

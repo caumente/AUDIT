@@ -57,7 +57,7 @@ def plot_longitudinal(data, temporal_axis="time_point", lines=["lesion_size", "l
         height=600,
         width=1000,
         xaxis_title=pretty_string(temporal_axis),
-        yaxis_title="Lesion size",
+        yaxis_title="Lesion size (mm<sup>3</sup>)",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0.7),
         hovermode="x unified",
     )
@@ -113,7 +113,7 @@ def plot_longitudinal2(data, temporal_axis="time_point", lines=["lesion_size", "
         height=600,
         width=1000,
         xaxis_title=pretty_string(temporal_axis),
-        yaxis_title="Lesion size",
+        yaxis_title="Lesion size (mm<sup>3</sup>)",
         title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0.7),
         hovermode="x unified",

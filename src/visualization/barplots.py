@@ -52,7 +52,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
                 orientation="h",
                 marker_color=df["color_bar"],
                 marker_line=dict(width=1, color="black"),
-                hovertemplate="Patient: "
+                hovertemplate="subject: "
                 f"{case}"
                 " <br>" + pretty_string(metric) + " : %{x:.2f}" + f"{units}<br>"
                 "Region: %{y}<br>Dataset: " + set_,

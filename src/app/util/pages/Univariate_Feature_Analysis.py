@@ -5,9 +5,10 @@ import pandas as pd
 from src.app.util.commons.data_preprocessing import processing_data
 from src.app.util.commons.sidebars import setup_sidebar_multi_datasets
 from src.app.util.commons.sidebars import setup_sidebar_features
-from src.app.util.commons.sidebars import setup_highlight_patient
+from src.app.util.commons.sidebars import setup_highlight_subject
 from src.app.util.commons.sidebars import setup_filtering_options
 from src.app.util.commons.sidebars import setup_histogram_options
+from src.app.util.commons.utils import download_plot
 from src.app.util.commons.checks import health_checks
 from src.app.util.constants.descriptions import UnivariatePage
 from src.utils.operations.file_operations import load_config_file
@@ -50,6 +51,7 @@ def histogram_logic(data, plot_type, feature, n_bins, bins_size):
             st.write(":red[Please, select the number of bins or bins size]",)
 
     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+    download_plot(fig, label="Data Distribution", filename="distribution")
     st.markdown(const_descriptions.description)
 
 
@@ -64,12 +66,14 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
         highlight_point=highlight_subject,
     )
     selected_points = plotly_events(boxplot_fig, click_event=True, override_height=None)
+    download_plot(boxplot_fig, label="Univariate Analysis", filename="univariate_analysis")
 
     selected_case, st.session_state.selected_case = None, None
 
     # Handle selected point
     info_placeholder = st.empty()
-    if selected_points and len(selected_points) == 1:  # last condition to avoid that clicking inside the boxplot randomly opens a patient
+    # last condition to avoid that clicking inside the boxplot randomly opens a subject
+    if selected_points and len(selected_points) == 1:
         point = selected_points[0]
         filtered_set_data = data[data.set == point["y"]]
         if point["curveNumber"] < len(data.set.unique()):
@@ -81,12 +85,14 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
     # Visualize case in ITK-SNAP
     if selected_case != st.session_state.selected_case:
         st.session_state.selected_case = selected_case
-        if (
-            selected_case and selected_case != "Select a case" and len(selected_points) == 1
-        ):  # last condition to avoid that clicking inside the boxplot randomly opens a patient
+        # last condition to avoid that clicking inside the boxplot randomly opens a subject
+        if selected_case and selected_case != "Select a case" and len(selected_points) == 1:
             dataset = data[data.ID == selected_case]["set"].unique()[0]
             verification_check = run_itk_snap(
-                path=datasets_root_path, dataset=dataset, case=selected_case, labels=labels
+                path=datasets_root_path,
+                dataset=dataset,
+                case=selected_case,
+                labels=labels
             )
             if not verification_check:
                 st.error("Ups, something wrong happened when opening the file in ITK-SNAP", icon="🚨")
@@ -94,13 +100,13 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
 
 def main(data, select_feature_name):
 
-    highlight_subject = setup_highlight_patient(data)
+    highlight_subject = setup_highlight_subject(data)
 
     # Visualize boxplot
     st.subheader("Boxplot")
     data.reset_index(drop=True, inplace=True)
     st.markdown(const_descriptions.description_boxplot)
-    plot_type = st.selectbox(label="Type of plot to visualize", options=["Box", "Violin"], index=0)
+    plot_type = st.selectbox(label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0)
     boxplot_logic(datasets_paths, data, select_feature_name, config.get("labels"), plot_type, highlight_subject)
 
     # Visualize histogram

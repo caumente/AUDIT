@@ -14,6 +14,7 @@ from src.app.util.commons.sidebars import setup_button_data_download
 from src.app.util.commons.checks import models_sanity_check
 from src.app.util.constants.descriptions import PairwiseModelPerformanceComparisonPage
 from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.commons.utils import download_plot
 from src.metrics.commons import calculate_improvements
 from src.metrics.statistical_tests import normality_test
 from src.metrics.statistical_tests import paired_ttest
@@ -47,9 +48,9 @@ def setup_sidebar(data, aggregated=True):
         selected_set = setup_sidebar_single_dataset(data)
         baseline_model, benchmark_model = setup_sidebar_pairwise_models(data, selected_set)
         selected_metric = setup_sidebar_single_metric(data)
-        num_max_patients, selected_sorted, selected_order = setup_metrics_customization(baseline_model, benchmark_model, aggregated)
+        num_max_subjects, selected_sorted, selected_order = setup_metrics_customization(baseline_model, benchmark_model, aggregated)
 
-    return selected_set, baseline_model, benchmark_model, selected_metric, num_max_patients, selected_sorted, selected_order
+    return selected_set, baseline_model, benchmark_model, selected_metric, num_max_subjects, selected_sorted, selected_order
 
 
 def process_metrics(data, selected_metric, baseline_model, benchmark_model, aggregate=False, improvement_type="Absolute"):
@@ -80,15 +81,15 @@ def process_metrics(data, selected_metric, baseline_model, benchmark_model, aggr
     return out
 
 
-def run_individualized(data, baseline_model, benchmark_model, improvement_type, selected_sorted, selected_order, num_max_patients):
+def run_individualized(data, baseline_model, benchmark_model, improvement_type, selected_sorted, selected_order, num_max_subjects):
     # Sort dataset
     l = data[data.region == 'Average'].sort_values(by=selected_sorted, ascending=selected_order)['ID']
     data['ID'] = pd.Categorical(data['ID'], categories=l, ordered=True)
     data = data.sort_values(['ID', 'region'])
 
-    # Filter based on the number of patients
-    if num_max_patients:
-        data = data[data.ID.isin(l[:num_max_patients])]
+    # Filter based on the number of subjects
+    if num_max_subjects:
+        data = data[data.ID.isin(l[:num_max_subjects])]
 
     # Clip metric
     clip_low, clip_up = setup_clip_sidebar(data, improvement_type)
@@ -103,6 +104,7 @@ def run_individualized(data, baseline_model, benchmark_model, improvement_type, 
 def run_aggregated(data, improvement_type, selected_metric, selected_set):
     fig = aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set)
     st.plotly_chart(fig, theme="streamlit", use_container_width=False, scrolling=True)
+    download_plot(fig, label="Aggregated Pairwise Model Performance", filename="agg_pairwise_model_performance")
 
 
 def visualize_histogram(data, model):

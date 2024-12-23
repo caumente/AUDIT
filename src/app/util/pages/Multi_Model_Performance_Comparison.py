@@ -8,6 +8,7 @@ from src.app.util.commons.sidebars import setup_sidebar_multi_model
 from src.app.util.commons.sidebars import setup_sidebar_regions
 from src.app.util.commons.sidebars import setup_sidebar_multi_metrics
 from src.app.util.commons.sidebars import setup_aggregation_button
+from src.app.util.commons.utils import download_plot
 from src.utils.operations.file_operations import read_datasets_from_dict
 
 from src.visualization.boxplot import models_performance_boxplot
@@ -42,6 +43,7 @@ def visualize_data(data, agg):
     st.markdown(const_descriptions.description)
     fig = models_performance_boxplot(data, aggregated=agg)
     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+    download_plot(fig, label="Models performance", filename="multimodel_performance")
 
 
 def main_table(data, agg):

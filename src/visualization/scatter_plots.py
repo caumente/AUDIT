@@ -154,7 +154,7 @@ def multivariate_metric_feature(
     x_label: str = None,
     color: str = "Dataset",
     facet_col: str = None,
-    highlighted_patients: list = None,
+    highlighted_subjects: list = None,
 ):
 
     if y_label is None:
@@ -202,9 +202,9 @@ def multivariate_metric_feature(
 
     # fig.for_each_yaxis(lambda y: pretty_string(y_label))
 
-    # Highlight specific patients
-    if highlighted_patients is not None:
-        highlighted_data = data[data["ID"].isin(highlighted_patients)]
+    # Highlight specific subjects
+    if highlighted_subjects is not None:
+        highlighted_data = data[data["ID"].isin(highlighted_subjects)]
 
         # Prepare custom data for hover template
         customdata = ["ID", x_axis, y_axis, highlighted_data["model"].apply(pretty_string).apply(capitalizer)]

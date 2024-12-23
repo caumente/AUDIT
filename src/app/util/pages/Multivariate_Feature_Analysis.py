@@ -5,7 +5,8 @@ from src.app.util.commons.data_preprocessing import processing_data
 from src.app.util.commons.sidebars import setup_sidebar_multi_datasets
 from src.app.util.commons.sidebars import setup_sidebar_features
 from src.app.util.commons.sidebars import setup_sidebar_color
-from src.app.util.commons.sidebars import setup_highlight_patient
+from src.app.util.commons.sidebars import setup_highlight_subject
+from src.app.util.commons.utils import download_plot
 from src.app.util.commons.checks import health_checks
 from src.app.util.constants.descriptions import MultivariatePage
 from src.app.util.constants.features import Features
@@ -40,7 +41,7 @@ def main(data, x_axis, y_axis, color_axis):
     # Scatter plot visualization
     st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
 
-    highlight_subject = setup_highlight_patient(data)
+    highlight_subject = setup_highlight_subject(data)
 
     fig = multivariate_features_highlighter(
         data=data,
@@ -50,6 +51,7 @@ def main(data, x_axis, y_axis, color_axis):
         highlight_point=highlight_subject,
     )
     selected_points = plotly_events(fig, click_event=True, override_height=None)
+    download_plot(fig, label="Multivariate Analysis", filename="multivariate_analysis")
 
     # retrieving selected ID
     selected_case, st.session_state.selected_case = None, None

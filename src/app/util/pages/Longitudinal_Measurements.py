@@ -1,17 +1,16 @@
 import pandas as pd
 import streamlit as st
 
+from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.commons.sidebars import setup_sidebar_longitudinal_subject
+from src.app.util.commons.sidebars import setup_sidebar_single_dataset
+from src.app.util.commons.sidebars import setup_sidebar_single_model
+from src.app.util.commons.utils import download_plot
 from src.app.util.constants.descriptions import LongitudinalAnalysisPage
 from src.utils.operations.file_operations import load_config_file
 from src.utils.operations.file_operations import read_datasets_from_dict
-from src.app.util.commons.data_preprocessing import processing_data
-from src.app.util.commons.sidebars import setup_sidebar_single_dataset
-from src.app.util.commons.sidebars import setup_sidebar_single_model
-from src.app.util.commons.sidebars import setup_sidebar_longitudinal_subject
-from src.app.util.commons.utils import download_plot
 from src.visualization.time_series import plot_longitudinal
 from src.visualization.time_series import plot_longitudinal2
-
 
 const = LongitudinalAnalysisPage()
 

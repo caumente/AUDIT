@@ -2,19 +2,21 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+from src.app.util.commons.checks import models_sanity_check
+from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.commons.sidebars import setup_aggregation_button
+from src.app.util.commons.sidebars import setup_button_data_download
+from src.app.util.commons.sidebars import setup_clip_sidebar
+from src.app.util.commons.sidebars import setup_improvement_button
+from src.app.util.commons.sidebars import setup_metrics_customization
+from src.app.util.commons.sidebars import setup_sidebar_pairwise_models
 from src.app.util.commons.sidebars import setup_sidebar_single_dataset
 from src.app.util.commons.sidebars import setup_sidebar_single_metric
-from src.app.util.commons.sidebars import setup_sidebar_pairwise_models
-from src.app.util.commons.sidebars import setup_metrics_customization
-from src.app.util.commons.sidebars import setup_improvement_button
-from src.app.util.commons.sidebars import setup_aggregation_button
-from src.app.util.commons.sidebars import setup_clip_sidebar
 from src.app.util.commons.sidebars import setup_statistical_test
-from src.app.util.commons.sidebars import setup_button_data_download
-from src.app.util.commons.checks import models_sanity_check
-from src.app.util.constants.descriptions import PairwiseModelPerformanceComparisonPage
-from src.app.util.commons.data_preprocessing import processing_data
 from src.app.util.commons.utils import download_plot
+from src.app.util.constants.descriptions import PairwiseModelPerformanceComparisonPage
+from src.app.util.constants.features import Features
+from src.app.util.constants.metrics import Metrics
 from src.metrics.commons import calculate_improvements
 from src.metrics.statistical_tests import normality_test
 from src.metrics.statistical_tests import paired_ttest
@@ -24,9 +26,6 @@ from src.utils.operations.file_operations import read_datasets_from_dict
 from src.visualization.barplots import aggregated_pairwise_model_performance
 from src.visualization.barplots import individual_pairwise_model_performance
 from src.visualization.histograms import plot_histogram
-from src.app.util.constants.metrics import Metrics
-from src.app.util.constants.features import Features
-
 
 # Load constants
 const_descriptions = PairwiseModelPerformanceComparisonPage()

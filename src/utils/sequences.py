@@ -1,9 +1,11 @@
 import os
-from loguru import logger
-from typing import List, Dict, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import numpy as np
 import SimpleITK
+from loguru import logger
 from SimpleITK import GetArrayFromImage
 from SimpleITK import GetImageFromArray
 from SimpleITK import ReadImage

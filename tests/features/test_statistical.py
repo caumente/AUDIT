@@ -1,8 +1,9 @@
 # export PYTHONPATH=$PYTHONPATH:/home/usr/AUDIT/src
-import pytest
 import numpy as np
-from scipy.stats import skew
+import pytest
 from scipy.stats import kurtosis
+from scipy.stats import skew
+
 from src.features.statistical import StatisticalFeatures
 
 

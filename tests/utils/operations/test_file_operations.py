@@ -1,6 +1,8 @@
 import os
-import pytest
 from unittest import mock
+
+import pytest
+
 from src.utils.operations.file_operations import list_dirs
 from src.utils.operations.file_operations import list_files
 

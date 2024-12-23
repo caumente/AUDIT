@@ -1,6 +1,7 @@
 # export PYTHONPATH=$PYTHONPATH:/home/usr/AUDIT/src
-import pytest
 import numpy as np
+import pytest
+
 from src.features.texture import TextureFeatures
 
 

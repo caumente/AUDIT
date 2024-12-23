@@ -1,23 +1,23 @@
+import pandas as pd
 import streamlit as st
 from streamlit_plotly_events import plotly_events
-import pandas as pd
 
-from src.app.util.commons.data_preprocessing import processing_data
-from src.app.util.commons.sidebars import setup_sidebar_multi_datasets
-from src.app.util.commons.sidebars import setup_sidebar_features
-from src.app.util.commons.sidebars import setup_highlight_subject
-from src.app.util.commons.sidebars import setup_filtering_options
-from src.app.util.commons.sidebars import setup_histogram_options
-from src.app.util.commons.utils import download_plot
 from src.app.util.commons.checks import health_checks
+from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.commons.sidebars import setup_filtering_options
+from src.app.util.commons.sidebars import setup_highlight_subject
+from src.app.util.commons.sidebars import setup_histogram_options
+from src.app.util.commons.sidebars import setup_sidebar_features
+from src.app.util.commons.sidebars import setup_sidebar_multi_datasets
+from src.app.util.commons.utils import download_plot
 from src.app.util.constants.descriptions import UnivariatePage
+from src.app.util.constants.features import Features
 from src.utils.operations.file_operations import load_config_file
 from src.utils.operations.file_operations import read_datasets_from_dict
 from src.utils.operations.itk_operations import run_itk_snap
 from src.visualization.boxplot import boxplot_highlighter
 from src.visualization.histograms import custom_distplot
 from src.visualization.histograms import custom_histogram
-from src.app.util.constants.features import Features
 
 # Load constants
 const_descriptions = UnivariatePage()

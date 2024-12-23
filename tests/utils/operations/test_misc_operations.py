@@ -1,4 +1,5 @@
 import pytest
+
 from src.utils.operations.misc_operations import add_prefix_dict
 from src.utils.operations.misc_operations import capitalizer
 from src.utils.operations.misc_operations import pretty_string

@@ -1,14 +1,15 @@
-import pytest
 from unittest import mock
-import SimpleITK as sitk
-import numpy as np
-from src.utils.sequences import read_sequences_dict
-from src.utils.sequences import load_nii
-from src.utils.sequences import get_spacing
-from src.utils.sequences import build_nifty_image
-from src.utils.sequences import label_replacement
-from src.utils.sequences import fit_brain_boundaries
 
+import numpy as np
+import pytest
+import SimpleITK as sitk
+
+from src.utils.sequences import build_nifty_image
+from src.utils.sequences import fit_brain_boundaries
+from src.utils.sequences import get_spacing
+from src.utils.sequences import label_replacement
+from src.utils.sequences import load_nii
+from src.utils.sequences import read_sequences_dict
 
 # Mock NIfTI Image
 mock_nii_image = mock.Mock()

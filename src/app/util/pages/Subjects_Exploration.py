@@ -1,16 +1,18 @@
+import warnings
+
 import pandas as pd
 import streamlit as st
-import warnings
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-from src.app.util.constants.descriptions import SubjectsExplorationPage
+from src.app.util.commons.data_preprocessing import processing_data
 from src.app.util.commons.sidebars import setup_sidebar_single_dataset
 from src.app.util.commons.sidebars import setup_sidebar_single_subjects
-from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.constants.descriptions import SubjectsExplorationPage
+from src.app.util.constants.features import Features
 from src.utils.operations.file_operations import load_config_file
 from src.utils.operations.file_operations import read_datasets_from_dict
 from src.utils.operations.misc_operations import pretty_string
-from src.app.util.constants.features import Features
 
 # Load constants
 const_descriptions = SubjectsExplorationPage()

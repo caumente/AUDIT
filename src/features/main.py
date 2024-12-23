@@ -3,8 +3,8 @@ from colorama import Fore
 from loguru import logger
 
 from src.features.spatial import SpatialFeatures
-from src.features.texture import TextureFeatures
 from src.features.statistical import StatisticalFeatures
+from src.features.texture import TextureFeatures
 from src.features.tumor import TumorFeatures
 from src.utils.operations.file_operations import list_dirs
 from src.utils.operations.misc_operations import fancy_tqdm

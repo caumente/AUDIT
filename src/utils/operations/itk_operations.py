@@ -1,6 +1,6 @@
 import os
-import subprocess
 import platform
+import subprocess
 
 
 # TODO: this functionality only works if all the sequences are present

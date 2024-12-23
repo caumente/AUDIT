@@ -1,5 +1,7 @@
+from typing import List
+from typing import Union
+
 import pandas as pd
-from typing import List, Union
 
 
 def select_datasets(data, sets=None):

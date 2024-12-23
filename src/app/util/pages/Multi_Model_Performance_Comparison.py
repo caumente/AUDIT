@@ -1,19 +1,18 @@
 import pandas as pd
 import streamlit as st
 
-from src.app.util.constants.descriptions import MultiModelPerformanceComparisonsPage
-from src.utils.operations.file_operations import load_config_file
-from src.app.util.commons.sidebars import setup_sidebar_single_dataset
+from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.commons.sidebars import setup_aggregation_button
+from src.app.util.commons.sidebars import setup_sidebar_multi_metrics
 from src.app.util.commons.sidebars import setup_sidebar_multi_model
 from src.app.util.commons.sidebars import setup_sidebar_regions
-from src.app.util.commons.sidebars import setup_sidebar_multi_metrics
-from src.app.util.commons.sidebars import setup_aggregation_button
+from src.app.util.commons.sidebars import setup_sidebar_single_dataset
 from src.app.util.commons.utils import download_plot
-from src.utils.operations.file_operations import read_datasets_from_dict
-
-from src.visualization.boxplot import models_performance_boxplot
-from src.app.util.commons.data_preprocessing import processing_data
+from src.app.util.constants.descriptions import MultiModelPerformanceComparisonsPage
 from src.app.util.constants.metrics import Metrics
+from src.utils.operations.file_operations import load_config_file
+from src.utils.operations.file_operations import read_datasets_from_dict
+from src.visualization.boxplot import models_performance_boxplot
 
 const_descriptions = MultiModelPerformanceComparisonsPage()
 const_metrics = Metrics()

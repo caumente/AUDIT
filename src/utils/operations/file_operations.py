@@ -1,9 +1,10 @@
 import os
-import shutil
 import re
+import shutil
+from typing import Any
+
 import pandas as pd
 import yaml
-from typing import Any
 
 
 def list_dirs(path: str) -> list:

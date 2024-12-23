@@ -1,6 +1,8 @@
-import pytest
 import numpy as np
-from src.metrics.error_matrix import errors_per_class, normalize_matrix_per_row
+import pytest
+
+from src.metrics.error_matrix import errors_per_class
+from src.metrics.error_matrix import normalize_matrix_per_row
 
 
 # Test data for errors_per_class function

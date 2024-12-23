@@ -1,19 +1,19 @@
-import sys
 import os
+import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from pprint import pformat
 
 import pandas as pd
 from loguru import logger
-from pprint import pformat
 
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.misc_operations import configure_logging
 from src.metrics.main import extract_custom_metrics
 from src.metrics.main import extract_pymia_metrics
-
+from src.utils.operations.file_operations import load_config_file
+from src.utils.operations.misc_operations import configure_logging
 
 if __name__ == "__main__":
     logger.remove()

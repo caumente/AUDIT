@@ -1,16 +1,14 @@
 import os
 from pathlib import Path
-import SimpleITK as sitk
+
 import numpy as np
-from pymia.evaluation.writer import CSVStatisticsWriter
-from pymia.evaluation.metric import metric
-import pymia.evaluation.evaluator as eval_
-
-
 import pandas as pd
+import pymia.evaluation.evaluator as eval_
+import SimpleITK as sitk
 from colorama import Fore
 from loguru import logger
-
+from pymia.evaluation.metric import metric
+from pymia.evaluation.writer import CSVStatisticsWriter
 
 from src.metrics.segmentation_metrics import calculate_metrics
 from src.metrics.segmentation_metrics import one_hot_encoding
@@ -19,7 +17,6 @@ from src.utils.operations.misc_operations import fancy_print
 from src.utils.operations.misc_operations import fancy_tqdm
 from src.utils.sequences import get_spacing
 from src.utils.sequences import load_nii_by_subject_id
-
 
 """
 CUSTOM METRICS

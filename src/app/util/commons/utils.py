@@ -1,5 +1,5 @@
-import streamlit as st
 import plotly.io as pio
+import streamlit as st
 
 
 def download_plot(fig, label="", filename="image"):

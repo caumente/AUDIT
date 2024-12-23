@@ -1,8 +1,8 @@
 from collections import Counter
 
 import numpy as np
-from scipy.spatial.distance import euclidean
 from loguru import logger
+from scipy.spatial.distance import euclidean
 
 from src.utils.operations.misc_operations import add_prefix_dict
 

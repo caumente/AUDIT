@@ -2,8 +2,8 @@ import base64
 
 from colorama import Fore
 from colorama import Style
-from tqdm import tqdm
 from loguru import logger
+from tqdm import tqdm
 
 
 def add_prefix_dict(dictionary: dict, prefix: str) -> dict:

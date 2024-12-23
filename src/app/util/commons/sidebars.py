@@ -1,8 +1,9 @@
 import streamlit as st
+
+from src.app.util.constants.features import Features
+from src.app.util.constants.metrics import Metrics
 from src.utils.operations.misc_operations import capitalizer
 from src.utils.operations.misc_operations import pretty_string
-from src.app.util.constants.metrics import Metrics
-from src.app.util.constants.features import Features
 
 # Load constants
 const_metrics = Metrics()

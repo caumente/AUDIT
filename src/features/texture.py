@@ -1,7 +1,9 @@
 import numpy as np
-from skimage.feature import graycomatrix, graycoprops
-from src.utils.sequences import fit_brain_boundaries
 from loguru import logger
+from skimage.feature import graycomatrix
+from skimage.feature import graycoprops
+
+from src.utils.sequences import fit_brain_boundaries
 
 
 class TextureFeatures:

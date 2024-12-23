@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.stats import skew
 from scipy.stats import kurtosis
+from scipy.stats import skew
 
 
 class StatisticalFeatures:

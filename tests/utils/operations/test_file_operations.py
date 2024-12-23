@@ -87,8 +87,10 @@ def test_ls_dirs_sorted_order():
 
 def test_ls_files_valid_path():
     # Mock the behavior of os.scandir to return files
-    mock_files = [mock.Mock(path="/mock/path/file1.txt", is_file=mock.Mock(return_value=True)),
-                  mock.Mock(path="/mock/path/file2.txt", is_file=mock.Mock(return_value=True))]
+    mock_files = [
+        mock.Mock(path="/mock/path/file1.txt", is_file=mock.Mock(return_value=True)),
+        mock.Mock(path="/mock/path/file2.txt", is_file=mock.Mock(return_value=True)),
+    ]
 
     with mock.patch("os.scandir", return_value=mock_files):
         result = list_files("/mock/path")
@@ -127,9 +129,11 @@ def test_ls_files_empty_path():
 
 def test_ls_files_path_with_mixed_file_types():
     # Mock the behavior of os.scandir with a mix of files and directories
-    mock_files = [mock.Mock(path="/mock/path/file1.txt", is_file=mock.Mock(return_value=True)),
-                  mock.Mock(path="/mock/path/file2.txt", is_file=mock.Mock(return_value=True)),
-                  mock.Mock(path="/mock/path/subdir", is_file=mock.Mock(return_value=False))]
+    mock_files = [
+        mock.Mock(path="/mock/path/file1.txt", is_file=mock.Mock(return_value=True)),
+        mock.Mock(path="/mock/path/file2.txt", is_file=mock.Mock(return_value=True)),
+        mock.Mock(path="/mock/path/subdir", is_file=mock.Mock(return_value=False)),
+    ]
 
     with mock.patch("os.scandir", return_value=mock_files):
         result = list_files("/mock/path")

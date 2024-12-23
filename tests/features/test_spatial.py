@@ -45,11 +45,13 @@ def test_calculate_brain_center_mass_non_isotropic_spacing(mock_sequence, mock_n
 
     # Expected center of mass, scaled by non-isotropic spacing
     expected_result = {
-        "axial_brain_centre_mass": 2.0 * 2.0,    # Axial spacing is 2.0
+        "axial_brain_centre_mass": 2.0 * 2.0,  # Axial spacing is 2.0
         "coronal_brain_centre_mass": 2.0 * 0.5,  # Coronal spacing is 0.5
         "sagittal_brain_centre_mass": 2.0 * 2.0,  # Sagittal spacing is 2.0
     }
-    assert result == pytest.approx(expected_result), "Center of mass calculation is incorrect with non-isotropic spacing."
+    assert result == pytest.approx(
+        expected_result
+    ), "Center of mass calculation is incorrect with non-isotropic spacing."
 
 
 def test_calculate_brain_center_mass_no_sequence():

@@ -33,11 +33,7 @@ def sample_segmentation():
     """
     A small sample segmentation array for testing.
     """
-    return np.array([
-        [0, 1, 2],
-        [3, 0, 1],
-        [2, 3, 0]
-    ])
+    return np.array([[0, 1, 2], [3, 0, 1], [2, 3, 0]])
 
 
 @pytest.fixture
@@ -85,8 +81,9 @@ def test_read_sequences_dict_valid():
     sequences = ["_t1", "_t1ce"]
 
     # Mock os.path.isfile to return True for the sequences
-    with mock.patch("os.path.isfile") as mock_isfile, \
-            mock.patch("src.utils.sequences.load_nii", return_value=mock_nii_image):
+    with mock.patch("os.path.isfile") as mock_isfile, mock.patch(
+        "src.utils.sequences.load_nii", return_value=mock_nii_image
+    ):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
         result = read_sequences_dict(root, subject_id, sequences)
@@ -101,8 +98,7 @@ def test_read_sequences_dict_with_missing_sequences():
     sequences = ["_t1", "_t2", "_flair"]
 
     # Mock os.path.isfile to simulate file existence
-    with mock.patch("os.path.isfile") as mock_isfile, \
-            mock.patch("src.utils.sequences.load_nii") as mock_load_nii:
+    with mock.patch("os.path.isfile") as mock_isfile, mock.patch("src.utils.sequences.load_nii") as mock_load_nii:
         # Only mock _t1 as existing
         mock_isfile.side_effect = lambda x: x == "/mock/path/subject_1/subject_1_t1.nii.gz"
         mock_load_nii.return_value = mock_nii_image
@@ -129,8 +125,9 @@ def test_read_sequences_dict_with_load_nii_error():
     sequences = ["_t1", "_t1ce"]
 
     # Mock os.path.isfile to simulate file existence
-    with mock.patch("os.path.isfile") as mock_isfile, \
-            mock.patch("src.utils.sequences.load_nii", side_effect=RuntimeError("NIfTI load error")):
+    with mock.patch("os.path.isfile") as mock_isfile, mock.patch(
+        "src.utils.sequences.load_nii", side_effect=RuntimeError("NIfTI load error")
+    ):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
         result = read_sequences_dict(root, subject_id, sequences)
@@ -223,11 +220,7 @@ def test_label_replacement_basic(sample_segmentation, original_labels, new_label
     """
     Test the basic functionality of label_replacement.
     """
-    expected_output = np.array([
-        [10, 11, 12],
-        [13, 10, 11],
-        [12, 13, 10]
-    ])
+    expected_output = np.array([[10, 11, 12], [13, 10, 11], [12, 13, 10]])
 
     output = label_replacement(sample_segmentation, original_labels, new_labels)
     assert np.array_equal(output, expected_output), f"Expected {expected_output}, but got {output}"
@@ -240,11 +233,7 @@ def test_label_replacement_partial_labels(sample_segmentation):
     original_labels = [1, 2]  # Only replace labels 1 and 2
     new_labels = [101, 102]
 
-    expected_output = np.array([
-        [0, 101, 102],
-        [3, 0, 101],
-        [102, 3, 0]
-    ])
+    expected_output = np.array([[0, 101, 102], [3, 0, 101], [102, 3, 0]])
 
     output = label_replacement(sample_segmentation, original_labels, new_labels)
     assert np.array_equal(output, expected_output), f"Expected {expected_output}, but got {output}"
@@ -268,7 +257,7 @@ def test_label_replacement_invalid_input_lengths(sample_segmentation):
     Test with mismatched lengths of original_labels and new_labels.
     """
     original_labels = [0, 1]  # Only two original labels
-    new_labels = [10]         # Only one new label
+    new_labels = [10]  # Only one new label
 
     with pytest.raises(ValueError, match="The lengths of original labels and new labels must match."):
         label_replacement(sample_segmentation, original_labels, new_labels)

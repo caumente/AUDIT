@@ -8,40 +8,30 @@ from src.features.tumor import TumorFeatures
 @pytest.fixture
 def mock_segmentation():
     """Fixture to create a mock 3D segmentation array for testing tumor features."""
-    return np.array([
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [1, 1, 1], [0, 1, 1]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [1, 1, 1], [0, 1, 1]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+    )
 
 
 @pytest.fixture
 def mock_segmentation_multiple_labels():
     """Fixture to create a mock 3D segmentation array with multiple labels."""
-    return np.array([
-        [[1, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[1, 2, 2], [2, 2, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [[[1, 0, 0], [0, 0, 0], [0, 0, 0]], [[1, 2, 2], [2, 2, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+    )
 
 
 @pytest.fixture
 def mock_zero_segmentation():
     """Fixture to create a mock 3D sequence array with all values defined to 0 for testing texture features."""
-    return np.array([
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+    )
 
 
 @pytest.fixture
 def segmentation_with_float_labels():
-    return np.array([
-        [0.0, 1.0, 1.0],
-        [2.0, 2.0, 0.0],
-        [0.0, 0.0, 0.0]
-    ])
+    return np.array([[0.0, 1.0, 1.0], [2.0, 2.0, 0.0], [0.0, 0.0, 0.0]])
 
 
 @pytest.fixture
@@ -107,7 +97,11 @@ def test_count_tumor_pixels_with_partial_mapping(mock_segmentation_multiple_labe
     result = tumor_features.count_tumor_pixels()
 
     # Check that the unmapped label retains its original value
-    assert result == {"background": 21, "tumor": 2, "2": 4}, "Result should retain unmapped labels and map others correctly."
+    assert result == {
+        "background": 21,
+        "tumor": 2,
+        "2": 4,
+    }, "Result should retain unmapped labels and map others correctly."
 
 
 def test_count_tumor_pixels_empty_segmentation():
@@ -131,17 +125,17 @@ def test_count_tumor_pixels_with_only_background(mock_zero_segmentation):
 
 def test_count_tumor_pixels_with_negative_values():
     """Test counting tumor pixels in a segmentation with negative values."""
-    segmentation_with_negative_values = np.array([
-        [0, -1, -1],
-        [1, 1, 0],
-        [0, 0, 0]
-    ])
+    segmentation_with_negative_values = np.array([[0, -1, -1], [1, 1, 0], [0, 0, 0]])
     mapping_names = {-1: "Artifact", 1: "Tumor", 0: "Background"}
     tumor_features = TumorFeatures(segmentation=segmentation_with_negative_values, mapping_names=mapping_names)
     result = tumor_features.count_tumor_pixels()
 
     # Check that negative values are correctly counted and mapped
-    assert result == {"background": 5, "artifact": 2, "tumor": 2}, "Result should correctly count and map negative values."
+    assert result == {
+        "background": 5,
+        "artifact": 2,
+        "tumor": 2,
+    }, "Result should correctly count and map negative values."
 
 
 def test_count_tumor_pixels_non_integer_labels(segmentation_with_float_labels):
@@ -198,7 +192,9 @@ def test_calculate_lesion_size_with_isotropic_spacing():
     result = tumor_features.calculate_lesion_size()
 
     # Check that the lesion size matches the total number of pixels in the segmentation
-    assert result == {"lesion_size": 1000 * 2**3}, "Result should match the total number of pixels for a full segmentation."
+    assert result == {
+        "lesion_size": 1000 * 2 ** 3
+    }, "Result should match the total number of pixels for a full segmentation."
 
 
 def test_calculate_lesion_size_with_non_isotropic_spacing():
@@ -208,7 +204,9 @@ def test_calculate_lesion_size_with_non_isotropic_spacing():
     result = tumor_features.calculate_lesion_size()
 
     # Check that the lesion size is scaled correctly by the voxel spacing
-    assert result == {"lesion_size": 1000 * 0.5**2 * 4}, "Result should be scaled by the product of the voxel spacing."
+    assert result == {
+        "lesion_size": 1000 * 0.5 ** 2 * 4
+    }, "Result should be scaled by the product of the voxel spacing."
 
 
 def test_calculate_lesion_size_partial_lesion(mock_segmentation):
@@ -233,7 +231,7 @@ def test_get_tumor_center_mass(mock_segmentation):
     """Test calculation of the tumor center of mass."""
     tumor_features = TumorFeatures(mock_segmentation, spacing=(1, 1, 1))
     result = tumor_features.get_tumor_center_mass(label=1)
-    expected_center = np.array([1., 1.4, 1.2])
+    expected_center = np.array([1.0, 1.4, 1.2])
 
     # Check that the center of mass is calculated
     assert isinstance(result, np.ndarray), "Result should be a numpy array."
@@ -266,7 +264,7 @@ def test_get_tumor_center_mass_with_spacing(mock_segmentation):
     result = tumor_features.get_tumor_center_mass(label=1)
 
     # Check that the center of mass is scaled correctly by voxel spacing
-    expected_center = np.array([1., 1.4, 1.2]) * np.array([2, 2, 2])
+    expected_center = np.array([1.0, 1.4, 1.2]) * np.array([2, 2, 2])
     assert np.allclose(result, expected_center), f"Expected {expected_center}, got {result}."
 
 
@@ -276,7 +274,9 @@ def test_get_tumor_center_mass_label_not_present(mock_segmentation_multiple_labe
     result = tumor_features.get_tumor_center_mass(label=3)
 
     # Check that the result is an array of NaN values when the label is not present
-    assert np.isnan(result).all(), "Result should be an array of NaN values for a label not present in the segmentation."
+    assert np.isnan(
+        result
+    ).all(), "Result should be an array of NaN values for a label not present in the segmentation."
 
 
 def test_get_tumor_center_mass_label_present(mock_segmentation_multiple_labels):
@@ -285,7 +285,7 @@ def test_get_tumor_center_mass_label_present(mock_segmentation_multiple_labels):
     result = tumor_features.get_tumor_center_mass(label=2)
 
     # Check that the center of mass is calculated correctly for the specified label
-    expected_center = np.array([1., 0.5, 1.])
+    expected_center = np.array([1.0, 0.5, 1.0])
     assert np.allclose(result, expected_center), f"Expected {expected_center}, got {result}."
 
 
@@ -295,7 +295,7 @@ def test_get_tumor_center_mass_label_with_spacing(mock_segmentation_multiple_lab
     result = tumor_features.get_tumor_center_mass(label=2)
 
     # Check that the center of mass is scaled correctly for the specified label with spacing
-    expected_center = np.array([1., 0.5, 1.]) * np.array([1, 2, 4])
+    expected_center = np.array([1.0, 0.5, 1.0]) * np.array([1, 2, 4])
     assert np.allclose(result, expected_center), f"Expected {expected_center}, got {result}."
 
 
@@ -387,8 +387,12 @@ def test_get_tumor_slices_basic_segmentation(mock_segmentation):
     expected_coronal_slices = [1, 2]
     expected_sagittal_slices = [0, 1, 2]
     assert result[0] == expected_axial_slices, f"Expected axial tumor slices {expected_axial_slices}, got {result[0]}"
-    assert result[1] == expected_coronal_slices, f"Expected coronal tumor slices {expected_coronal_slices}, got {result[1]}"
-    assert result[2] == expected_sagittal_slices, f"Expected sagittal tumor slices {expected_sagittal_slices}, got {result[2]}"
+    assert (
+        result[1] == expected_coronal_slices
+    ), f"Expected coronal tumor slices {expected_coronal_slices}, got {result[1]}"
+    assert (
+        result[2] == expected_sagittal_slices
+    ), f"Expected sagittal tumor slices {expected_sagittal_slices}, got {result[2]}"
 
 
 def test_calculate_position_tumor_slices(mock_segmentation_multiple_labels):
@@ -410,4 +414,3 @@ def test_calculate_tumor_pixel(mock_segmentation_multiple_labels):
     # Check that the result contains tumor pixel counts with proper prefixes
     assert "lesion_size_1" in result, "Tumor pixels for label '1' should be in the result."
     assert "lesion_size_2" in result, "Tumor pixels for label '2' should be in the result."
-

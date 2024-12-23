@@ -14,6 +14,7 @@ def test_add_prefix_dict():
     expected = {"prefix_a": 1, "prefix_b": 2, "prefix_c": 3}
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_add_prefix_dict_empty():
     # Test with an empty dictionary
     input_dict = {}
@@ -21,6 +22,7 @@ def test_add_prefix_dict_empty():
     result = add_prefix_dict(input_dict, prefix)
     expected = {}
     assert result == expected, f"Expected {expected}, but got {result}"
+
 
 def test_add_prefix_dict_no_prefix():
     # Test with a prefix that is an empty string
@@ -38,6 +40,7 @@ def test_capitalizer():
     expected = "HELLO WORLD"
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_capitalizer_empty():
     # Test empty string
     text = ""
@@ -45,12 +48,14 @@ def test_capitalizer_empty():
     expected = ""
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_capitalizer_mixed_case():
     # Test string with mixed case
     text = "HeLLo WoRLd"
     result = capitalizer(text)
     expected = "HELLO WORLD"
     assert result == expected, f"Expected {expected}, but got {result}"
+
 
 def test_capitalizer_numbers_and_special_chars():
     # Test string with numbers and special characters
@@ -67,6 +72,7 @@ def test_pretty_string():
     expected = "Hello World Test"
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_pretty_string_empty():
     # Test empty string
     text = ""
@@ -74,12 +80,14 @@ def test_pretty_string_empty():
     expected = ""
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_pretty_string_with_custom_delimiter():
     # Test with a custom delimiter
     text = "hello-world-test"
     result = pretty_string(text, splitting_pattern="-")
     expected = "Hello World Test"
     assert result == expected, f"Expected {expected}, but got {result}"
+
 
 def test_pretty_string_single_word():
     # Test with a single word
@@ -96,12 +104,14 @@ def test_snake_case():
     expected = "hello_world_test"
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_snake_case_empty():
     # Test empty string
     text = ""
     result = snake_case(text)
     expected = ""
     assert result == expected, f"Expected {expected}, but got {result}"
+
 
 def test_snake_case_with_custom_delimiter():
     # Test with a custom delimiter
@@ -110,10 +120,10 @@ def test_snake_case_with_custom_delimiter():
     expected = "hello_world_test"
     assert result == expected, f"Expected {expected}, but got {result}"
 
+
 def test_snake_case_single_word():
     # Test with a single word
     text = "hello"
     result = snake_case(text)
     expected = "hello"
     assert result == expected, f"Expected {expected}, but got {result}"
-

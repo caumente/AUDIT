@@ -75,9 +75,9 @@ def test_paired_ttest_valid_samples():
     result = paired_ttest(sample_a, sample_b)
 
     # The paired t-test should return a p-value and interpretation of the results
-    assert isinstance(result['p-value'], float)
-    assert 'fail to reject' in result['interpretation']  # Null hypothesis should not be rejected
-    assert result['p-value'] > 0.05  # p-value should be greater than 0.05 (indicating no significant difference)
+    assert isinstance(result["p-value"], float)
+    assert "fail to reject" in result["interpretation"]  # Null hypothesis should not be rejected
+    assert result["p-value"] > 0.05  # p-value should be greater than 0.05 (indicating no significant difference)
 
 
 # Test case for invalid sample sizes (less than 5 elements)
@@ -100,9 +100,9 @@ def test_paired_ttest_significantly_different_samples():
     result = paired_ttest(sample_a, sample_b)
 
     # Since the distributions are significantly different, the paired t-test should reject the null hypothesis
-    assert isinstance(result['p-value'], float)
-    assert 'reject' in result['interpretation']  # Null hypothesis should be rejected
-    assert result['p-value'] <= 0.05  # p-value should be less than 0.05 (indicating significant difference)
+    assert isinstance(result["p-value"], float)
+    assert "reject" in result["interpretation"]  # Null hypothesis should be rejected
+    assert result["p-value"] <= 0.05  # p-value should be less than 0.05 (indicating significant difference)
 
 
 # Test case for identical samples (should fail to reject the null hypothesis)
@@ -113,9 +113,9 @@ def test_paired_ttest_identical_samples():
     result = paired_ttest(sample_a, sample_b)
 
     # Since the samples are identical, the paired t-test should fail to reject the null hypothesis
-    assert isinstance(result['p-value'], float)
-    assert 'fail to reject' in result['interpretation']  # Null hypothesis should not be rejected
-    assert result['p-value'] > 0.05  # p-value should be greater than 0.05 (indicating no significant difference)
+    assert isinstance(result["p-value"], float)
+    assert "fail to reject" in result["interpretation"]  # Null hypothesis should not be rejected
+    assert result["p-value"] > 0.05  # p-value should be greater than 0.05 (indicating no significant difference)
 
 
 # Test case for empty sample (should raise ValueError)
@@ -138,9 +138,12 @@ def test_wilcoxon_identical_samples():
     result = wilcoxon_test(sample_a, sample_b)
 
     # Since the samples are identical, the Wilcoxon test should fail to reject the null hypothesis
-    assert isinstance(result['p-value'], float)
-    assert result['interpretation'] == "Given the significance level 0.05, it fails to reject the null hypothesis. The differences between both samples are not statistically significant."
-    assert result['p-value'] == 1.0  # p-value should be 1 for identical samples
+    assert isinstance(result["p-value"], float)
+    assert (
+        result["interpretation"]
+        == "Given the significance level 0.05, it fails to reject the null hypothesis. The differences between both samples are not statistically significant."
+    )
+    assert result["p-value"] == 1.0  # p-value should be 1 for identical samples
 
 
 # Test case for valid samples with more than 5 elements and significant difference
@@ -151,9 +154,9 @@ def test_wilcoxon_significantly_different_samples():
     result = wilcoxon_test(sample_a, sample_b)
 
     # The samples are significantly different, so the Wilcoxon test should reject the null hypothesis
-    assert isinstance(result['p-value'], float)
-    assert 'rejects the null hypothesis' in result['interpretation']  # Null hypothesis should be rejected
-    assert result['p-value'] < 0.05  # p-value should be less than 0.05 (indicating significant difference)
+    assert isinstance(result["p-value"], float)
+    assert "rejects the null hypothesis" in result["interpretation"]  # Null hypothesis should be rejected
+    assert result["p-value"] < 0.05  # p-value should be less than 0.05 (indicating significant difference)
 
 
 # Test case for invalid sample size (less than 5 elements in one sample)
@@ -176,9 +179,9 @@ def test_wilcoxon_no_significant_difference():
     result = wilcoxon_test(sample_a, sample_b)
 
     # The samples are not identical, but there is no significant difference between them
-    assert isinstance(result['p-value'], float)
-    assert 'fails to reject the null hypothesis' in result['interpretation']
-    assert result['p-value'] > 0.05  # p-value should be greater than 0.05
+    assert isinstance(result["p-value"], float)
+    assert "fails to reject the null hypothesis" in result["interpretation"]
+    assert result["p-value"] > 0.05  # p-value should be greater than 0.05
 
 
 def test_wilcoxon_with_invalid_values():
@@ -188,9 +191,9 @@ def test_wilcoxon_with_invalid_values():
     result = wilcoxon_test(sample_a, sample_b)
 
     # The samples are not identical, but there is no significant difference between them
-    assert isinstance(result['p-value'], float)
-    assert 'fails to reject the null hypothesis' in result['interpretation']
-    assert result['p-value'] > 0.05  # p-value should be greater than 0.05
+    assert isinstance(result["p-value"], float)
+    assert "fails to reject the null hypothesis" in result["interpretation"]
+    assert result["p-value"] > 0.05  # p-value should be greater than 0.05
 
 
 # Test case for empty samples (which should raise an error)
@@ -210,8 +213,8 @@ def test_shapiro_valid_sample():
     sample = np.random.normal(loc=0, scale=1, size=30)  # Generate a normal sample
     result = shapiro_wilk_test(sample)
 
-    assert result['Normally distributed'] is True
-    assert float(result['P-value']) > 0.05  # P-value should indicate normality for a normal distribution
+    assert result["Normally distributed"] is True
+    assert float(result["P-value"]) > 0.05  # P-value should indicate normality for a normal distribution
 
 
 # Test for valid samples (non-normal distribution)
@@ -219,8 +222,8 @@ def test_shapiro_non_normal_sample():
     sample = np.random.uniform(low=0, high=1, size=30)  # Generate a non-normal sample
     result = shapiro_wilk_test(sample)
 
-    assert result['Normally distributed'] is False
-    assert float(result['P-value']) <= 0.05  # P-value should indicate non-normality for a uniform distribution
+    assert result["Normally distributed"] is False
+    assert float(result["P-value"]) <= 0.05  # P-value should indicate non-normality for a uniform distribution
 
 
 # Test for sample size too small
@@ -235,8 +238,8 @@ def test_lilliefors_valid_sample():
     sample = np.random.normal(loc=0, scale=1, size=100)  # Generate a normal sample
     result = lilliefors_test(sample)
 
-    assert result['Normally distributed'] is True
-    assert float(result['P-value']) > 0.05  # P-value should indicate normality for a normal distribution
+    assert result["Normally distributed"] is True
+    assert float(result["P-value"]) > 0.05  # P-value should indicate normality for a normal distribution
 
 
 # Test for valid samples (non-normal distribution) for Lilliefors test
@@ -244,8 +247,8 @@ def test_lilliefors_non_normal_sample():
     sample = np.random.uniform(low=0, high=1, size=100)  # Generate a non-normal sample
     result = lilliefors_test(sample)
 
-    assert result['Normally distributed'] is False
-    assert float(result['P-value']) <= 0.05  # P-value should indicate non-normality for a uniform distribution
+    assert result["Normally distributed"] is False
+    assert float(result["P-value"]) <= 0.05  # P-value should indicate non-normality for a uniform distribution
 
 
 # Test for sample size too small for Lilliefors test

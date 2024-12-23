@@ -102,7 +102,9 @@ def test_one_hot_encoding_with_multiple_labels(mock_segmentation_multiple_labels
 
 def test_calculate_confusion_matrix_elements_binary(mock_segmentation_binary_labels, mock_ground_truth_binary_labels):
     """Test confusion matrix elements for a binary segmentation and ground truth."""
-    tp, tn, fp, fn = calculate_confusion_matrix_elements(mock_ground_truth_binary_labels, mock_segmentation_binary_labels)
+    tp, tn, fp, fn = calculate_confusion_matrix_elements(
+        mock_ground_truth_binary_labels, mock_segmentation_binary_labels
+    )
 
     # Manually count the confusion matrix elements
     expected_tp = 9  # True positives: pixels where both gt and seg are 1
@@ -114,7 +116,6 @@ def test_calculate_confusion_matrix_elements_binary(mock_segmentation_binary_lab
     assert tn == expected_tn
     assert fp == expected_fp
     assert fn == expected_fn
-
 
 
 def test_calculate_confusion_matrix_elements_all_zeros(mock_segmentation_binary_labels):
@@ -466,4 +467,3 @@ def test_hausdorff_distance_edge_case_empty_both():
     # Both are empty, Hausdorff distance should be NaN
     result = hausdorff_distance(gt, seg)
     assert result == 0.0
-

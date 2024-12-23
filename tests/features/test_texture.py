@@ -8,39 +8,41 @@ from src.features.texture import TextureFeatures
 @pytest.fixture
 def mock_sequence():
     """Fixture to create a mock 3D sequence array for testing texture features."""
-    return np.array([
-        [[0, 1, 2], [3, 4, 5], [6, 7, 8]],
-        [[9, 10, 11], [12, 13, 14], [15, 16, 17]],
-        [[18, 19, 20], [21, 22, 23], [24, 25, 26]],
-    ])
+    return np.array(
+        [
+            [[0, 1, 2], [3, 4, 5], [6, 7, 8]],
+            [[9, 10, 11], [12, 13, 14], [15, 16, 17]],
+            [[18, 19, 20], [21, 22, 23], [24, 25, 26]],
+        ]
+    )
 
 
 @pytest.fixture
 def mock_zero_sequence():
     """Fixture to create a mock 3D sequence array with all values defined to 0 for testing texture features."""
-    return np.array([
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+    )
 
 
 @pytest.fixture
 def mock_sequence_with_empty_planes():
     """Fixture to create a mock 3D sequence array with some empty planes."""
-    return np.array([
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 10, 11], [12, 13, 14], [15, 16, 0]],
-        [[0, 0, 0], [12, 13, 14], [0, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-    ])
+    return np.array(
+        [
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 10, 11], [12, 13, 14], [15, 16, 0]],
+            [[0, 0, 0], [12, 13, 14], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
+    )
 
 
 def test_compute_texture_values(mock_sequence):
     """Test the calculation of texture values."""
     texture_features = TextureFeatures(mock_sequence)
-    result = texture_features.compute_texture_values('contrast')
+    result = texture_features.compute_texture_values("contrast")
 
     assert len(result) == mock_sequence.shape[0], "The number of texture values should match the number of planes."
     assert isinstance(result, np.ndarray), "Result should be a numpy array."
@@ -50,7 +52,7 @@ def test_compute_texture_values(mock_sequence):
 def test_compute_texture_values_zero_sequence(mock_zero_sequence):
     """Test the calculation of texture values with an empty sequence."""
     texture_features = TextureFeatures(mock_zero_sequence)
-    result = texture_features.compute_texture_values('contrast')
+    result = texture_features.compute_texture_values("contrast")
 
     # Check that the result is NaN because all values in the sequence are zero
     assert np.isnan(result), "The texture value should be NaN for a sequence of all zeros."
@@ -61,7 +63,7 @@ def test_compute_texture_values_with_empty_planes(mock_sequence_with_empty_plane
     texture_features = TextureFeatures(mock_sequence_with_empty_planes, remove_empty_planes=True)
 
     # Perform texture value computation for 'contrast'
-    result = texture_features.compute_texture_values('contrast')
+    result = texture_features.compute_texture_values("contrast")
 
     # After removing empty planes, the number of planes should be 1 (the middle plane)
     assert len(result) == 4, "There should be 1 texture value after removing empty planes."
@@ -76,7 +78,7 @@ def test_compute_texture_values_with_empty_planes(mock_sequence_with_empty_plane
 def test_extract_features_valid_sequence(mock_sequence):
     """Test extraction of features from a valid sequence with multiple textures."""
     texture_features = TextureFeatures(mock_sequence)
-    textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
+    textures = ["contrast", "dissimilarity", "homogeneity", "ASM", "energy", "correlation"]
 
     # Extract features
     result = texture_features.extract_features(textures=textures)
@@ -97,7 +99,7 @@ def test_extract_features_valid_sequence(mock_sequence):
 def test_extract_features_zero_sequence(mock_zero_sequence):
     """Test extraction of features from a sequence with all zero values."""
     texture_features = TextureFeatures(mock_zero_sequence)
-    textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
+    textures = ["contrast", "dissimilarity", "homogeneity", "ASM", "energy", "correlation"]
 
     # Extract features
     result = texture_features.extract_features(textures=textures)
@@ -115,7 +117,7 @@ def test_extract_features_zero_sequence(mock_zero_sequence):
 def test_extract_features_with_empty_planes(mock_sequence_with_empty_planes):
     """Test extraction of features from a sequence with some empty planes."""
     texture_features = TextureFeatures(mock_sequence_with_empty_planes, remove_empty_planes=True)
-    textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
+    textures = ["contrast", "dissimilarity", "homogeneity", "ASM", "energy", "correlation"]
 
     # Extract features
     result = texture_features.extract_features(textures=textures)
@@ -142,7 +144,7 @@ def test_extract_features_with_default_textures(mock_sequence):
     assert isinstance(result, dict), "The result should be a dictionary."
 
     # Assert that the expected default texture features are present in the dictionary
-    default_textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
+    default_textures = ["contrast", "dissimilarity", "homogeneity", "ASM", "energy", "correlation"]
     for texture in default_textures:
         assert f"mean_{texture}" in result, f"Missing mean for texture {texture}."
         assert f"std_{texture}" in result, f"Missing standard deviation for texture {texture}."
@@ -157,7 +159,7 @@ def test_extract_single_texture(mock_sequence):
     texture_features = TextureFeatures(mock_sequence)
 
     # Extract features for just the 'contrast' texture
-    result = texture_features.extract_features(textures=['contrast'])
+    result = texture_features.extract_features(textures=["contrast"])
 
     # Assert that the result is a dictionary
     assert isinstance(result, dict), "The result should be a dictionary."
@@ -174,11 +176,12 @@ def test_compute_texture_values_no_removal(mock_sequence_with_empty_planes):
     texture_features = TextureFeatures(mock_sequence_with_empty_planes, remove_empty_planes=False)
 
     # Perform texture value computation for 'contrast'
-    result = texture_features.compute_texture_values('contrast')
+    result = texture_features.compute_texture_values("contrast")
 
     # The number of planes should match the original sequence (5 planes in this case)
-    assert len(result) == mock_sequence_with_empty_planes.shape[
-        0], "The number of texture values should match the number of planes."
+    assert (
+        len(result) == mock_sequence_with_empty_planes.shape[0]
+    ), "The number of texture values should match the number of planes."
 
     # Ensure that all computed texture values are finite
     assert np.all(np.isfinite(result)), "All computed texture values should be finite."

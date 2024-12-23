@@ -27,9 +27,13 @@ def test_errors_per_class(simple_data):
     ground_truth, predicted, unique_classes = simple_data
     result = errors_per_class(ground_truth, predicted, unique_classes)
 
-    expected = np.array([[0, 0, 0],  # Class 0 was predicted 2 times (correctly) for ground truth 0
-                         [1, 0, 1],  # Class 1 was predicted 1 time (correctly) for ground truth 1
-                         [0, 1, 0]])  # Class 2 was predicted 1 time (correctly) for ground truth 2
+    expected = np.array(
+        [
+            [0, 0, 0],  # Class 0 was predicted 2 times (correctly) for ground truth 0
+            [1, 0, 1],  # Class 1 was predicted 1 time (correctly) for ground truth 1
+            [0, 1, 0],
+        ]
+    )  # Class 2 was predicted 1 time (correctly) for ground truth 2
     # Check if the result matches expected
     np.testing.assert_array_equal(result, expected)
 
@@ -38,9 +42,13 @@ def test_errors_per_class_edge_case(edge_case_data):
     ground_truth, predicted, unique_classes = edge_case_data
     result = errors_per_class(ground_truth, predicted, unique_classes)
 
-    expected = np.array([[0, 0, 0],  # Class 0 was predicted 1 time (correctly) for ground truth 0
-                         [0, 0, 0],  # Class 1 was predicted 2 times (correctly) for ground truth 1
-                         [0, 1, 0]])  # Class 2 was predicted 0 times for ground truth 2
+    expected = np.array(
+        [
+            [0, 0, 0],  # Class 0 was predicted 1 time (correctly) for ground truth 0
+            [0, 0, 0],  # Class 1 was predicted 2 times (correctly) for ground truth 1
+            [0, 1, 0],
+        ]
+    )  # Class 2 was predicted 0 times for ground truth 2
     # Check if the result matches expected
     np.testing.assert_array_equal(result, expected)
 
@@ -50,9 +58,13 @@ def test_normalize_matrix_per_row():
     matrix = np.array([[1, 4, 5], [2, 8, 10], [4, 5, 1]])
     result = normalize_matrix_per_row(matrix)
 
-    expected = np.array([[10., 40., 50.],  # First row is normalized to 100
-                         [10., 40., 50.],  # Second row normalized to 100
-                         [40., 50., 10.]])  # Third row normalized to 100
+    expected = np.array(
+        [
+            [10.0, 40.0, 50.0],  # First row is normalized to 100
+            [10.0, 40.0, 50.0],  # Second row normalized to 100
+            [40.0, 50.0, 10.0],
+        ]
+    )  # Third row normalized to 100
 
     np.testing.assert_equal(result, expected)
 
@@ -62,7 +74,7 @@ def test_normalize_matrix_per_row_zero_sum():
     result = normalize_matrix_per_row(matrix)
 
     # In this case, the rows that sum to 0 should be replaced with 0s
-    expected = np.array([[0., 0., 0.], [0., 0., 0.], [33.33333333, 33.33333333, 33.33333333]])
+    expected = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [33.33333333, 33.33333333, 33.33333333]])
 
     np.testing.assert_almost_equal(result, expected, decimal=6)
 

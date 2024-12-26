@@ -2,8 +2,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from src.utils.operations.misc_operations import capitalizer
-from src.utils.operations.misc_operations import pretty_string
+from src.utils.commons.strings import capitalizer
+from src.utils.commons.strings import pretty_string
 from src.visualization.constants import Dashboard
 
 constants = Dashboard()

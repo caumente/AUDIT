@@ -12,11 +12,11 @@ from pymia.evaluation.writer import CSVStatisticsWriter
 
 from src.metrics.segmentation_metrics import calculate_metrics
 from src.metrics.segmentation_metrics import one_hot_encoding
-from src.utils.operations.file_operations import list_dirs
-from src.utils.operations.misc_operations import fancy_print
-from src.utils.operations.misc_operations import fancy_tqdm
-from src.utils.sequences import get_spacing
-from src.utils.sequences import load_nii_by_subject_id
+from src.utils.commons.file_manager import list_dirs
+from src.utils.commons.strings import fancy_print
+from src.utils.commons.strings import fancy_tqdm
+from src.utils.sequences.sequences import get_spacing
+from src.utils.sequences.sequences import load_nii_by_subject_id
 
 """
 CUSTOM METRICS

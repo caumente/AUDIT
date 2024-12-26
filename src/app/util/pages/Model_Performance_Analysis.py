@@ -1,5 +1,3 @@
-import sys
-
 import pandas as pd
 import streamlit as st
 from streamlit_plotly_events import plotly_events
@@ -14,9 +12,9 @@ from src.app.util.commons.sidebars import setup_sidebar_single_metric
 from src.app.util.commons.sidebars import setup_sidebar_single_model
 from src.app.util.constants.descriptions import ModelPerformanceAnalysisPage
 from src.app.util.constants.metrics import Metrics
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.file_operations import read_datasets_from_dict
-from src.utils.operations.misc_operations import pretty_string
+from src.utils.commons.file_manager import load_config_file
+from src.utils.commons.file_manager import read_datasets_from_dict
+from src.utils.commons.strings import pretty_string
 from src.visualization.scatter_plots import multivariate_metric_feature
 
 # Load constants

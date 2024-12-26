@@ -12,8 +12,8 @@ from loguru import logger
 
 from src.metrics.main import extract_custom_metrics
 from src.metrics.main import extract_pymia_metrics
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.misc_operations import configure_logging
+from src.utils.commons.file_manager import load_config_file
+from src.utils.commons.strings import configure_logging
 
 if __name__ == "__main__":
     logger.remove()

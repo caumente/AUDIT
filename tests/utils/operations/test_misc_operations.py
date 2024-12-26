@@ -1,9 +1,7 @@
-import pytest
-
-from src.utils.operations.misc_operations import add_prefix_dict
-from src.utils.operations.misc_operations import capitalizer
-from src.utils.operations.misc_operations import pretty_string
-from src.utils.operations.misc_operations import snake_case
+from src.utils.commons.strings import add_prefix_dict
+from src.utils.commons.strings import capitalizer
+from src.utils.commons.strings import pretty_string
+from src.utils.commons.strings import snake_case
 
 
 def test_add_prefix_dict():

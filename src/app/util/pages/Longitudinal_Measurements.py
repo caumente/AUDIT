@@ -7,8 +7,8 @@ from src.app.util.commons.sidebars import setup_sidebar_single_dataset
 from src.app.util.commons.sidebars import setup_sidebar_single_model
 from src.app.util.commons.utils import download_plot
 from src.app.util.constants.descriptions import LongitudinalAnalysisPage
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.file_operations import read_datasets_from_dict
+from src.utils.commons.file_manager import load_config_file
+from src.utils.commons.file_manager import read_datasets_from_dict
 from src.visualization.time_series import plot_longitudinal
 from src.visualization.time_series import plot_longitudinal2
 

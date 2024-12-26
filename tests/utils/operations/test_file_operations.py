@@ -1,10 +1,7 @@
-import os
 from unittest import mock
 
-import pytest
-
-from src.utils.operations.file_operations import list_dirs
-from src.utils.operations.file_operations import list_files
+from src.utils.commons.file_manager import list_dirs
+from src.utils.commons.file_manager import list_files
 
 
 # Sample directories and files structure for testing

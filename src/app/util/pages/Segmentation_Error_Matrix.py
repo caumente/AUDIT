@@ -7,12 +7,12 @@ from stqdm import stqdm
 from src.app.util.constants.descriptions import SegmentationErrorMatrixPage
 from src.metrics.error_matrix import errors_per_class
 from src.metrics.error_matrix import normalize_matrix_per_row
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.itk_operations import run_comparison_segmentation_itk_snap
-from src.utils.operations.misc_operations import capitalizer
-from src.utils.operations.misc_operations import pretty_string
-from src.utils.operations.misc_operations import snake_case
-from src.utils.sequences import load_nii_by_subject_id
+from src.utils.commons.file_manager import load_config_file
+from src.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap
+from src.utils.commons.strings import capitalizer
+from src.utils.commons.strings import pretty_string
+from src.utils.commons.strings import snake_case
+from src.utils.sequences.sequences import load_nii_by_subject_id
 from src.visualization.confusion_matrices import plt_confusion_matrix_plotly
 from src.visualization.sequences import plot_seq
 

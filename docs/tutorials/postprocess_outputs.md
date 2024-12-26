@@ -19,7 +19,7 @@ modules to manipulate files and sequences.
 
 ```python
 import os
-from src.utils.operations.file_operations import (
+from src.utils.commons.file_manager import (
     list_dirs,
     list_files,
     rename_files,
@@ -28,7 +28,7 @@ from src.utils.operations.file_operations import (
     organize_files_into_folders,
     add_suffix_to_files
 )
-from src.utils.sequences import (
+from src.utils.sequences.sequences import (
     read_sequences_dict,
     iterative_labels_replacement,
     load_nii,

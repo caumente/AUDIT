@@ -8,7 +8,6 @@ def run_itk_snap(path, dataset, case, labels=None):
     os.environ["PATH"] += os.pathsep + "/usr/local/itksnap-4.2.0-20240422-Linux-gcc64/bin"
 
     verification_check = True
-    from src.utils.sequences import load_nii
     names = ["t1", "t1ce", "t2", "flair", "seg"]
     t1, t1ce, t2, flair, seg = [f"{path}/{dataset}/{dataset}_images/{case}/{case}_{n}.nii.gz" for n in names]
 

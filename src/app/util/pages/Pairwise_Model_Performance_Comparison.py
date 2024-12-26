@@ -21,8 +21,8 @@ from src.metrics.commons import calculate_improvements
 from src.metrics.statistical_tests import normality_test
 from src.metrics.statistical_tests import paired_ttest
 from src.metrics.statistical_tests import wilcoxon_test
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.file_operations import read_datasets_from_dict
+from src.utils.commons.file_manager import load_config_file
+from src.utils.commons.file_manager import read_datasets_from_dict
 from src.visualization.barplots import aggregated_pairwise_model_performance
 from src.visualization.barplots import individual_pairwise_model_performance
 from src.visualization.histograms import plot_histogram

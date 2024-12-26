@@ -11,9 +11,9 @@ from colorama import Fore
 from loguru import logger
 
 from src.features.main import extract_features
-from src.utils.operations.file_operations import load_config_file
-from src.utils.operations.misc_operations import configure_logging
-from src.utils.operations.misc_operations import fancy_print
+from src.utils.commons.file_manager import load_config_file
+from src.utils.commons.strings import configure_logging
+from src.utils.commons.strings import fancy_print
 
 if __name__ == "__main__":
     logger.remove()

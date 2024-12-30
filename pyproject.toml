@@ -4,11 +4,35 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "audit"
-version = "0.1.0"
+version = "0.0.1"
 description = "AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence"
 authors = ["Carlos Aumente <carlosaumente@gmail.com>"]
-license = "Apache 2.0"
+license = "Apache-2.0"
 readme = "README.md"
+repository = "https://github.com/caumente/AUDIT"
+documentation = "https://caumente.github.io/AUDIT/"
+keywords=[
+    'medical image analysis',
+    'deep learning',
+    'mri',
+    'model evaluation',
+    'dashboard'
+]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3.6',
+    'Topic :: Scientific/Engineering',
+    'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    'Topic :: Scientific/Engineering :: Image Processing',
+    'Topic :: Scientific/Engineering :: Medical Science Apps.',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+packages = [{include = "audit", from="src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

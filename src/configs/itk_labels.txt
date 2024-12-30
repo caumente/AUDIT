@@ -1,0 +1,6 @@
+# ITK-SNAP Label Description File
+# Columns = Index, Red, Green, Blue, Visibility, Opacity, Label Name
+0  0   0   0      0 0 0    "BKG"
+3  0   0   255    1 1 1    "EDE"
+1  255 255 0      1 1 1    "ENH"
+2  255 0   0      1 1 1    "NEC"

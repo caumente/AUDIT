@@ -1,18 +1,17 @@
 # Path to the raw dataset
-data_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets/NW/NW_images'
+data_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_images'
 
 # Paths to model predictions
 model_predictions_paths:
-  mvp_1: '/home/carlos/Documentos/proyectos/AUDIT/datasets/NW/NW_seg/NW_mvp_1'
-  mvp_2: '/home/carlos/Documentos/proyectos/AUDIT/datasets/NW/NW_seg/NW_mvp_2'
-  mvp_2.3: '/home/carlos/Documentos/proyectos/AUDIT/datasets/NW/NW_seg/NW_mvp_23'
+#  nnUnet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/nnUnet'
+  SegResNet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/SegResNet'
 
 # Mapping of labels to their numeric values
 labels:
   BKG: 0
-  EDE: 1
+  EDE: 3
+  ENH: 1
   NEC: 2
-  ENH: 3
 
 # List of metrics to compute
 metrics:
@@ -25,13 +24,13 @@ metrics:
   haus: true
   size: true
 
-# library used for computing all the metrics
-package: pymia
+# Library used for computing all the metrics
+package: custom
 calculate_stats: false
 
 # Path where output metrics will be saved
 output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
 
 # Filename for the extracted information
-filename: 'NW'
+filename: 'UCSF'
 

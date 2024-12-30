@@ -1,3 +1,4 @@
+# Mapping of labels to their numeric values
 labels:
   BKG: 0
   EDE: 3
@@ -11,29 +12,33 @@ metrics_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:
-  NW: "${datasets_path}/NW/NW_images"
+  BraTS2020: "${datasets_path}/BraTS2020/BraTS2020_images"
+  BraTS2024_SSA: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_images"
+  BraTS2024_PED: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_images"
   UCSF: "${datasets_path}/UCSF/UCSF_images"
-  BRATS2020: "${datasets_path}/BraTS2020/BraTS2020_images"
 
 # Paths for feature extraction CSV files
 features:
-  NW: "${features_path}/extracted_information_NW.csv"
+  BraTS2020: "${features_path}/extracted_information_BraTS2020.csv"
+  BraTS2024_SSA: "${features_path}/extracted_information_BraTS2024_SSA.csv"
+  BraTS2024_PED: "${features_path}/extracted_information_BraTS2024_PED.csv"
   UCSF: "${features_path}/extracted_information_UCSF.csv"
-  BRATS2020: "${features_path}/extracted_information_BRATS.csv"
 
 # Paths for metric extraction CSV files
 metrics:
-  NW: "${metrics_path}/extracted_information_NW.csv"
+  BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS_SSA.csv"
+  BraTS2024_PED: "${metrics_path}/extracted_information_BraTS_PED.csv"
   UCSF: "${metrics_path}/extracted_information_UCSF.csv"
-#  BRATS: "${metrics_path}/extracted_information_BRATS.csv"
 
 # Paths for models predictions
 predictions:
-  NW:
-    mvp_1: "${datasets_path}/NW/NW_seg/NW_mvp_1"
-    mvp_2: "${datasets_path}/NW/NW_seg/NW_mvp_2"
-    mvp_2_3: "${datasets_path}/NW/NW_seg/NW_mvp_23"
+  BraTS2024_SSA:
+    nnUnet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/SegResNet"
+    BTSUnet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/BTSUnet"
+  BraTS2024_PED:
+    nnUnet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/SegResNet"
+    BTSUnet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/BTSUnet"
   UCSF:
-    mvp_1: "${datasets_path}/UCSF/UCSF_seg/UCSF_mvp_1"
-    mvp_2: "${datasets_path}/UCSF/UCSF_seg/UCSF_mvp_2"
-#    mvp_2_3: "${datasets_path}/UCSF/UCSF_seg/UCSF_mvp_23"
+    SegResNet: "${datasets_path}/UCSF/UCSF_seg/SegResNet"

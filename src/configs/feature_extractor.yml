@@ -1,37 +1,31 @@
 # Paths to all the datasets
 data_paths:
-  NW: '/home/carlos/Documentos/proyectos/AUDIT/datasets/NW/NW_images'
+  BraTS2020: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2020/BraTS2020_images'
+  BraTS2024_PED: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
+  BraTS2024_SSA: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
   UCSF: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_images'
-  BRATS2020: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2020/BraTS2020_images'
-  BRATS_PED: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
-  BRATS_PED_VAL: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED_VAL/BraTS2024_PED_VAL_images'
-  BRATS_SSA: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
-  BRATS_SSA_VAL: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_SSA_VAL/BraTS2024_SSA_VAL_images'
 
 # Mapping of labels to their numeric values
 labels:
   BKG: 0
+  EDE: 3
   ENH: 1
   NEC: 2
-  EDE: 3
 
 # List of features to extract
 features:
   statistical: true
-  texture: false
-  spatial: false
-  tumor: false
+  texture: true
+  spatial: true
+  tumor: true
 
 # Longitudinal study settings
 longitudinal:
-  FDA:
-    pattern: "-"            # Pattern used for splitting filename
+  UCSF:
+    pattern: "_"            # Pattern used for splitting filename
     longitudinal_id: 1      # Index position for the subject ID after splitting the filename
     time_point: 2           # Index position for the time point after splitting the filename
-#  NW:
-#    pattern: "_"
-#    longitudinal_id: 0
-#    time_point: 1
+
 
 # Path where extracted features will be saved
 output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/features'

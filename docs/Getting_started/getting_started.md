@@ -218,13 +218,13 @@ predictions in the AUDIT library. Each key is explained below:
 - `features_path`: Defines the root path where the feature extraction results are saved.
 - `metrics_path`: Defines the root path where the metric extraction results are saved.
 - `raw_datasets`: Specifies paths to directories containing the raw MRI datasets. Each key represents a dataset name 
-                  (e.g., BraTS2020, UCSF), and the value is the file path to the respective dataset folder.
+                  (e.g., BraTS, UCSF), and the value is the file path to the respective dataset folder.
 - `features`: Specifies paths to CSV files where the extracted feature information is saved for each dataset. Each key 
               represents a dataset name, and the value is the file path to the corresponding feature extraction CSV file.
 - `metrics`: Specifies paths to CSV files where metric extraction information is saved for each dataset. Similar to the
              features section, each key represents a dataset name, and the value is the path to the corresponding metrics CSV file.
 - `predictions`: Specifies the paths for model predictions for different datasets. Each dataset name 
-                 (e.g., BraTS2024_SSA) maps to a dictionary containing model names (e.g., nnUnet, SegResNet) as keys, 
+                 (e.g., BraTS_SSA) maps to a dictionary containing model names (e.g., nnUnet, SegResNet) as keys, 
                  and the file paths to their respective segmentation predictions as values.
 
 ```json
@@ -242,24 +242,24 @@ metrics_path: '/home/user/AUDIT/outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:
-  BraTS2020: "${datasets_path}/BraTS2020/BraTS2020_images"
-  BraTS2024_SSA: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_images"
+  BraTS: "${datasets_path}/BraTS/BraTS_images"
+  BraTS_SSA: "${datasets_path}/BraTS_SSA/BraTS_SSA_images"
   UCSF: "${datasets_path}/UCSF/UCSF_images"
 
 # Paths for feature extraction CSV files
 features:
-  BraTS2020: "${features_path}/extracted_information_BraTS2020.csv"
-  BraTS2024_SSA: "${features_path}/extracted_information_BraTS2024_SSA.csv"
+  BraTS: "${features_path}/extracted_information_BraTS.csv"
+  BraTS_SSA: "${features_path}/extracted_information_BraTS_SSA.csv"
   UCSF: "${features_path}/extracted_information_UCSF.csv"
 
 # Paths for metric extraction CSV files
 metrics:
-  BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS_SSA.csv"
+  BraTS_SSA: "${metrics_path}/extracted_information_BraTS.csv"
   UCSF: "${metrics_path}/extracted_information_UCSF.csv"
 
 # Paths for models predictions
 predictions:
-  BraTS2024_SSA:
+  BraTS_SSA:
     nnUnet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/nnUnet"
     SegResNet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/SegResNet"
   UCSF:

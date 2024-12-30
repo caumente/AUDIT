@@ -84,7 +84,7 @@ The library _poetry_ must be installed in your environment to follow this via of
 
 Clone the repository:
  ```bash
- git clone https://github.com/caumente/AUDIT.git
+ git clone git@github.com:caumente/AUDIT.git
  cd AUDIT
 ```
 

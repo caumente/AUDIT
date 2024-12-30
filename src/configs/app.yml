@@ -6,22 +6,20 @@ labels:
   NEC: 2
 
 # Root path for datasets, features extracted, and metrics extracted
-datasets_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets'
-features_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/features'
-metrics_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
+datasets_path: '/home/user/AUDIT/datasets'
+features_path: '/home/user/AUDIT/outputs/features'
+metrics_path: '/home/user/AUDIT/outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:
   BraTS2020: "${datasets_path}/BraTS2020/BraTS2020_images"
   BraTS2024_SSA: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_images"
-  BraTS2024_PED: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_images"
   UCSF: "${datasets_path}/UCSF/UCSF_images"
 
 # Paths for feature extraction CSV files
 features:
   BraTS2020: "${features_path}/extracted_information_BraTS2020.csv"
   BraTS2024_SSA: "${features_path}/extracted_information_BraTS2024_SSA.csv"
-  BraTS2024_PED: "${features_path}/extracted_information_BraTS2024_PED.csv"
   UCSF: "${features_path}/extracted_information_UCSF.csv"
 
 # Paths for metric extraction CSV files

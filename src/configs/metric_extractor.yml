@@ -1,10 +1,10 @@
 # Path to the raw dataset
-data_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_images'
+data_path: '/home/user/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_seg'
 
 # Paths to model predictions
 model_predictions_paths:
-#  nnUnet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/nnUnet'
-  SegResNet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/SegResNet'
+  nnUnet: '/home/user/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_seg/nnUnet'
+  SegResNet: '/home/user/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_seg/SegResNet'
 
 # Mapping of labels to their numeric values
 labels:
@@ -29,8 +29,8 @@ package: custom
 calculate_stats: false
 
 # Path where output metrics will be saved
-output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
+output_path: '/home/user/AUDIT/outputs/metrics'
 
 # Filename for the extracted information
-filename: 'UCSF'
+filename: 'BraTS2024_SSA'
 

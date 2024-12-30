@@ -1,9 +1,8 @@
 # Paths to all the datasets
 data_paths:
-  BraTS2020: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2020/BraTS2020_images'
-  BraTS2024_PED: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
-  BraTS2024_SSA: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
-  UCSF: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_images'
+  BraTS2020: '/home/user/AUDIT/datasets/BraTS2020/BraTS2020_images'
+  BraTS2024_SSA: '/home/user/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
+  UCSF: '/home/user/AUDIT/datasets/UCSF/UCSF_images'
 
 # Mapping of labels to their numeric values
 labels:
@@ -28,4 +27,4 @@ longitudinal:
 
 
 # Path where extracted features will be saved
-output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/features'
+output_path: '/home/user/outputs/features'

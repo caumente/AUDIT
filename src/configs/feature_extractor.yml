@@ -27,4 +27,4 @@ longitudinal:
 
 
 # Path where extracted features will be saved
-output_path: '/home/user/outputs/features'
+output_path: '/home/user/AUDIT/outputs/features'

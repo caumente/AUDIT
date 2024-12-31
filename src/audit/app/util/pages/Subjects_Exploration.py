@@ -18,10 +18,6 @@ from audit.utils.commons.strings import pretty_string
 const_descriptions = SubjectsExplorationPage()
 const_features = Features()
 
-# Load configuration and data
-config = load_config_file("./audit/configs/app.yml")
-features = config.get("features")
-
 
 def setup_sidebar(data):
     with st.sidebar:
@@ -98,7 +94,10 @@ def show_outlier_information(subject_data, data):
         st.write("The subject is not an outlier for any of the features")
 
 
-def subjects():
+def subjects(config):
+    # Load configuration and data
+    features = config.get("features")
+
     # Load configuration and data
     st.header(const_descriptions.header)
     st.markdown(const_descriptions.sub_header)

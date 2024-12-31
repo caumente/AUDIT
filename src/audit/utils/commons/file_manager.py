@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 from typing import Any
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -47,12 +48,42 @@ def list_files(path: str) -> list:
         return []
 
 
-def load_config_file(path: str) -> dict:
+# def load_config_file(path: str) -> dict:
+#     """
+#     Loads a configuration file in YAML format and returns its contents as a dictionary.
+#
+#     Args:
+#         path: The file path to the YAML configuration file.
+#
+#     Returns:
+#         dict: The contents of the YAML file as a dictionary.
+#     """
+#
+#     def replace_variables(config, variables):
+#         def replace(match):
+#             return variables.get(match.group(1), match.group(0))
+#
+#         for key, value in config.items():
+#             if isinstance(value, str):
+#                 config[key] = re.sub(r"\$\{(\w+)\}", replace, value)
+#             elif isinstance(value, dict):
+#                 replace_variables(value, variables)
+#
+#     with open(path, "r") as file:
+#         config = yaml.safe_load(file)
+#
+#     variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
+#     replace_variables(config, variables)
+#
+#     return config
+
+
+def load_config_file(relative_path: str) -> dict:
     """
     Loads a configuration file in YAML format and returns its contents as a dictionary.
 
     Args:
-        path: The file path to the YAML configuration file.
+        relative_path: The relative file path to the YAML configuration file.
 
     Returns:
         dict: The contents of the YAML file as a dictionary.
@@ -68,9 +99,19 @@ def load_config_file(path: str) -> dict:
             elif isinstance(value, dict):
                 replace_variables(value, variables)
 
-    with open(path, "r") as file:
+    # Resolve the absolute path based on the current file's directory
+    base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust the depth according to your project
+    absolute_path = base_dir / relative_path
+
+    # Validate if the file exists
+    if not absolute_path.exists():
+        raise FileNotFoundError(f"Config file not found: {absolute_path}")
+
+    # Load the YAML file
+    with open(absolute_path, "r") as file:
         config = yaml.safe_load(file)
 
+    # Replace variables in the YAML configuration
     variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
     replace_variables(config, variables)
 

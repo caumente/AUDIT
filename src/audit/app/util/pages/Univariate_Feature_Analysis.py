@@ -22,11 +22,6 @@ from audit.visualization.histograms import custom_histogram
 const_descriptions = UnivariatePage()
 const_features = Features()
 
-# Load configuration and data
-config = load_config_file("./audit/configs/app.yml")
-datasets_paths = config.get("datasets_path")
-features_paths = config.get("features")
-
 
 def setup_sidebar(data, data_paths):
     with st.sidebar:
@@ -97,7 +92,7 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
                 st.error("Ups, something wrong happened when opening the file in ITK-SNAP", icon="🚨")
 
 
-def main(data, select_feature_name):
+def main(data, datasets_paths, select_feature_name, labels):
 
     highlight_subject = setup_highlight_subject(data)
 
@@ -106,7 +101,7 @@ def main(data, select_feature_name):
     data.reset_index(drop=True, inplace=True)
     st.markdown(const_descriptions.description_boxplot)
     plot_type = st.selectbox(label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0)
-    boxplot_logic(datasets_paths, data, select_feature_name, config.get("labels"), plot_type, highlight_subject)
+    boxplot_logic(datasets_paths, data, select_feature_name, labels, plot_type, highlight_subject)
 
     # Visualize histogram
     st.subheader("Continuous distribution")
@@ -116,7 +111,12 @@ def main(data, select_feature_name):
     histogram_logic(data, plot_type, select_feature_name, n_bins, bins_size)
 
 
-def univariate():
+def univariate(config):
+    # Load configuration and data
+    datasets_paths = config.get("datasets_path")
+    features_paths = config.get("features")
+    labels = config.get("labels")
+
     # Load configuration and data
     st.header(const_descriptions.header)
     st.markdown(const_descriptions.sub_header)
@@ -144,6 +144,6 @@ def univariate():
             num_std_devs=num_std_devs
         )
 
-        main(df, selected_feature)
+        main(df, datasets_paths, selected_feature, labels)
     else:
         st.error(proceed[-1], icon='🚨')

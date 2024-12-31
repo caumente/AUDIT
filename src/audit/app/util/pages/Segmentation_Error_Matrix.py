@@ -18,13 +18,6 @@ from audit.visualization.sequences import plot_seq
 
 const = SegmentationErrorMatrixPage()
 
-config = load_config_file("./audit/configs/app.yml")
-labels_dict = load_config_file("./audit/configs/app.yml").get("labels")
-classes = list(labels_dict.keys())
-labels = list(labels_dict.values())
-datasets = list(config.get("predictions", {}).keys())
-raw_datasets = config.get("raw_datasets", {})
-
 
 def setup_sidebar(config, datasets):
     """
@@ -190,7 +183,13 @@ def main(selected_dataset, selected_model, selected_id, models, subjects_in_path
         visualize_confusion_matrix(accumulated, classes, normalized)
 
 
-def matrix():
+def matrix(config):
+    labels_dict = load_config_file("./configs/app.yml").get("labels")
+    classes = list(labels_dict.keys())
+    labels = list(labels_dict.values())
+    datasets = list(config.get("predictions", {}).keys())
+    raw_datasets = config.get("raw_datasets", {})
+
     st.subheader(const.header)
     st.markdown(const.sub_header)
     st.markdown(const.description)

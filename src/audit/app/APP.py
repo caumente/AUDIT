@@ -4,10 +4,11 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import warnings
-
+from pathlib import Path
 import streamlit as st
 from PIL import Image
 
+from audit.utils.commons.file_manager import load_config_file
 from audit.app.util.pages.Home_Page import home_page
 from audit.app.util.pages.Longitudinal_Measurements import longitudinal
 from audit.app.util.pages.Model_Performance_Analysis import performance
@@ -22,24 +23,36 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 class AUDIT:
-    def __init__(self):
+    def __init__(self, config):
         self.apps = []
+        self.config = config
 
     def add_page(self, title, func):
         self.apps.append({"title": title, "function": func})
 
     def run(self):
         st.set_page_config(page_title="AUDIT", page_icon=":brain", layout="wide")
-        audit_logo = Image.open("./audit/app/util/images/AUDIT_transparent.png")
-        st.sidebar.image(audit_logo, use_column_width=True)
+
+        # Resolve the absolute path for the logo
+        base_dir = Path(__file__).resolve().parent
+        audit_logo_path = base_dir / "util/images/AUDIT_transparent.png"
+
+        # Load the image
+        if audit_logo_path.exists():
+            audit_logo = Image.open(audit_logo_path)
+            st.sidebar.image(audit_logo, use_column_width=True)
+        else:
+            st.sidebar.error(f"Logo not found: {audit_logo_path}")
 
         st.sidebar.markdown("## Main Menu")
         page = st.sidebar.selectbox("Select Page", self.apps, format_func=lambda page: page["title"])
         st.sidebar.markdown("---")
-        page["function"]()
+        page["function"](self.config)
 
 
-app = AUDIT()
+config = load_config_file("./configs/app.yml")
+
+app = AUDIT(config)
 app.add_page("Home Page", home_page)
 app.add_page("Univariate Analysis", univariate)
 app.add_page("Multivariate Analysis", multivariate)
@@ -51,3 +64,4 @@ app.add_page("Longitudinal Measurements", longitudinal)
 app.add_page("Subjects Exploration", subjects)
 
 app.run()
+

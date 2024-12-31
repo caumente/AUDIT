@@ -22,11 +22,6 @@ const_descriptions = ModelPerformanceAnalysisPage()
 const_metrics = Metrics()
 metrics_dict = const_metrics.get_metrics()
 
-# Load configuration file
-config = load_config_file("./audit/configs/app.yml")
-metrics_paths = config.get("metrics")
-features_paths = config.get("features")
-
 
 def setup_sidebar(data, data_paths, aggregated):
     with st.sidebar:
@@ -118,7 +113,11 @@ def reset_highlighted_cases():
     st.rerun()
 
 
-def performance():
+def performance(config):
+    # Load configuration file
+    metrics_paths = config.get("metrics")
+    features_paths = config.get("features")
+
     # Define page
     st.subheader(const_descriptions.header)
     st.markdown(const_descriptions.sub_header)

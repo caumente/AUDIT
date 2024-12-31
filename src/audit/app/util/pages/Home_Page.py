@@ -17,13 +17,16 @@
 
 import streamlit as st
 from PIL import Image
+from pathlib import Path
 
 
-def home_page():
+def home_page(config):
 
     # Load images
-    audit_logo = Image.open("./audit/app/util/images/AUDIT.png")
-    audit_schema = Image.open("./audit/app/util/images/audit_schema.png")
+    # audit_logo = Image.open("./audit/app/util/images/AUDIT.png")
+    # audit_schema = Image.open("./audit/app/util/images/audit_schema.png")
+    audit_logo = Image.open(Path(__file__).parent.parent / "images/AUDIT_transparent.png")
+    audit_schema = Image.open(Path(__file__).parent.parent / "images/audit_schema.png")
 
     # Title and description
     left_col, right_col = st.columns([2, 1])

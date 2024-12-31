@@ -34,11 +34,6 @@ metrics_dict = const_metrics.get_metrics()
 orderby_dict = const_metrics.orderby
 const_features = Features()
 
-# Load configuration files
-config = load_config_file("./audit/configs/app.yml")
-metrics_paths = config.get("metrics")
-features_paths = config.get("features")
-
 
 def setup_sidebar(data, aggregated=True):
     with st.sidebar:
@@ -168,7 +163,10 @@ def perform_statistical_test(
     )
 
 
-def pairwise_comparison():
+def pairwise_comparison(config):
+    # Load configuration files
+    metrics_paths = config.get("metrics")
+    features_paths = config.get("features")
 
     # Defining page
     st.subheader(const_descriptions.header)

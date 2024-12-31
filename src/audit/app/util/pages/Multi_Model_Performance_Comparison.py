@@ -18,11 +18,6 @@ const_descriptions = MultiModelPerformanceComparisonsPage()
 const_metrics = Metrics()
 metrics_dict = const_metrics.get_metrics()
 
-# load config files
-config = load_config_file("./audit/configs/app.yml")
-metrics_paths = config.get("metrics")
-features_paths = config.get("features")
-
 
 def setup_sidebar(data):
     with st.sidebar:
@@ -69,7 +64,10 @@ def main_table(data, agg):
     return data_melted
 
 
-def multi_model():
+def multi_model(config):
+    # load config files
+    metrics_paths = config.get("metrics")
+    features_paths = config.get("features")
 
     # Defining page
     st.subheader(const_descriptions.header)

@@ -19,12 +19,6 @@ from audit.visualization.scatter_plots import multivariate_features_highlighter
 const_descriptions = MultivariatePage()
 const_features = Features()
 
-# Load configuration
-config = load_config_file("./audit/configs/app.yml")
-datasets_root_path = config.get("datasets_path")
-features_information = config.get("features")
-
-
 def setup_sidebar(data, data_paths):
     with st.sidebar:
         st.header("Configuration")
@@ -37,7 +31,7 @@ def setup_sidebar(data, data_paths):
         return selected_sets, select_x_axis, select_y_axis, select_color_axis
 
 
-def main(data, x_axis, y_axis, color_axis):
+def main(data, datasets_root_path, x_axis, y_axis, color_axis, labels):
     # Scatter plot visualization
     st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
 
@@ -67,12 +61,16 @@ def main(data, x_axis, y_axis, color_axis):
     if selected_case != st.session_state.selected_case:
         st.session_state.selected_case = selected_case
         dataset = data[data.ID == selected_case]["set"].unique()[0].lower()
-        verification_check = run_itk_snap(datasets_root_path, dataset, selected_case, config.get("labels"))
+        verification_check = run_itk_snap(datasets_root_path, dataset, selected_case, labels)
         if not verification_check:
             st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
 
 
-def multivariate():
+def multivariate(config):
+    datasets_root_path = config.get("datasets_path")
+    features_information = config.get("features")
+    labels = config.get("labels")
+
     # Define page layout
     st.header(const_descriptions.header)
     st.markdown(const_descriptions.sub_header)
@@ -89,7 +87,7 @@ def multivariate():
         df = processing_data(df, sets=selected_sets)
         df.reset_index(drop=True, inplace=True)
 
-        main(df, select_x_feature_name, select_y_feature_name, select_color_feature_name)
+        main(df, datasets_root_path, select_x_feature_name, select_y_feature_name, select_color_feature_name, labels)
 
         st.markdown(const_descriptions.description)
     else:

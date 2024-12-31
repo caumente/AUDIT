@@ -14,12 +14,6 @@ from audit.visualization.time_series import plot_longitudinal2
 
 const = LongitudinalAnalysisPage()
 
-# Load configuration and data
-config = load_config_file("./audit/configs/app.yml")
-features_paths = config.get("features")
-metrics_paths = config.get("metrics")
-
-
 def setup_sidebar(data):
 
     with st.sidebar:
@@ -68,7 +62,10 @@ def plot_visualization(data):
     download_plot(fig, label="Absolute Difference in Lesion Size Variation", filename="absolute_difference_in_LSV")
 
 
-def longitudinal():
+def longitudinal(config):
+    features_paths = config.get("features")
+    metrics_paths = config.get("metrics")
+
     # Define page layout
     st.header(const.header)
     st.markdown(const.sub_header)

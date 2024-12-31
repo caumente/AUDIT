@@ -1,0 +1,34 @@
+# Path to the raw dataset
+data_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_images'
+
+# Paths to model predictions
+model_predictions_paths:
+#  nnUnet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/nnUnet'
+  SegResNet: '/home/carlos/Documentos/proyectos/AUDIT/datasets/UCSF/UCSF_seg/SegResNet'
+
+# Mapping of labels to their numeric values
+labels:
+  BKG: 0
+  EDE: 3
+  ENH: 1
+  NEC: 2
+
+# List of metrics to compute
+metrics:
+  dice: true
+  jacc: true
+  accu: true
+  prec: true
+  sens: true
+  spec: true
+  haus: true
+  size: true
+
+# Library used for computing all the metrics
+package: custom
+calculate_stats: false
+
+# Path where output metrics will be saved
+output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
+filename: 'UCSF'
+logs_path: '/home/carlos/Documentos/proyectos/AUDIT/logs/metric'

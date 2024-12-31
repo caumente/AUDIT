@@ -1,11 +1,15 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import numpy as np
 import pandas as pd
 import pytest
 
-from src.metrics.commons import calculate_absolute_error
-from src.metrics.commons import calculate_improvements
-from src.metrics.commons import calculate_ratio_improvement
-from src.metrics.commons import calculate_relative_error
+from src.audit.metrics.commons import calculate_absolute_error
+from src.audit.metrics.commons import calculate_improvements
+from src.audit.metrics.commons import calculate_ratio_improvement
+from src.audit.metrics.commons import calculate_relative_error
 
 
 @pytest.fixture

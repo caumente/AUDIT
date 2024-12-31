@@ -1,15 +1,19 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from unittest import mock
 
 import numpy as np
 import pytest
 import SimpleITK as sitk
 
-from src.utils.sequences.sequences import build_nifty_image
-from src.utils.sequences.sequences import fit_brain_boundaries
-from src.utils.sequences.sequences import get_spacing
-from src.utils.sequences.sequences import label_replacement
-from src.utils.sequences.sequences import load_nii
-from src.utils.sequences.sequences import read_sequences_dict
+from src.audit.utils.sequences.sequences import build_nifty_image
+from src.audit.utils.sequences.sequences import fit_brain_boundaries
+from src.audit.utils.sequences.sequences import get_spacing
+from src.audit.utils.sequences.sequences import label_replacement
+from src.audit.utils.sequences.sequences import load_nii
+from src.audit.utils.sequences.sequences import read_sequences_dict
 
 # Mock NIfTI Image
 mock_nii_image = mock.Mock()
@@ -19,12 +23,12 @@ mock_nii_image.GetSpacing.return_value = (2.0, 2.0, 2.0)  # Mock spacing returne
 
 @pytest.fixture
 def dummy_sequence_path():
-    return "./tests/dummy_sequence.nii.gz"
+    return "dummy_sequence.nii.gz"
 
 
 @pytest.fixture
 def fake_sequence_path():
-    return "./tests/fake_sequence.nii.gz"
+    return "fake_sequence.nii.gz"
 
 
 # Fixtures for reusable test inputs
@@ -82,7 +86,7 @@ def test_read_sequences_dict_valid():
 
     # Mock os.path.isfile to return True for the sequences
     with mock.patch("os.path.isfile") as mock_isfile, mock.patch(
-        "src.utils.sequences.load_nii", return_value=mock_nii_image
+        "src.audit.utils.sequences.sequences.load_nii", return_value=mock_nii_image
     ):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
@@ -98,7 +102,7 @@ def test_read_sequences_dict_with_missing_sequences():
     sequences = ["_t1", "_t2", "_flair"]
 
     # Mock os.path.isfile to simulate file existence
-    with mock.patch("os.path.isfile") as mock_isfile, mock.patch("src.utils.sequences.load_nii") as mock_load_nii:
+    with mock.patch("os.path.isfile") as mock_isfile, mock.patch("src.audit.utils.sequences.sequences.load_nii") as mock_load_nii:
         # Only mock _t1 as existing
         mock_isfile.side_effect = lambda x: x == "/mock/path/subject_1/subject_1_t1.nii.gz"
         mock_load_nii.return_value = mock_nii_image
@@ -126,7 +130,7 @@ def test_read_sequences_dict_with_load_nii_error():
 
     # Mock os.path.isfile to simulate file existence
     with mock.patch("os.path.isfile") as mock_isfile, mock.patch(
-        "src.utils.sequences.load_nii", side_effect=RuntimeError("NIfTI load error")
+        "src.audit.utils.sequences.sequences.load_nii", side_effect=RuntimeError("NIfTI load error")
     ):
         mock_isfile.side_effect = lambda x: x.endswith("_t1.nii.gz") or x.endswith("_t1ce.nii.gz")
 
@@ -163,7 +167,7 @@ def test_get_spacing_with_image():
 
 def test_get_spacing_with_none_image():
     # Mock the logger to capture the warning
-    with mock.patch("src.utils.sequences.logger.warning") as mock_warning:
+    with mock.patch("src.audit.utils.sequences.sequences.logger.warning") as mock_warning:
         spacing = get_spacing(None)
 
         # Assert that the spacing returned is the default [1, 1, 1]
@@ -175,7 +179,7 @@ def test_get_spacing_with_none_image():
 
 def test_get_spacing_with_valid_sequence(dummy_sequence_path):
     # Mock load_nii to simulate loading a valid image and returning the mock image
-    with mock.patch("src.utils.sequences.load_nii", return_value=mock_nii_image):
+    with mock.patch("src.audit.utils.sequences.sequences.load_nii", return_value=mock_nii_image):
         # Simulate that the file exists (by mocking os.path.isfile)
         with mock.patch("os.path.isfile", return_value=True):
             img = load_nii(dummy_sequence_path)  # This will use the mocked image

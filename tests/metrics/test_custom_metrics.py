@@ -1,21 +1,20 @@
-from collections import Counter
+import os
+import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import numpy as np
 import pytest
-from numpy import logical_and as l_and
-from numpy import logical_not as l_not
 from scipy.spatial.distance import directed_hausdorff
 
-from src.metrics.segmentation_metrics import accuracy
-from src.metrics.segmentation_metrics import calculate_confusion_matrix_elements
-from src.metrics.segmentation_metrics import calculate_metrics
-from src.metrics.segmentation_metrics import dice_score
-from src.metrics.segmentation_metrics import hausdorff_distance
-from src.metrics.segmentation_metrics import jaccard_index
-from src.metrics.segmentation_metrics import one_hot_encoding
-from src.metrics.segmentation_metrics import precision
-from src.metrics.segmentation_metrics import sensitivity
-from src.metrics.segmentation_metrics import specificity
+from src.audit.metrics.segmentation_metrics import accuracy
+from src.audit.metrics.segmentation_metrics import calculate_confusion_matrix_elements
+from src.audit.metrics.segmentation_metrics import dice_score
+from src.audit.metrics.segmentation_metrics import hausdorff_distance
+from src.audit.metrics.segmentation_metrics import jaccard_index
+from src.audit.metrics.segmentation_metrics import one_hot_encoding
+from src.audit.metrics.segmentation_metrics import precision
+from src.audit.metrics.segmentation_metrics import sensitivity
+from src.audit.metrics.segmentation_metrics import specificity
 
 
 # Fixtures

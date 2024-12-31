@@ -1,7 +1,11 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from unittest import mock
 
-from src.utils.commons.file_manager import list_dirs
-from src.utils.commons.file_manager import list_files
+from src.audit.utils.commons.file_manager import list_dirs
+from src.audit.utils.commons.file_manager import list_files
 
 
 # Sample directories and files structure for testing

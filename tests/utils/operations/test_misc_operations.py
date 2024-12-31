@@ -1,7 +1,11 @@
-from src.utils.commons.strings import add_prefix_dict
-from src.utils.commons.strings import capitalizer
-from src.utils.commons.strings import pretty_string
-from src.utils.commons.strings import snake_case
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from src.audit.utils.commons.strings import add_prefix_dict
+from src.audit.utils.commons.strings import capitalizer
+from src.audit.utils.commons.strings import pretty_string
+from src.audit.utils.commons.strings import snake_case
 
 
 def test_add_prefix_dict():

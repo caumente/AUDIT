@@ -1,11 +1,15 @@
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import numpy as np
 import pytest
 
-from src.metrics.statistical_tests import lilliefors_test
-from src.metrics.statistical_tests import mann_whitney_test
-from src.metrics.statistical_tests import paired_ttest
-from src.metrics.statistical_tests import shapiro_wilk_test
-from src.metrics.statistical_tests import wilcoxon_test
+from src.audit.metrics.statistical_tests import lilliefors_test
+from src.audit.metrics.statistical_tests import mann_whitney_test
+from src.audit.metrics.statistical_tests import paired_ttest
+from src.audit.metrics.statistical_tests import shapiro_wilk_test
+from src.audit.metrics.statistical_tests import wilcoxon_test
 
 
 # Test case for valid samples with more than 5 elements

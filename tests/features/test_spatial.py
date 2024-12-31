@@ -1,8 +1,12 @@
-# export PYTHONPATH=$PYTHONPATH:/home/usr/AUDIT/src
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import numpy as np
 import pytest
 
-from src.features.spatial import SpatialFeatures
+from src.audit.features.spatial import SpatialFeatures
 
 
 @pytest.fixture

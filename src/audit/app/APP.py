@@ -1,8 +1,4 @@
-import os
 import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import warnings
 from pathlib import Path
 import streamlit as st
@@ -50,18 +46,29 @@ class AUDIT:
         page["function"](self.config)
 
 
-config = load_config_file("./configs/app.yml")
+def main():
+    # Extract the config path from sys.argv (Streamlit passes arguments this way)
+    config_path = "./configs/app.yml"  # Default config path
+    if len(sys.argv) > 2 and sys.argv[1] == "--config":
+        config_path = sys.argv[2]
 
-app = AUDIT(config)
-app.add_page("Home Page", home_page)
-app.add_page("Univariate Analysis", univariate)
-app.add_page("Multivariate Analysis", multivariate)
-app.add_page("Segmentation Error Matrix", matrix)
-app.add_page("Model Performance Analysis", performance)
-app.add_page("Pairwise Model Performance Comparison", pairwise_comparison)
-app.add_page("Multi-model Performance Comparison", multi_model)
-app.add_page("Longitudinal Measurements", longitudinal)
-app.add_page("Subjects Exploration", subjects)
+    # Load the configuration file
+    config = load_config_file(config_path)
 
-app.run()
+    # Initialize and run the app
+    app = AUDIT(config)
+    app.add_page("Home Page", home_page)
+    app.add_page("Univariate Analysis", univariate)
+    app.add_page("Multivariate Analysis", multivariate)
+    app.add_page("Segmentation Error Matrix", matrix)
+    app.add_page("Model Performance Analysis", performance)
+    app.add_page("Pairwise Model Performance Comparison", pairwise_comparison)
+    app.add_page("Multi-model Performance Comparison", multi_model)
+    app.add_page("Longitudinal Measurements", longitudinal)
+    app.add_page("Subjects Exploration", subjects)
 
+    app.run()
+
+
+if __name__ == "__main__":
+    main()

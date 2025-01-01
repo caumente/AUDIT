@@ -1,5 +1,5 @@
 import click
-from audit.app.launcher import main as app_main
+from audit.app.launcher import run_streamlit_app
 from audit.feature_extractor import run_feature_extractor
 from audit.metric_extractor import run_metric_extractor
 
@@ -10,8 +10,14 @@ def cli():
 
 
 @cli.command()
-def run_app():
-    app_main()
+@click.option(
+    '--config',
+    type=str,
+    default='./configs/app.yml',
+    help="Path to the configuration file for the app"
+)
+def run_app(config):
+    run_streamlit_app(config)
 
 
 @cli.command()

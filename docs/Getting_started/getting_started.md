@@ -1,13 +1,12 @@
 # Getting Started
 
-Welcome to **AUDIT**! Follow these steps to install, configure, and use AUDIT for analyzing MRI datasets and evaluating AI models.
 
 ---
 
 ## 1. Installation
 
 
-### 1.1 Using PIP
+### 1.1 For standard users - Using PIP
 Install AUDIT directly from PyPI (when available): 
 
 ```bash
@@ -18,7 +17,9 @@ This is the simplest method if you just want to use the library without modifyin
 
 ---
 
-### 1.2 Using AUDIT repository
+### 1.2. For developers - Using AUDIT repository
+
+#### 1.2.1. Without using Poetry for dependency management
 
 For development or if you need access to the latest updates, install AUDIT from the repository:
 
@@ -44,7 +45,7 @@ For development or if you need access to the latest updates, install AUDIT from 
 
 ---
 
-### 1.3 Using Poetry
+#### 1.2.2. Using Poetry for dependency management
 
 Poetry is a dependency manager that simplifies library management and environment creation. Follow these steps:
 
@@ -271,14 +272,35 @@ predictions:
 
 ## 3. Run AUDIT Backend
 
-The backend processes data for analysis and evaluation. Run the following commands:
+The backend of AUDIT is responsible for calculating the metrics specified in configuration files and extracting features 
+from magnetic resonance imaging (MRI) data. Depending on the installation method—either via the AUDIT repository 
+(for developers) or through pip (for standard usage)—the library is designed to execute these processes via 
+command-line commands.
 
-1. Run the feature extractor and metric extractor modules: 
+### 3.1. For standard users
+
+For a standard installation (e.g., via pip), the library provides a more user-friendly command-line interface. Use the 
+following commands to run the feature extractor and metric extractor modules:
 
 ```bash
-python src/feature_extractor.py
-python src/metric_extractor.py
+audit feature-extractor --config path/to/your/feature_extractor/config/file.yaml
+audit metric-extractor --config path/to/your/metric_extractor/config/file.yaml
 ```
+
+### 3.2. For developers
+
+If you are using the developer mode of AUDIT (installed via the repository), you can directly run the feature extractor 
+and metric extractor modules as follows:
+
+```bash
+python src/audit/feature_extractor.py --config path/to/your/feature_extractor/config/file.yml
+python src/audit/metric_extractor.py --config path/to/your/metric_extractor/config/file.yml
+```
+
+In developer mode, specifying the --config parameter is optional. Instead, you can edit the default configuration files
+provided by the library to suit your needs. These files are located at AUDIT/src/audit/configs folder. Simply modify the 
+configuration files (feature_extractor.yml and metric_extractor.yml) to match your requirements before running the commands.
+
 
 Logs and output files will be saved in the directories specified in the configuration files (default is the 
 outputs folder).
@@ -289,9 +311,21 @@ outputs folder).
 
 The AUDIT web app provides an interactive interface for exploring your data and visualizing metrics. Start the app with:
 
+### 4.1. For standard users
+
 ```bash
-streamlit run src/app/APP.py
+audit run-app --config path/to/your/app/config/file.yml
 ```
+
+### 4.2. For developers
+
+```bash
+python src/audit/metric_extractor.py --config path/to/your/app/config/file.yml
+```
+
+In developer mode, specifying the --config parameter is optional. Instead, you can edit the default configuration file
+provided by the library to suit your needs. These file is located at AUDIT/src/audit/configs folder. Simply modify the 
+configuration file (app.yml) to match your requirements before running the commands.
 
 This will open the app in your default web browser  at <a href="http://localhost:8501/" class="external-link" target="_blank">http://localhost:8501/</a>. Use the dashboards to:
 

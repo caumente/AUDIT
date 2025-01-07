@@ -6,9 +6,9 @@ labels:
   NEC: 2
 
 # Root path for datasets, features extracted, and metrics extracted
-datasets_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets'
-features_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/features'
-metrics_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
+datasets_path: './datasets'
+features_path: './outputs/features'
+metrics_path: './outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:
@@ -33,10 +33,8 @@ metrics:
 # Paths for models predictions
 predictions:
   BraTS2024_SSA:
-    nnUnet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/nnUnet"
-    SegResNet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/SegResNet"
-    BTSUnet: "${datasets_path}/BraTS_SSA/BraTS_SSA_seg/BTSUnet"
+    nnUnet: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_seg/SegResNet"
   BraTS2024_PED:
-    nnUnet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/nnUnet"
-    SegResNet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/SegResNet"
-    BTSUnet: "${datasets_path}/BraTS_PED/BraTS_PED_seg/BTSUnet"
+    nnUnet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/SegResNet"

@@ -49,7 +49,7 @@ def histogram_logic(data, plot_type, feature, n_bins, bins_size):
     st.markdown(const_descriptions.description)
 
 
-def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highlight_subject):
+def render_boxplot(data, feature, plot_type, highlight_subject):
     st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
 
     boxplot_fig = boxplot_highlighter(
@@ -62,25 +62,32 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
     selected_points = plotly_events(boxplot_fig, click_event=True, override_height=None)
     download_plot(boxplot_fig, label="Univariate Analysis", filename="univariate_analysis")
 
-    selected_case, st.session_state.selected_case = None, None
+    return selected_points
 
-    # Handle selected point
-    info_placeholder = st.empty()
+
+def get_case_from_point(data, selected_points, highlight_subject):
+    selected_case = None
+
     # last condition to avoid that clicking inside the boxplot randomly opens a subject
     if selected_points and len(selected_points) == 1:
         point = selected_points[0]
         filtered_set_data = data[data.set == point["y"]]
         if point["curveNumber"] < len(data.set.unique()):
             selected_case = filtered_set_data.iloc[point["pointIndex"]]["ID"]
-        else:  # to open the case highlighted when clicking on it
+        else:  # to open the case highlighted when clicking on it (because red points are new curves in the plot)
             selected_case = highlight_subject
-        info_placeholder.write(f"Open ITK-SNAP for visualizing the case: {selected_case}")
 
+    return selected_case
+
+
+def manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case):
     # Visualize case in ITK-SNAP
-    if selected_case != st.session_state.selected_case:
-        st.session_state.selected_case = selected_case
-        # last condition to avoid that clicking inside the boxplot randomly opens a subject
-        if selected_case and selected_case != "Select a case" and len(selected_points) == 1:
+    if "last_opened_case_itk" not in st.session_state:
+        st.session_state.last_opened_case_itk = None
+    # last condition to avoid that clicking inside the boxplot randomly opens a subject
+    if selected_case and selected_case != "Select a case" and len(selected_points) == 1:
+        if selected_case != st.session_state.last_opened_case_itk:
+            st.session_state.last_opened_case_itk = selected_case
             dataset = data[data.ID == selected_case]["set"].unique()[0]
             verification_check = run_itk_snap(
                 path=datasets_root_path,
@@ -89,7 +96,19 @@ def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highligh
                 labels=labels
             )
             if not verification_check:
-                st.error("Ups, something wrong happened when opening the file in ITK-SNAP", icon="🚨")
+                st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
+                st.session_state.last_opened_case_itk = None
+            else:
+                info_placeholder = st.empty()
+                info_placeholder.write(f"Opened case {selected_case} in ITK-SNAP")
+
+
+def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highlight_subject):
+    selected_points = render_boxplot(data, feature, plot_type, highlight_subject)
+
+    selected_case = get_case_from_point(data, selected_points, highlight_subject)
+
+    manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)
 
 
 def main(data, datasets_paths, select_feature_name, labels):

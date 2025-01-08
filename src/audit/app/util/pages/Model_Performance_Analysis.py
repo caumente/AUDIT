@@ -39,6 +39,10 @@ def setup_sidebar(data, data_paths, aggregated):
 def merge_features_and_metrics(features: pd.DataFrame, metrics: pd.DataFrame, aggregate=True) -> pd.DataFrame:
     # Aggregate metrics by ID, model, and set (optionally including region)
     group_cols = ["ID", "model", "set"] if aggregate else ["ID", "model", "set", "region"]
+    st.write(aggregate)
+    st.write(group_cols)
+    st.write(metrics.dtypes)
+    st.dataframe(metrics.head())
     metrics_df = metrics.groupby(group_cols).mean().reset_index()
 
     # Add 'region' column with value 'All' if it doesn't exist after aggregation

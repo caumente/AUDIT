@@ -10,9 +10,9 @@ def run_itk_snap(path, dataset, case, labels=None):
     verification_check = True
     names = ["t1", "t1ce", "t2", "flair", "seg"]
     t1, t1ce, t2, flair, seg = [f"{path}/{dataset}/{dataset}_images/{case}/{case}_{n}.nii.gz" for n in names]
-
+    
     if labels:
-        labels_path = "./audit/configs/itk_labels.txt"
+        labels_path = "./src/audit/configs/itk_labels.txt"
         generate_itk_labels(labels, labels_path)
         command = open_itk_command() + ["-l", labels_path, "-g", t1ce, "-s", seg, "-o"] + [t1, t2, flair]
     else:
@@ -71,7 +71,7 @@ def run_comparison_segmentation_itk_snap(path_seg, path_pred, case, labels=None)
     seg_ai = f"{path_pred}/{case}/{case}_pred.nii.gz"
 
     if labels:
-        labels_path = "./audit/configs/itk_labels.txt"
+        labels_path = "./src/audit/configs/itk_labels.txt"
         generate_itk_labels(labels, labels_path)
         command = open_itk_command() + ["-g", t1ce, "-s", seg, "-o", t1, t2, flair, seg_ai, "-l", labels_path]
     else:

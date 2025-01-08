@@ -40,6 +40,7 @@ class AUDIT:
         if audit_logo_path.exists():
             audit_logo = Image.open(audit_logo_path)
             st.sidebar.image(audit_logo, use_column_width=True)
+            # st.sidebar.image(audit_logo, use_container_width=True)
         else:
             st.sidebar.error(f"Logo not found: {audit_logo_path}")
 

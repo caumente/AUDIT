@@ -166,3 +166,16 @@ class Features:
             if hasattr(self, category_lower):
                 features.update(getattr(self, category_lower))
         return features
+
+    def get_pretty_feature_name(self, feature):
+        """
+        Given an 'ugly' feature name, returns its 'pretty' counterpart by searching through all feature dictionaries.
+        """
+        # Traverse all feature dictionaries to find the matching value
+        for feature_dict in [self.common, self.longitudinal, self.statistical, self.spatial, self.tumor, self.texture]:
+            for pretty, ugly in feature_dict.items():
+                if ugly == feature:
+                    return pretty
+
+        # Return None if no match is found
+        return None

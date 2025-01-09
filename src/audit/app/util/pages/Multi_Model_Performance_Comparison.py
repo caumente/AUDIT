@@ -40,7 +40,7 @@ def visualize_data(data, agg):
     download_plot(fig, label="Models performance", filename="multimodel_performance")
 
 
-def main_table(data, agg):
+def main_table(data, aggregate):
     # postprocessing data
     data.rename(columns={v: k for k, v in metrics_dict.items()}, inplace=True)
     data_melted = pd.melt(
@@ -52,8 +52,9 @@ def main_table(data, agg):
     )
 
     # general results
-    group_cols = ["model", "region"] if not agg else ["model"]
-    aggregated = data.drop(columns=["ID", "set"]).groupby(group_cols).agg(["mean", "std"])
+    group_cols = ["model", "region"] if not aggregate else ["model"]
+    drop_cols = ["region"] if aggregate else []
+    aggregated = data.drop(columns=["ID", "set"] + drop_cols).groupby(group_cols).agg(["mean", "std"])
 
     # formatting results
     formatted = pd.DataFrame(index=aggregated.index)

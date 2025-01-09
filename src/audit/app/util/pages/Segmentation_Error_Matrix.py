@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import streamlit as st
+from numpy.ma.extras import average
 from stqdm import stqdm
 
 from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
@@ -109,12 +110,10 @@ def visualize_subject_level(gt_path, predictions_path, selected_id, labels_dict,
     cm = compute_confusion_matrix(seg, pred, labels, normalized)
     visualize_confusion_matrix(cm, classes, normalized)
 
-    if "visualize_itk" not in st.session_state:
-        st.session_state.visualize_itk = False
-    visualize_itk = st.checkbox("Visualize it in ITK-SNAP", value=st.session_state.visualize_itk)
+    # run itk-snap
+    visualize_itk = st.button("Visualize it in ITK-SNAP")
     if visualize_itk:
         run_comparison_segmentation_itk_snap(gt_path, predictions_path, selected_id, labels_dict)
-        st.session_state.visualize_itk = False
 
 
 def visualize_aggregated(gt_path, predictions_path, subjects_in_path, labels_dict, averaged, normalized):
@@ -162,18 +161,19 @@ def matrix(config):
     selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = setup_sidebar(predictions, raw_datasets)
 
     # Main visualization logic
-    averaged = st.checkbox(
-        "Averaged per number of subjects",
-        value=True,
-        help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
-    )
     normalized = st.checkbox(
         "Normalized per ground truth label",
         value=True,
         help="It normalizes the errors per class, if enabled."
     )
 
-    if selected_id != "All":
-        visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
-    else:
+    if selected_id == "All":
+        averaged = st.checkbox(
+            "Averaged per number of subjects",
+            value=True,
+            help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
+        )
         visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
+    else:
+        visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+

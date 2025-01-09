@@ -23,11 +23,21 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 
 class AUDIT:
     def __init__(self, config):
-        self.apps = []
+        self.pages = [
+            {"title": "Home Page", "function": home_page},
+            {"title": "Univariate Analysis", "function": univariate},
+            {"title": "Multivariate Analysis", "function": multivariate},
+            {"title": "Segmentation Error Matrix", "function": matrix},
+            {"title": "Model Performance Analysis", "function": performance},
+            {"title": "Pairwise Model Performance Comparison", "function": pairwise_comparison},
+            {"title": "Multi-model Performance Comparison", "function": multi_model},
+            {"title": "Longitudinal Measurements", "function": longitudinal},
+            {"title": "Subjects Exploration", "function": subjects}
+        ]
         self.config = config
 
     def add_page(self, title, func):
-        self.apps.append({"title": title, "function": func})
+        self.pages.append({"title": title, "function": func})
 
     def run(self):
         st.set_page_config(page_title="AUDIT", page_icon=":brain", layout="wide")
@@ -39,13 +49,13 @@ class AUDIT:
         # Load the image
         if audit_logo_path.exists():
             audit_logo = Image.open(audit_logo_path)
-            st.sidebar.image(audit_logo, use_column_width=True)
-            # st.sidebar.image(audit_logo, use_container_width=True)
+            # st.sidebar.image(audit_logo, use_column_width=True)
+            st.sidebar.image(audit_logo, use_container_width=True)
         else:
             st.sidebar.error(f"Logo not found: {audit_logo_path}")
 
         st.sidebar.markdown("## Main Menu")
-        page = st.sidebar.selectbox("Select Page", self.apps, format_func=lambda page: page["title"])
+        page = st.sidebar.selectbox("Select Page", self.pages, format_func=lambda page: page["title"])
         st.sidebar.markdown("---")
         page["function"](self.config)
 
@@ -61,16 +71,6 @@ def main():
 
     # Initialize and run the app
     app = AUDIT(config)
-    app.add_page("Home Page", home_page)
-    app.add_page("Univariate Analysis", univariate)
-    app.add_page("Multivariate Analysis", multivariate)
-    app.add_page("Segmentation Error Matrix", matrix)
-    app.add_page("Model Performance Analysis", performance)
-    app.add_page("Pairwise Model Performance Comparison", pairwise_comparison)
-    app.add_page("Multi-model Performance Comparison", multi_model)
-    app.add_page("Longitudinal Measurements", longitudinal)
-    app.add_page("Subjects Exploration", subjects)
-
     app.run()
 
 

@@ -43,6 +43,9 @@ def render_scatter_plot(data, x_axis, y_axis, color_axis):
         x_axis=x_axis,
         y_axis=y_axis,
         color=color_axis,
+        x_label=const_features.get_pretty_feature_name(x_axis),
+        y_label=const_features.get_pretty_feature_name(y_axis),
+        legend_title=const_features.get_pretty_feature_name(y_axis) if color_axis != "Dataset" else None,
         highlight_point=highlight_subject,
     )
     selected_points = plotly_events(fig, click_event=True, override_height=None)

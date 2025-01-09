@@ -19,6 +19,8 @@ def mann_whitney_test(samples, alpha=0.05):
     """
 
     sample_a, sample_b = samples
+    sample_a, sample_b = np.array(sample_a), np.array(sample_b)
+
     if len(sample_a) < 5 or len(sample_b) < 5:
         raise ValueError("Each sample must contain at least 5 elements to perform the Mann-Whitney test.")
 
@@ -30,29 +32,31 @@ def mann_whitney_test(samples, alpha=0.05):
         return round(p_value, 3), "accepted"
 
 
-def paired_ttest(sample1, sample2, alpha=0.05):
+def paired_ttest(sample_a, sample_b, alpha=0.05):
     """
     Perform paired t-test between two samples and interpret the result.
 
     Parameters:
-    - sample1: The first sample.
-    - sample2: The second sample.
+    - sample_a: The first sample.
+    - sample_b: The second sample.
     - alpha: The significance level for the test (default is 0.05).
 
     Returns:
     - dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
 
-    if len(sample1) < 5 or len(sample2) < 5:
+    sample_a, sample_b = np.array(sample_a), np.array(sample_b)
+
+    if len(sample_a) < 5 or len(sample_b) < 5:
         raise ValueError("Each sample must contain at least 5 elements to perform the Paired T-test.")
 
     # Check if the samples are identical
-    if sample1 == sample2:
+    if np.array_equal(sample_a, sample_b):
         return {"p-value": 1.0, "interpretation": f"Given the alpha {alpha}, fail to reject the null hypothesis. There "
                                                   f"is no significant difference between the samples."}
 
     # Perform paired t-test if both samples are normal
-    t_stat, p_value = ttest_rel(sample1, sample2, nan_policy="omit")
+    t_stat, p_value = ttest_rel(sample_a, sample_b, nan_policy="omit")
 
     # Interpret the result
     if p_value <= alpha:
@@ -69,30 +73,32 @@ def paired_ttest(sample1, sample2, alpha=0.05):
     return {"p-value": p_value, "interpretation": interpretation}
 
 
-def wilcoxon_test(sample1, sample2, alpha=0.05):
+def wilcoxon_test(sample_a, sample_b, alpha=0.05):
     """
     Perform the Wilcoxon signed-rank test between two samples and interpret the result.
 
     Parameters:
-    sample1 (array-like): The first sample.
-    sample2 (array-like): The second sample.
+    sample_a (array-like): The first sample.
+    sample_b (array-like): The second sample.
     alpha (float): The significance level for the test (default is 0.05).
 
     Returns:
     dict: A dictionary containing the test statistic, p-value, and interpretation.
     """
 
+    sample_a, sample_b = np.array(sample_a), np.array(sample_b)
+
     # Check that both samples have at least 5 elements
-    if len(sample1) < 5 or len(sample2) < 5:
+    if len(sample_a) < 5 or len(sample_b) < 5:
         raise ValueError("Each sample must contain at least 5 elements to perform the Wilcoxon test.")
 
     # Check if samples are identical (early exit with p-value = 1)
-    if sample1 == sample2:
+    if np.array_equal(sample_a, sample_b):
         return {"p-value": 1.0,
                 "interpretation": f"Given the significance level {alpha}, it fails to reject the null hypothesis. The differences between both samples are not statistically significant."}
 
     # Perform Wilcoxon signed-rank test
-    w_stat, p_value = wilcoxon(sample1, sample2, nan_policy="omit")
+    w_stat, p_value = wilcoxon(sample_a, sample_b, nan_policy="omit")
 
     # Handle cases with NaN p-values (invalid results)
     if p_value != p_value:  # NaN check

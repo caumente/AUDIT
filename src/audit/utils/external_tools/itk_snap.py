@@ -62,6 +62,8 @@ def generate_itk_labels(labels, output_file):
 
 
 def run_comparison_segmentation_itk_snap(path_seg, path_pred, case, labels=None):
+    from audit.utils.sequences.sequences import read_sequences_dict
+
     verification_check = True
     t1 = f"{path_seg}/{case}/{case}_t1.nii.gz"
     t1ce = f"{path_seg}/{case}/{case}_t1ce.nii.gz"

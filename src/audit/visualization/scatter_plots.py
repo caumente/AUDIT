@@ -191,6 +191,9 @@ def multivariate_metric_feature(
         # legend=dict(yanchor="top", xanchor="right")
     )
 
+    fig.for_each_xaxis(lambda x: x.update(title_text=x_label))
+    fig.for_each_yaxis(lambda y: y.update(title_text=y_label))
+
     fig.update_traces(
         marker=dict(size=12, line=dict(width=1, color="DarkSlateGrey")),
         selector=dict(mode="markers"),

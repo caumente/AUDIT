@@ -107,7 +107,7 @@ def visualize_histogram(data, model):
         x_axis=model,
         color_var=None,
         n_bins=10,
-        x_label=None,
+        x_label=model,
     )
 
     return fig
@@ -147,7 +147,7 @@ def perform_statistical_test(
         Therefore, the **Paired Student t-test** will be performed. This is a parametric test that compares two
         **paired samples** normally distributed.""")
 
-        statistical_diff = paired_ttest(sample1=sample_baseline_model, sample2=sample_benchmark_model)
+        statistical_diff = paired_ttest(sample_a=sample_baseline_model, sample_b=sample_benchmark_model)
     else:
         st.markdown("""
         Either the baseline model sample or the benchmark model sample does not follow a normal distribution.
@@ -155,7 +155,7 @@ def perform_statistical_test(
         **paired samples** when normality cannot be assumed.
         """)
 
-        statistical_diff = wilcoxon_test(sample1=sample_baseline_model, sample2=sample_benchmark_model)
+        statistical_diff = wilcoxon_test(sample_a=sample_baseline_model, sample_b=sample_benchmark_model)
 
     st.markdown(
         f":red[**Results:**] The p-value obtained from the test was {statistical_diff.get('p-value'): .4e}. "

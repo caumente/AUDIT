@@ -12,7 +12,7 @@ from audit.app.util.commons.sidebars import setup_sidebar_single_metric
 from audit.app.util.commons.sidebars import setup_sidebar_single_model
 from audit.app.util.constants.descriptions import ModelPerformanceAnalysisPage
 from audit.app.util.constants.metrics import Metrics
-from audit.utils.commons.file_manager import load_config_file
+from audit.app.util.commons.utils import download_plot
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
 from audit.visualization.scatter_plots import multivariate_metric_feature
@@ -39,11 +39,8 @@ def setup_sidebar(data, data_paths, aggregated):
 def merge_features_and_metrics(features: pd.DataFrame, metrics: pd.DataFrame, aggregate=True) -> pd.DataFrame:
     # Aggregate metrics by ID, model, and set (optionally including region)
     group_cols = ["ID", "model", "set"] if aggregate else ["ID", "model", "set", "region"]
-    st.write(aggregate)
-    st.write(group_cols)
-    st.write(metrics.dtypes)
-    st.dataframe(metrics.head())
-    metrics_df = metrics.groupby(group_cols).mean().reset_index()
+    drop_cols = ["region"] if aggregate else []
+    metrics_df = metrics.drop(columns=drop_cols).groupby(group_cols).mean().reset_index()
 
     # Add 'region' column with value 'All' if it doesn't exist after aggregation
     if 'region' not in metrics_df.columns:
@@ -55,14 +52,8 @@ def merge_features_and_metrics(features: pd.DataFrame, metrics: pd.DataFrame, ag
     return merged
 
 
-def visualize_data(data, x_axis, y_axis, aggregated):
-
-    # Initialize session state for highlighted subjects
-    if "highlighted_subjects" not in st.session_state:
-        st.session_state.highlighted_subjects = []
-        st.session_state.dict_cases = {}
-
-    # Visualize scatter plot
+def render_scatter_plot(data, x_axis, y_axis, aggregated):
+    # Scatter plot visualization
     fig = multivariate_metric_feature(
         data=data,
         x_axis=x_axis,
@@ -77,16 +68,12 @@ def visualize_data(data, x_axis, y_axis, aggregated):
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
     selected_points = plotly_events(fig, click_event=True, override_height=None)
+    download_plot(fig, label="Univariate Analysis", filename="univariate_analysis")
 
-    process_selected_points(selected_points, data, aggregated)
-
-    # Button to reset highlighted cases
-    reset_selected_cases = st.button(label="Reset highlighted cases")
-    if reset_selected_cases:
-        reset_highlighted_cases()
+    return selected_points
 
 
-def process_selected_points(selected_points, data, aggregated):
+def get_case_from_point(selected_points, data, aggregated):
     if selected_points and aggregated:
         point = selected_points[0]
         if point["curveNumber"] < len(data.set.unique()):
@@ -106,6 +93,23 @@ def process_selected_points(selected_points, data, aggregated):
             ":red[Please, return to the aggregated view to highlight more cases and/or discard them or click on the "
             "'Reset highlighted cases' button below.]"
         )
+
+
+def visualize_data(data, x_axis, y_axis, aggregated):
+
+    # Initialize session state for highlighted subjects
+    if "highlighted_subjects" not in st.session_state:
+        st.session_state.highlighted_subjects = []
+        st.session_state.dict_cases = {}
+
+    selected_points = render_scatter_plot(data, x_axis, y_axis, aggregated)
+
+    get_case_from_point(selected_points, data, aggregated)
+
+    # Button to reset highlighted cases
+    reset_selected_cases = st.button(label="Reset highlighted cases")
+    if reset_selected_cases:
+        reset_highlighted_cases()
 
 
 def reset_highlighted_cases():

@@ -19,6 +19,7 @@ from audit.visualization.scatter_plots import multivariate_features_highlighter
 const_descriptions = MultivariatePage()
 const_features = Features()
 
+
 def setup_sidebar(data, data_paths):
     with st.sidebar:
         st.header("Configuration")
@@ -31,7 +32,7 @@ def setup_sidebar(data, data_paths):
         return selected_sets, select_x_axis, select_y_axis, select_color_axis
 
 
-def main(data, datasets_root_path, x_axis, y_axis, color_axis, labels):
+def render_scatter_plot(data, x_axis, y_axis, color_axis):
     # Scatter plot visualization
     st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
 
@@ -47,8 +48,12 @@ def main(data, datasets_root_path, x_axis, y_axis, color_axis, labels):
     selected_points = plotly_events(fig, click_event=True, override_height=None)
     download_plot(fig, label="Multivariate Analysis", filename="multivariate_analysis")
 
+    return selected_points, highlight_subject
+
+
+def get_case_from_point(data, selected_points, highlight_subject):
     # retrieving selected ID
-    selected_case, st.session_state.selected_case = None, None
+    selected_case = None
     if selected_points:
         try:
             point = selected_points[0]
@@ -57,13 +62,38 @@ def main(data, datasets_root_path, x_axis, y_axis, color_axis, labels):
         except IndexError:
             selected_case = highlight_subject
 
+    return selected_case
+
+
+def manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case):
     # Visualize case in ITK-SNAP
-    if selected_case != st.session_state.selected_case:
-        st.session_state.selected_case = selected_case
-        dataset = data[data.ID == selected_case]["set"].unique()[0].lower()
-        verification_check = run_itk_snap(datasets_root_path, dataset, selected_case, labels)
-        if not verification_check:
-            st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
+    if "last_opened_case_itk" not in st.session_state:
+        st.session_state.last_opened_case_itk = None
+    # last condition to avoid that clicking inside the boxplot randomly opens a subject
+    if selected_case and selected_case != "Select a case" and len(selected_points) == 1:
+        if selected_case != st.session_state.last_opened_case_itk:
+            st.session_state.last_opened_case_itk = selected_case
+            dataset = data[data.ID == selected_case]["set"].unique()[0]
+            verification_check = run_itk_snap(
+                path=datasets_root_path,
+                dataset=dataset,
+                case=selected_case,
+                labels=labels
+            )
+            if not verification_check:
+                st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
+                st.session_state.last_opened_case_itk = None
+            else:
+                info_placeholder = st.empty()
+                info_placeholder.write(f"Opened case {selected_case} in ITK-SNAP")
+
+
+def main(data, datasets_root_path, x_axis, y_axis, color_axis, labels):
+    selected_points, highlight_subject = render_scatter_plot(data, x_axis, y_axis, color_axis)
+
+    selected_case = get_case_from_point(data, selected_points, highlight_subject)
+
+    manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)
 
 
 def multivariate(config):

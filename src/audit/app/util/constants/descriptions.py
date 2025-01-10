@@ -164,18 +164,23 @@ class UnivariatePage(ConstantsAPP):
             """
 
         self.description_boxplot = """
-            The inclusion of a boxplot offers a robust summary of the feature's distribution, highlighting key
-            statistics such as the median, quartiles, and potential outliers. The boxplot complements the histogram and
-            probability distribution, providing additional insights into the data's spread and central tendency.
+            The inclusion of a box plots or violin plots offers a summary of the feature's distribution, highlighting key
+            statistics such as the median, quartiles, and potential outliers. These types of visualizations complement 
+            the histogram and probability distribution, providing additional insights into the data's spread and 
+            central tendency.
             """
 
         self.description_distribution = """
-            - **Histogram**: This visual representation helps in understanding the frequency distribution of the data
-                             points across different value ranges.
-            - **Probability distribution**: Users can also view probability distributions, offering a smooth and
-                                            continuous representation of the data, which is particularly useful for
-                                             identifying underlying patterns and trends.
+            The inclusion of histograms or probability distribution plots offers a detailed view of the feature’s 
+            underlying distribution, highlighting the frequency or density of data points across defined intervals. 
+            These visualizations complement box plots and violin plots by providing a clear representation of the 
+            data’s overall shape, including patterns such as skewness, peaks, or multimodal tendencies. By capturing 
+            the nuances of the distribution, histograms and probability plots enable researchers to uncover hidden 
+            trends and better understand the variability within their datasets.           
         """
+# Boxplot: This visualization provides a concise summary of the data’s distribution, showcasing key statistics such as the median, quartiles, and potential outliers. It is particularly effective for comparing multiple groups or datasets, offering a clear view of variability and central tendency.
+#
+# Violin Plot: Combining the features of a boxplot with a detailed representation of the data's density, the violin plot offers a richer visualization of the distribution's shape. It is especially useful for identifying multimodal distributions or subtle patterns within the dat
 
 
 class MultivariatePage(ConstantsAPP):

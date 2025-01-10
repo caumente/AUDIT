@@ -8,6 +8,7 @@ from audit.app.util.commons.sidebars import setup_highlight_subject
 from audit.app.util.commons.sidebars import setup_histogram_options
 from audit.app.util.commons.sidebars import setup_sidebar_features
 from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
+from audit.app.util.commons.sidebars import setup_sidebar_plot_customization
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import UnivariatePage
 from audit.app.util.constants.features import Features
@@ -64,6 +65,52 @@ def render_boxplot(data, feature, plot_type, highlight_subject):
     return selected_points
 
 
+def render_boxplot_with_customization(data, feature, plot_type, highlight_subject):
+    st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
+
+    # Create a layout with two columns: one for the plot and another for the customization panel
+    col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+
+    # Column 1: Display the plot
+    with col1:
+        # Call the boxplot_highlighter function to generate the plot
+        boxplot_fig = boxplot_highlighter(
+            data,
+            x_axis=feature,
+            color_var="set",
+            plot_type=plot_type,
+            highlight_point=highlight_subject,
+        )
+
+    # Column 2: Customization panel
+    with col2:
+        show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization()
+
+        # Update the legend layout
+        boxplot_fig.update_layout(
+                legend=dict(
+                    x=leg_x,
+                    y=leg_y,
+                    xanchor=leg_xanc,
+                    yanchor=leg_yanc,
+                )
+        )
+
+        boxplot_fig.update_layout(
+            showlegend=show_leg,  # Show or hide the legend
+            xaxis_title=xlabel,
+            yaxis_title=ylabel,
+            title=dict(text=title, x=0.5),  # Center the title
+        )
+
+    # Render the adjusted plot in the main column
+    with col1:
+        selected_points = plotly_events(boxplot_fig, click_event=True, override_height=None)
+        download_plot(boxplot_fig, label="Univariate Analysis", filename="univariate_analysis")
+
+    return selected_points
+
+
 def get_case_from_point(data, selected_points, highlight_subject):
     selected_case = None
 
@@ -102,8 +149,11 @@ def manage_itk_opening(data, datasets_root_path, labels, selected_points, select
                 info_placeholder.write(f"Opened case {selected_case} in ITK-SNAP")
 
 
-def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highlight_subject):
-    selected_points = render_boxplot(data, feature, plot_type, highlight_subject)
+def boxplot_logic(datasets_root_path, data, feature, labels, plot_type, highlight_subject, customization=False):
+    if customization == 'Standard visualization':
+        selected_points = render_boxplot(data, feature, plot_type, highlight_subject)
+    else:
+        selected_points = render_boxplot_with_customization(data, feature, plot_type, highlight_subject)
 
     selected_case = get_case_from_point(data, selected_points, highlight_subject)
 
@@ -115,14 +165,18 @@ def main(data, datasets_paths, select_feature_name, labels):
     highlight_subject = setup_highlight_subject(data)
 
     # Visualize boxplot
-    st.subheader("Boxplot")
     data.reset_index(drop=True, inplace=True)
     st.markdown(const_descriptions.description_boxplot)
-    plot_type = st.selectbox(label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0)
-    boxplot_logic(datasets_paths, data, select_feature_name, labels, plot_type, highlight_subject)
+    col1, col2 = st.columns([1, 1], gap="small")
+    with col1:
+        plot_type = st.selectbox(label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0)
+    with col2:
+        customization = st.selectbox(label="Customize visualization", options=["Standard visualization", "Custom visualization"], index=0)
+    boxplot_logic(datasets_paths, data, select_feature_name, labels, plot_type, highlight_subject, customization)
+
+    st.markdown("---")
 
     # Visualize histogram
-    st.subheader("Continuous distribution")
     st.markdown(const_descriptions.description_distribution)
     plot_type = st.selectbox(label="Type of plot to visualize", options=["Histogram", "Probability"], index=1)
     n_bins, bins_size = setup_histogram_options(plot_type)

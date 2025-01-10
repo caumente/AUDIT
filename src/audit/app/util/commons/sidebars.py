@@ -328,3 +328,30 @@ def setup_sidebar_single_subjects(data):
         )
 
     return subject_selected
+
+
+def setup_sidebar_plot_customization():
+    with st.expander("Customize Plot", expanded=False):
+        # Legend position selection, only shown if "Show Legend" is checked
+        show_legend = st.checkbox("Show Legend", value=True)
+        legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor = None, None, None, None, None
+        if show_legend:
+            legend_position = st.selectbox(
+                "Legend Position",
+                options=["top left", "top right", "bottom left", "bottom right"],
+                index=1,
+            )
+        if legend_position:
+            legend_x = 0 if "left" in legend_position else 1
+            legend_y = 1 if "top" in legend_position else 0
+            legend_xanchor = "left" if "left" in legend_position else "right"
+            legend_yanchor = "top" if "top" in legend_position else "bottom"
+
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Feature name")
+        y_axis_label = st.text_input("Y-axis Label", value="Datasets")
+
+        # Customize the plot title
+        plot_title = st.text_input("Plot Title", value=f"Plot")
+
+    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title

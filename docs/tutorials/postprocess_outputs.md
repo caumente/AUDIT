@@ -19,7 +19,7 @@ modules to manipulate files and sequences.
 
 ```python
 import os
-from audit.utils import (
+from audit.utils.commons.file_manager import (
     list_dirs,
     list_files,
     rename_files,
@@ -28,7 +28,7 @@ from audit.utils import (
     organize_files_into_folders,
     add_suffix_to_files
 )
-from audit.utils import (
+from audit.utils.sequences.sequences import (
     read_sequences_dict,
     iterative_labels_replacement,
     load_nii,
@@ -39,7 +39,9 @@ from audit.utils import (
 
 ## 2. Data understanding
 
-Now, let's suppose we have a model that was trained on a brain MRI dataset that we don't know in advance (in this case, it was BraTS2020). We use this model to generate a series of predictions on our own dataset. In our scenario, we want to run inference on BraTS2024 Pediatrics.
+Now, let's suppose we have a model that was trained on a brain MRI dataset that we don't know in advance 
+(in this case, it was BraTS2020). We use this model to generate a series of predictions on our own dataset. In our 
+scenario, we want to run inference on BraTS2024 Pediatrics.
 
 After running the inference, we store the predictions in the following directory:
 
@@ -84,7 +86,7 @@ print(file_3.shape)
 
 ## 3. Remove unnecessary data
 
-In this case, the developers of the model conducted other experiments during inference by modifying the original 
+The developers of the model conducted other experiments during inference by modifying the original 
 dimensions of the images (155, 240, 240). As a result, all the files ending with "_ground_truth," "segmentation," and 
 "_sequences" are unnecessary for our purposes and should be deleted.
 
@@ -120,7 +122,7 @@ ls_files(root_path)[:6]
 ```
 
 Now, let's proceed to remove the rest of the unnecessary files as well. We will apply the same 
-_delete_files_by_extension_ function to eliminate any remaining files that we do not need.
+`delete_files_by_extension` function to eliminate any remaining files that we do not need.
 
 
 ## 4. Organize folder

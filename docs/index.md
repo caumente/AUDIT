@@ -41,12 +41,20 @@ This documentation is structured to help you get the most out of AUDIT:
 - **[About](about/release-notes.md)**: Check latest AUDIT release and license terms.
 
 
-## 🧑‍💻 Installation
+# 🌟 Quick Start
 
-Install AUDIT directly from PyPI:
+The best way to get familiar with AUDIT and explore all its capabilities is through our interactive DEMO. You can find
+it at: <a href="https://auditapp.streamlit.app/" target="_blank">https://auditapp.streamlit.app/</a>
+
+
+However, you could use AUDIT easily in your own computer by following a few little steps.
+
+**Install AUDIT** 
+
+Directly from PyPI:
 
 ```bash
-pip install audit
+pip install auditapp
 ```
 
 Alternatively, clone the repository and install it locally:
@@ -54,47 +62,36 @@ Alternatively, clone the repository and install it locally:
 ```bash
 git clone https://github.com/caumente/AUDIT.git
 cd AUDIT
-pip install .
+pip install -r requirements.txt
 ```
 
-# 🌟 Quick Start
-
-
-Start using AUDIT in just a few steps:
-
-**Configure AUDIT**  
-Edit the configuration files in the `./src/configs/` directory to set up paths for data loading and other configurations:
-
-      feature_extractor_config.json: Configure MRI features and datasets.
-      metric_extractor_config.json: Define evaluation metrics and paths.
-      app_config.json: Customize app settings for data exploration.
-
-**Run AUDIT Backend**  
-Execute the feature extraction and metric evaluation scripts to analyze your MRI datasets and AI model predictions:
-
-```bash
-python src/feature_extractor.py
-python src/metric_extractor.py
-```
-   
-A logs folder will be generated to track execution details, and all output files will be saved in the directory specified in the configuration files (default is the output folder).
 
 **Launch AUDIT App**  
 
-Start the interactive web app for data visualization and exploration
+Start the interactive web app using our default configuration for data visualization and exploration
 
-   ```bash
-   streamlit run src/app/APP.py
-   ```
+Run the following command if you installed AUDIT directly from PyPI:
+```bash
+auditapp run-app
+```
 
-That's it! You're ready to explore your data and evaluate your AI models with AUDIT.
+Or alternatively, if you cloned the repository and install it locally, run:
+
+```bash
+python src/audit/app/launcher.py
+```
+
+That's it! You're ready to explore our default data and evaluate AI segmentations models with AUDIT. Go to 
+[Getting Started](Getting_started/getting_started.md) to learn more about how to use AUDIT with your own datasets and 
+configurations.
+
 
 # 🤝 Contributing
 Contributions are welcome! Please check the contributing guide for details on how to report issues, suggest new features, or contribute code.
 
-# 🔗 Links
-GitHub: https://github.com/caumente/AUDIT
-Documentation: Your Documentation Link Here
-License: Apache 2.0
 
-AUDIT is designed to address the unique challenges of evaluating AI in medical imaging, empowering researchers to develop robust, clinically reliable solutions.
+# 🔗 Links
+
+AUDIT is designed to address the unique challenges of evaluating AI in medical imaging, empowering researchers to 
+develop robust, clinically reliable solutions.
+License: Apache 2.0

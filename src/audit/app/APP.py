@@ -8,56 +8,76 @@ import streamlit as st
 from PIL import Image
 
 from audit.utils.commons.file_manager import load_config_file
-from audit.app.util.pages.Home_Page import home_page
-from audit.app.util.pages.Longitudinal_Measurements import longitudinal
-from audit.app.util.pages.Model_Performance_Analysis import performance
-from audit.app.util.pages.Multi_Model_Performance_Comparison import multi_model
-from audit.app.util.pages.Multivariate_Feature_Analysis import multivariate
-from audit.app.util.pages.Pairwise_Model_Performance_Comparison import pairwise_comparison
-from audit.app.util.pages.Segmentation_Error_Matrix import matrix
-from audit.app.util.pages.Subjects_Exploration import subjects
-from audit.app.util.pages.Univariate_Feature_Analysis import univariate
+from audit.app.util.pages.Home_Page import HomePage
+# from audit.app.util.pages.Longitudinal_Measurements import LongitudinalMeasurements
+# from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
+# from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
+from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
+# from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
+# from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
+# from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
+from audit.app.util.pages.Univariate_Feature_Analysis import UnivariateFeatureAnalysis
+from audit.app.util.constants.features import Features
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 class AUDIT:
     def __init__(self, config):
-        self.pages = [
-            {"title": "Home Page", "function": home_page},
-            {"title": "Univariate Analysis", "function": univariate},
-            {"title": "Multivariate Analysis", "function": multivariate},
-            {"title": "Segmentation Error Matrix", "function": matrix},
-            {"title": "Model Performance Analysis", "function": performance},
-            {"title": "Pairwise Model Performance Comparison", "function": pairwise_comparison},
-            {"title": "Multi-model Performance Comparison", "function": multi_model},
-            {"title": "Longitudinal Measurements", "function": longitudinal},
-            {"title": "Subjects Exploration", "function": subjects}
-        ]
         self.config = config
+        self.features = Features(config)
 
-    def add_page(self, title, func):
-        self.pages.append({"title": title, "function": func})
+        # Instantiate pages
+        self.pages = [
+            {"title": "Home Page", "page": HomePage(config)},
+            {"title": "Univariate Analysis", "page": UnivariateFeatureAnalysis(config)},
+            {"title": "Multivariate Analysis", "page": MultivariateFeatureAnalysis(config)},
+            # {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config, constants)},
+            # {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config, constants)},
+            # {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config, constants)},
+            # {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config, constants)},
+            # {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config, constants)},
+            # {"title": "Subjects Exploration", "page": SubjectsExploration(config, constants)}
+        ]
+
+    def add_page(self, title, page_instance):
+        """
+        Adds a new page to the application.
+        Args:
+            title (str): Title of the page to be displayed in the sidebar.
+            page_instance (BasePage): Instance of the page class.
+        """
+        self.pages.append({"title": title, "page": page_instance})
 
     def run(self):
+        """
+        Main function to run the Streamlit app.
+        """
         st.set_page_config(page_title="AUDIT", page_icon=":brain", layout="wide")
 
         # Resolve the absolute path for the logo
         base_dir = Path(__file__).resolve().parent
         audit_logo_path = base_dir / "util/images/AUDIT_transparent.png"
 
-        # Load the image
+        # Load and display the logo
         if audit_logo_path.exists():
             audit_logo = Image.open(audit_logo_path)
-            # st.sidebar.image(audit_logo, use_column_width=True)
             st.sidebar.image(audit_logo, use_container_width=True)
         else:
             st.sidebar.error(f"Logo not found: {audit_logo_path}")
 
         st.sidebar.markdown("## Main Menu")
-        page = st.sidebar.selectbox("Select Page", self.pages, format_func=lambda page: page["title"])
+
+        # Sidebar for selecting pages
+        selected_page = st.sidebar.selectbox(
+            "Select Page",
+            self.pages,
+            format_func=lambda page: page["title"]
+        )
         st.sidebar.markdown("---")
-        page["function"](self.config)
+
+        # Run the selected page
+        selected_page["page"].run()
 
 
 def main():

@@ -3,12 +3,13 @@ import streamlit as st
 from audit.app.util.constants.features import Features
 from audit.app.util.constants.metrics import Metrics
 from audit.utils.commons.strings import pretty_string
+from audit.utils.commons.file_manager import load_config_file
 
 # Load constants
 const_metrics = Metrics()
 metrics_dict = const_metrics.get_metrics()
 orderby_dict = const_metrics.orderby
-const_features = Features()
+const_features = Features(load_config_file('./configs/app.yml'))
 
 
 def setup_sidebar_multi_datasets(data_paths):

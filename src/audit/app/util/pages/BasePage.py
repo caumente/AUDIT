@@ -1,10 +1,12 @@
 from audit.app.util.constants.features import Features
+from audit.app.util.constants.metrics import Metrics
 
 
 class BasePage:
     def __init__(self, config):
         self.config = config
         self.features = Features(config)
+        self.metrics = Metrics()
 
     def run(self):
         raise NotImplementedError("Each page must implement its own `run` method.")

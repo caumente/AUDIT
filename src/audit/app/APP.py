@@ -10,11 +10,11 @@ from PIL import Image
 from audit.utils.commons.file_manager import load_config_file
 from audit.app.util.pages.Home_Page import HomePage
 # from audit.app.util.pages.Longitudinal_Measurements import LongitudinalMeasurements
-# from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
+from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
 # from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
 from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
 # from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
-# from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
+from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
 # from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
 from audit.app.util.pages.Univariate_Feature_Analysis import UnivariateFeatureAnalysis
 from audit.app.util.constants.features import Features
@@ -32,8 +32,8 @@ class AUDIT:
             {"title": "Home Page", "page": HomePage(config)},
             {"title": "Univariate Analysis", "page": UnivariateFeatureAnalysis(config)},
             {"title": "Multivariate Analysis", "page": MultivariateFeatureAnalysis(config)},
-            # {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config, constants)},
-            # {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config, constants)},
+            {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config)},
+            {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config)},
             # {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config, constants)},
             # {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config, constants)},
             # {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config, constants)},

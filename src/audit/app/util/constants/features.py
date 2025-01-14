@@ -1,6 +1,7 @@
 class Features:
     def __init__(self, config):
-        self.sequences = ["T1", "T1ce", "T2", "FLAIR"] if config is None else config.get("sequences")
+        self.sequences = ["T1", "T1ce", "T2", "FLAIR"] if config is None else \
+                         [s[1:] if s.startswith('_') else s for s in config.get("sequences")]
         self.lesion_regions = list(config.get('labels').keys())
         self.planes = ['Axial', 'Coronal', 'Sagittal']
         self.categories = ['Statistical', 'Texture', 'Spatial', 'Tumor']

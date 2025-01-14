@@ -98,14 +98,14 @@ class TextureFeatures:
             A dictionary containing texture features for each plane.
         """
         if not textures:
-            textures = ['contrast', 'dissimilarity', 'homogeneity', 'asm', 'energy', 'correlation']
+            textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
 
         features = {}
         for texture in textures:
             texture_values = self.compute_texture_values(texture=texture)
 
             # Create a dictionary to store texture features
-            features.update({f"mean_{texture}": np.mean(texture_values)})
-            features.update({f"std_{texture}": np.std(texture_values)})
+            features.update({f"mean_{texture.lower()}": np.mean(texture_values)})
+            features.update({f"std_{texture.lower()}": np.std(texture_values)})
 
         return features

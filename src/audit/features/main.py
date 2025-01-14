@@ -30,6 +30,9 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     # get configuration
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
     features_to_extract = [key for key, value in config_file["features"].items() if value]
+    available_sequences = config_file.get("sequences")
+    seq_reference = available_sequences[0].replace("_", "")
+
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
     subjects_list = list_dirs(path_images)
 
@@ -45,11 +48,11 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
             pbar.update(1)
 
             # read sequences and segmentation
-            sequences = read_sequences_dict(root=path_images, subject_id=subject_id)
+            sequences = read_sequences_dict(root=path_images, subject_id=subject_id, sequences=available_sequences)
             seg = load_nii_by_subject_id(root=path_images, subject_id=subject_id, as_array=True)
 
             # calculating spacing
-            sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_t1ce"))
+            sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, seq_reference))
             seg_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_seg"))
 
             # extract first order (statistical) information from sequences
@@ -68,9 +71,9 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     if seq is not None
                 }
 
-            # calculate spatial features (dimensions and brain center mass)
+            # calculate spatial features (dimensions and center mass)
             if 'spatial' in features_to_extract:
-                sf = SpatialFeatures(sequence=sequences.get("t1ce"), spacing=sequences_spacing)
+                sf = SpatialFeatures(sequence=sequences.get(seq_reference), spacing=sequences_spacing)
                 spatial_features = sf.extract_features()
 
             # calculate tumor features

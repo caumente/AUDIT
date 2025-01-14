@@ -9,7 +9,7 @@ class ConstantsAPP:
         self.sub_header = ""
         self.description = ""
         self.contact = "[Contact us - MIA group](%s)" % self.mia_url
-        self.features = Features()
+        # self.features = Features()
 
 
 class UnivariatePage(ConstantsAPP):

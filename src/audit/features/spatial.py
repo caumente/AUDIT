@@ -49,7 +49,7 @@ class SpatialFeatures:
             The center of mass coordinates adjusted by the voxel spacing.
         """
         if self.sequence is None:
-            logger.warning("Sequence '_t1ce' not found. Assigning center of mass (nan, nan, nan)")
+            logger.warning("Sequence not found. Assigning center of mass (nan, nan, nan)")
             return {
                 "axial_plane_center_of_mass": np.nan,
                 "coronal_plane_center_of_mass": np.nan,
@@ -81,7 +81,7 @@ class SpatialFeatures:
             - Sagittal plane resolution
         """
         if self.sequence is None:
-            logger.warning(" Sequence '_t1ce' not found. Assigning dimensions (nan, nan, nan)")
+            logger.warning("Sequence not found. Assigning dimensions (nan, nan, nan)")
             return {
                 "axial_plane_resolution": np.nan,
                 "coronal_plane_resolution": np.nan,

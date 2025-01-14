@@ -24,6 +24,43 @@ class UnivariateFeatureAnalysis(BasePage):
         super().__init__(config)
         self.descriptions = UnivariatePage()
 
+    def run(self):
+        # Load configuration and data
+        datasets_paths = self.config.get("datasets_path")
+        features_paths = self.config.get("features")
+        labels = self.config.get("labels")
+
+        # Load configuration and data
+        st.header(self.descriptions.header)
+        st.markdown(self.descriptions.sub_header)
+
+        # Load datasets
+        df = read_datasets_from_dict(features_paths)
+
+        # Set up sidebar and plot options
+        selected_sets, selected_feature = self.setup_sidebar(df, features_paths)
+        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = setup_filtering_options(df, selected_feature)
+
+        proceed = health_checks(selected_sets, [selected_feature])
+        if proceed[0]:
+
+            # filtering data
+            df = processing_data(
+                data=df,
+                sets=selected_sets,
+                filtering_method=filtering_method,
+                filtering_feature=selected_feature,
+                remove_low=r_low,
+                remove_up=r_up,
+                clip_low=c_low,
+                clip_up=c_up,
+                num_std_devs=num_std_devs
+            )
+
+            self.main(df, datasets_paths, selected_feature, labels)
+        else:
+            st.error(proceed[-1], icon='🚨')
+
     @staticmethod
     def setup_sidebar(data, data_paths):
         with st.sidebar:
@@ -33,6 +70,16 @@ class UnivariateFeatureAnalysis(BasePage):
             select_feature = setup_sidebar_features(data, name="Features", key="features")
 
         return selected_sets, select_feature
+
+    def boxplot_logic(self, datasets_root_path, data, feature, labels, plot_type, highlight_subject, customization=False):
+        if customization == 'Standard visualization':
+            selected_points = self.render_boxplot(data, feature, plot_type, highlight_subject)
+        else:
+            selected_points = self.render_boxplot_with_customization(data, feature, plot_type, highlight_subject)
+
+        selected_case = self.get_case_from_point(data, selected_points, highlight_subject)
+
+        self.manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)
 
     def histogram_logic(self, data, plot_type, feature, n_bins, bins_size):
         if plot_type == "Probability":
@@ -149,18 +196,6 @@ class UnivariateFeatureAnalysis(BasePage):
                     info_placeholder = st.empty()
                     info_placeholder.write(f"Opened case {selected_case} in ITK-SNAP")
 
-
-    def boxplot_logic(self, datasets_root_path, data, feature, labels, plot_type, highlight_subject, customization=False):
-        if customization == 'Standard visualization':
-            selected_points = self.render_boxplot(data, feature, plot_type, highlight_subject)
-        else:
-            selected_points = self.render_boxplot_with_customization(data, feature, plot_type, highlight_subject)
-
-        selected_case = self.get_case_from_point(data, selected_points, highlight_subject)
-
-        self.manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)
-
-
     def main(self, data, datasets_paths, select_feature_name, labels):
 
         highlight_subject = setup_highlight_subject(data)
@@ -182,40 +217,3 @@ class UnivariateFeatureAnalysis(BasePage):
         plot_type = st.selectbox(label="Type of plot to visualize", options=["Histogram", "Probability"], index=1)
         n_bins, bins_size = setup_histogram_options(plot_type)
         self.histogram_logic(data, plot_type, select_feature_name, n_bins, bins_size)
-
-    def run(self):
-        # Load configuration and data
-        datasets_paths = self.config.get("datasets_path")
-        features_paths = self.config.get("features")
-        labels = self.config.get("labels")
-
-        # Load configuration and data
-        st.header(self.descriptions.header)
-        st.markdown(self.descriptions.sub_header)
-
-        # Load datasets
-        df = read_datasets_from_dict(features_paths)
-
-        # Set up sidebar and plot options
-        selected_sets, selected_feature = self.setup_sidebar(df, features_paths)
-        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = setup_filtering_options(df, selected_feature)
-
-        proceed = health_checks(selected_sets, [selected_feature])
-        if proceed[0]:
-
-            # filtering data
-            df = processing_data(
-                data=df,
-                sets=selected_sets,
-                filtering_method=filtering_method,
-                filtering_feature=selected_feature,
-                remove_low=r_low,
-                remove_up=r_up,
-                clip_low=c_low,
-                clip_up=c_up,
-                num_std_devs=num_std_devs
-            )
-
-            self.main(df, datasets_paths, selected_feature, labels)
-        else:
-            st.error(proceed[-1], icon='🚨')

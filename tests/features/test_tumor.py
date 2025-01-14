@@ -154,7 +154,7 @@ def test_count_tumor_pixels_non_integer_labels(segmentation_with_float_labels):
 def test_calculate_lesion_size_no_segmentation():
     """Test when segmentation is None."""
     tumor_features = TumorFeatures(segmentation=None)
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the result contains NaN
     assert result == {"lesion_size": np.nan}, "Result should be NaN when segmentation is None."
@@ -164,7 +164,7 @@ def test_calculate_lesion_size_empty_segmentation():
     """Test when segmentation is an empty array."""
     empty_segmentation = np.array([])
     tumor_features = TumorFeatures(segmentation=empty_segmentation)
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size is zero for an empty array
     assert result == {"lesion_size": 0}, "Result should be 0 for an empty segmentation."
@@ -173,7 +173,7 @@ def test_calculate_lesion_size_empty_segmentation():
 def test_calculate_lesion_size_all_zero_segmentation(mock_zero_segmentation):
     """Test when segmentation contains only zeros."""
     tumor_features = TumorFeatures(segmentation=mock_zero_segmentation)
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size is zero for an all-zero segmentation
     assert result == {"lesion_size": 0}, "Result should be 0 for an all-zero segmentation."
@@ -182,7 +182,7 @@ def test_calculate_lesion_size_all_zero_segmentation(mock_zero_segmentation):
 def test_calculate_lesion_size(mock_segmentation):
     """Test lesion size calculation for a basic segmentation."""
     tumor_features = TumorFeatures(segmentation=mock_segmentation, spacing=(1, 1, 1))
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the number of non-zero pixels
     assert result == {"lesion_size": 5}, "Result should match the number of non-zero pixels for unit spacing."
@@ -192,7 +192,7 @@ def test_calculate_lesion_size_with_isotropic_spacing():
     """Test lesion size calculation for a large segmentation."""
     large_segmentation = np.ones((10, 10, 10), dtype=int)
     tumor_features = TumorFeatures(segmentation=large_segmentation, spacing=(2, 2, 2))
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the total number of pixels in the segmentation
     assert result == {
@@ -204,7 +204,7 @@ def test_calculate_lesion_size_with_non_isotropic_spacing():
     """Test lesion size calculation for a large segmentation with non-unit spacing."""
     large_segmentation = np.ones((10, 10, 10), dtype=int)
     tumor_features = TumorFeatures(segmentation=large_segmentation, spacing=(0.5, 4, 0.5))
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size is scaled correctly by the voxel spacing
     assert result == {
@@ -215,7 +215,7 @@ def test_calculate_lesion_size_with_non_isotropic_spacing():
 def test_calculate_lesion_size_partial_lesion(mock_segmentation):
     """Test lesion size calculation for a segmentation with partial lesions."""
     tumor_features = TumorFeatures(segmentation=mock_segmentation, spacing=(1, 1, 1))
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the number of non-zero pixels
     assert result == {"lesion_size": 5}, "Result should count only non-zero pixels."
@@ -224,7 +224,7 @@ def test_calculate_lesion_size_partial_lesion(mock_segmentation):
 def test_calculate_lesion_size_mixed_values(mock_segmentation_multiple_labels):
     """Test lesion size calculation for a segmentation with multiple label values."""
     tumor_features = TumorFeatures(segmentation=mock_segmentation_multiple_labels, spacing=(1, 1, 1))
-    result = tumor_features.calculate_lesion_size()
+    result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the total number of non-zero pixels
     assert result == {"lesion_size": 6}, "Result should count all non-zero pixels, regardless of label values."
@@ -353,9 +353,9 @@ def test_calculate_tumor_slices(mock_segmentation_multiple_labels):
 
     # Check that the result is a dictionary
     assert isinstance(result, dict), "Result should be a dictionary."
-    assert "axial_tumor_slice" in result, "Axial tumor slices should be in the result."
-    assert "coronal_tumor_slice" in result, "Coronal tumor slices should be in the result."
-    assert "sagittal_tumor_slice" in result, "Sagittal tumor slices should be in the result."
+    assert "axial_tumor_slices" in result, "Axial tumor slices should be in the result."
+    assert "coronal_tumor_slices" in result, "Coronal tumor slices should be in the result."
+    assert "sagittal_tumor_slices" in result, "Sagittal tumor slices should be in the result."
 
 
 def test_get_tumor_slices_no_segmentation():

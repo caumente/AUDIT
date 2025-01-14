@@ -1,6 +1,8 @@
 class Features:
-    def __init__(self):
-
+    def __init__(self, config):
+        self.sequences = ["T1", "T1ce", "T2", "FLAIR"] if config is None else config.get("sequences")
+        self.lesion_regions = list(config.get('labels').keys())
+        self.planes = ['Axial', 'Coronal', 'Sagittal']
         self.categories = ['Statistical', 'Texture', 'Spatial', 'Tumor']
 
         self.common = {
@@ -12,140 +14,99 @@ class Features:
             'Time point': 'time_point'
         }
 
-        self.statistical = {
-            'Max. intensity (T1)': 't1_max_intensity',
-            'Max. intensity (T1ce)': 't1ce_max_intensity',
-            'Max. intensity (T2)': 't2_max_intensity',
-            'Max. intensity (FLAIR)': 'flair_max_intensity',
-            'Min. intensity (T1)': 't1_min_intensity',
-            'Min. intensity (T1ce)': 't1ce_min_intensity',
-            'Min. intensity (T2)': 't2_min_intensity',
-            'Min. intensity (FLAIR)': 'flair_min_intensity',
-            'Mean intensity (T1)': 't1_mean_intensity',
-            'Mean intensity (T1ce)': 't1ce_mean_intensity',
-            'Mean intensity (T2)': 't2_mean_intensity',
-            'Mean intensity (FLAIR)': 'flair_mean_intensity',
-            "Median intensity (T1)": "t1_median_intensity",
-            "Median intensity (T1ce)": "t1ce_median_intensity",
-            "Median intensity (T2)": "t2_median_intensity",
-            "Median intensity (FLAIR)": "flair_median_intensity",
-            'Std. intensity (T1)': 't1_std_intensity',
-            'Std. intensity (T1ce)': 't1ce_std_intensity',
-            'Std. intensity (T2)': 't2_std_intensity',
-            'Std. intensity (FLAIR)': 'flair_std_intensity',
-            '10th-Percentile (T1) ': 't1_10_perc_intensity',
-            '10th-Percentile (T1ce) ': 't1ce_10_perc_intensity',
-            '10th-Percentile (T2) ': 't2_10_perc_intensity',
-            '10th-Percentile (FLAIR) ': 'flair_10_perc_intensity',
-            '90th-Percentile (T1) ': 't1_90_perc_intensity',
-            '90th-Percentile (T1ce) ': 't1ce_90_perc_intensity',
-            '90th-Percentile (T2) ': 't2_90_perc_intensity',
-            '90th-Percentile (FLAIR) ': 'flair_90_perc_intensity',
-            'Intensity range (T1)': 't1_range_intensity',
-            'Intensity range (T1ce)': 't1ce_range_intensity',
-            'Intensity range (T2)': 't2_range_intensity',
-            'Intensity range (FLAIR)': 'flair_range_intensity',
-            'Skewness (T1)': 't1_skewness',
-            'Skewness (T1ce)': 't1ce_skewness',
-            'Skewness (T2)': 't2_skewness',
-            'Skewness (FLAIR)': 'flair_skewness',
-            'Kurtosis (T1)': 't1_kurtosis',
-            'Kurtosis (T1ce)': 't1ce_kurtosis',
-            'Kurtosis (T2)': 't2_kurtosis',
-            'Kurtosis (FLAIR)': 'flair_kurtosis',
+        self.statistical = self._generate_statistical_features()
+        self.spatial = self._generate_spatial_features()
+        self.tumor = self._generate_tumor_features()
+        self.texture = self._generate_texture_features()
+
+    def _generate_statistical_features(self):
+        """
+        Generate statistical features dynamically based on MRI sequences.
+        """
+        metrics = [
+            'Max. intensity',
+            'Min. intensity',
+            'Mean intensity',
+            'Median intensity',
+            'Std. intensity',
+            '10th-Percentile intensity',
+            '90th-Percentile intensity',
+            'Range intensity',
+            'Skewness',
+            'Kurtosis'
+        ]
+        return {f"{metric} ({sequence})": f"{sequence.lower()}_{metric.lower().replace('.', '').replace(' ', '_').replace('-', '_')}"
+                for metric in metrics for sequence in self.sequences}
+
+    def _generate_spatial_features(self):
+        """
+        Generate spatial features dynamically based on planes
+        """
+
+        features = {
+            f"{dim} plane resolution": f"{dim.lower()}_plane_resolution" for dim in self.planes
+        }
+        features.update({
+            f"{plane} plane center of mass": f"{plane.lower()}_plane_center_of_mass" for plane in self.planes
+        })
+        return features
+
+    def _generate_texture_features(self):
+        """
+        Generate texture features dynamically based on MRI sequences, metrics, and texture types.
+        """
+        metrics = ['Mean', 'Std']
+        textures = [
+            'contrast',
+            'correlation',
+            'dissimilarity',
+            'energy',
+            'homogeneity',
+            'ASM'
+        ]
+
+        return {
+            f"{metric} {texture} ({sequence})": f"{sequence.lower()}_{metric.lower()}_{texture.lower()}"
+            for metric in metrics for texture in textures for sequence in self.sequences
         }
 
-        self.spatial = {
-            'Axial dim.': 'axial_dim',
-            'Coronal dim.': 'coronal_dim',
-            'Sagittal dim.': 'sagittal_dim',
-            'Brain CM (Axial)': 'axial_brain_centre_mass',
-            'Brain CM (Coronal)': 'coronal_brain_centre_mass',
-            'Brain CM (Sagittal)': 'sagittal_brain_centre_mass'
-        }
+    def _generate_tumor_features(self):
+        """
+        Generate tumor-related features dynamically based on planes and lesion regions.
+        """
+        region_renamed = {'BKG': 'WHOLE'}
+        tumor_features = {}
 
-        self.tumor = {
-            'No. tumor slices (Axial)': 'axial_tumor_slices',
-            'No. tumor slices (Coronal)': 'coronal_tumor_slices',
-            'No. tumor slices (Sagittal)': 'sagittal_tumor_slices',
-            'Lower tumor slice (Axial)': 'min_axial_tumor_slice',
-            'Upper tumor slice (Axial)': 'max_axial_tumor_slice',
-            'Lower tumor slices (Coronal)': 'min_coronal_tumor_slice',
-            'Upper tumor slice (Coronal)': 'max_coronal_tumor_slice',
-            'Lower. tumor slices (Sagittal)': 'min_sagittal_tumor_slice',
-            'Upper tumor slice (Sagittal)': 'max_sagittal_tumor_slice',
-            'Lesion size (ENH)': 'lesion_size_enh',
-            'Lesion size (EDE)': 'lesion_size_ede',
-            'Lesion size (NEC)': 'lesion_size_nec',
-            'Lesion size': 'lesion_size',
-            'Tumor location (All labels)': 'whole_tumor_location',
-            'Tumor location (ENH)': 'enh_tumor_location',
-            'Tumor location (EDE)': 'ede_tumor_location',
-            'Tumor location (NEC)': 'nec_tumor_location',
-            'Tumor CM (Whole Axial)': 'axial_whole_center_mass',
-            'Tumor CM (Whole Coronal)': 'coronal_whole_center_mass',
-            'Tumor CM (Whole Sagittal)': 'sagittal_whole_center_mass',
-            'Tumor CM (ENH Axial)': 'axial_enh_center_mass',
-            'Tumor CM (ENH Coronal)': 'coronal_enh_center_mass',
-            'Tumor CM (ENH Sagittal)': 'sagittal_enh_center_mass',
-            'Tumor CM (EDE Axial)': 'axial_ede_center_mass',
-            'Tumor CM (EDE Coronal)': 'coronal_ede_center_mass',
-            'Tumor CM (EDE Sagittal)': 'sagittal_ede_center_mass',
-            'Tumor CM (NEC Axial)': 'axial_nec_center_mass',
-            'Tumor CM (NEC Coronal)': 'coronal_nec_center_mass',
-            'Tumor CM (NEC Sagittal)': 'sagittal_nec_center_mass',
-        }
+        tumor_features.update({
+            f"Number of tumor slices ({plane})": f"{plane.lower()}_tumor_slices".replace(' ', '_')
+            for plane in self.planes
+        })
 
-        self.texture = {
-            'Mean contrast (T1)': 't1_mean_contrast',
-            'Mean contrast (T1ce)': 't1ce_mean_contrast',
-            'Mean contrast (T2)': 't2_mean_contrast',
-            'Mean contrast (FLAIR)': 'flair_mean_contrast',
-            'Std contrast (T1)': 't1_std_contrast',
-            'Std contrast (T1ce)': 't1ce_std_contrast',
-            'Std contrast (T2)': 't2_std_contrast',
-            'Std contrast (FLAIR)': 'flair_std_contrast',
-            'Mean correlation (T1)': 't1_mean_correlation',
-            'Mean correlation (T1ce)': 't1ce_mean_correlation',
-            'Mean correlation (T2)': 't2_mean_correlation',
-            'Mean correlation (FLAIR)': 'flair_mean_correlation',
-            'Std correlation (T1)': 't1_std_correlation',
-            'Std correlation (T1ce)': 't1ce_std_correlation',
-            'Std correlation (T2)': 't2_std_correlation',
-            'Std correlation (FLAIR)': 'flair_std_correlation',
-            'Mean dissimilarity (T1)': 't1_mean_dissimilarity',
-            'Mean dissimilarity (T1ce)': 't1ce_mean_dissimilarity',
-            'Mean dissimilarity (T2)': 't2_mean_dissimilarity',
-            'Mean dissimilarity (FLAIR)': 'flair_mean_dissimilarity',
-            'Std dissimilarity (T1)': 't1_std_dissimilarity',
-            'Std dissimilarity (T1ce)': 't1ce_std_dissimilarity',
-            'Std dissimilarity (T2)': 't2_std_dissimilarity',
-            'Std dissimilarity (FLAIR)': 'flair_std_dissimilarity',
-            'Mean energy (T1)': 't1_mean_energy',
-            'Mean energy (T1ce)': 't1ce_mean_energy',
-            'Mean energy (T2)': 't2_mean_energy',
-            'Mean energy (FLAIR)': 'flair_mean_energy',
-            'Std energy (T1)': 't1_std_energy',
-            'Std energy (T1ce)': 't1ce_std_energy',
-            'Std energy (T2)': 't2_std_energy',
-            'Std energy (FLAIR)': 'flair_std_energy',
-            'Mean homogeneity (T1)': 't1_mean_homogeneity',
-            'Mean homogeneity (T1ce)': 't1ce_mean_homogeneity',
-            'Mean homogeneity (T2)': 't2_mean_homogeneity',
-            'Mean homogeneity (FLAIR)': 'flair_mean_homogeneity',
-            'Std homogeneity (T1)': 't1_std_homogeneity',
-            'Std homogeneity (T1ce)': 't1ce_std_homogeneity',
-            'Std homogeneity (T2)': 't2_std_homogeneity',
-            'Std homogeneity (FLAIR)': 'flair_std_homogeneity',
-            'Mean ASM (T1)': 't1_mean_ASM',
-            'Mean ASM (T1ce)': 't1ce_mean_ASM',
-            'Mean ASM (T2)': 't2_mean_ASM',
-            'Mean ASM (FLAIR)': 'flair_mean_ASM',
-            'Std ASM (T1)': 't1_std_ASM',
-            'Std ASM (T1ce)': 't1ce_std_ASM',
-            'Std ASM (T2)': 't2_std_ASM',
-            'Std ASM (FLAIR)': 'flair_std_ASM'
-        }
+        tumor_features.update({
+            f"{slice_type} tumor slice ({plane})": f"{slice_type.lower()}_{plane.lower()}_tumor_slice".replace(' ', '_')
+            for plane in self.planes
+            for slice_type in ['Lower', 'Upper']
+        })
+
+        tumor_features.update({
+            f"Lesion size ({region_renamed.get(region, region)})":
+            f"lesion_size_{region_renamed.get(region, region).lower()}"
+            for region in self.lesion_regions
+        })
+
+        tumor_features.update({
+            f"Tumor location ({region_renamed.get(region, region)})":
+            f"{region_renamed.get(region, region).lower()}_tumor_location"
+            for region in self.lesion_regions
+        })
+
+        tumor_features.update({
+            f"{plane} plane tumor center of mass ({region_renamed.get(region, region)})":
+            f"{plane.lower()}_{region_renamed.get(region, region).lower()}_center_mass".replace(' ', '_')
+            for region in self.lesion_regions for plane in self.planes
+        })
+
+        return tumor_features
 
     def get_features(self, category):
         if category == "Statistical":

@@ -98,7 +98,7 @@ class TextureFeatures:
             A dictionary containing texture features for each plane.
         """
         if not textures:
-            textures = ['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']
+            textures = ['contrast', 'dissimilarity', 'homogeneity', 'asm', 'energy', 'correlation']
 
         features = {}
         for texture in textures:

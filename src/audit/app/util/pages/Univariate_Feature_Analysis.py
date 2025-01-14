@@ -20,7 +20,6 @@ from audit.visualization.histograms import custom_histogram
 
 # Load constants
 const_descriptions = UnivariatePage()
-const_features = Features()
 
 
 def setup_sidebar(data, data_paths):

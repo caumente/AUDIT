@@ -32,7 +32,7 @@ def mock_non_isotropic_spacing():
 def test_calculate_brain_center_mass(mock_sequence, mock_isotropic_spacing):
     """Test the calculation of brain center of mass with isotropic spacing."""
     spatial_features = SpatialFeatures(mock_sequence, mock_isotropic_spacing)
-    result = spatial_features.calculate_brain_center_mass()
+    result = spatial_features.calculate_anatomical_center_mass()
 
     expected_result = {
         "axial_brain_centre_mass": 2.0,
@@ -45,7 +45,7 @@ def test_calculate_brain_center_mass(mock_sequence, mock_isotropic_spacing):
 def test_calculate_brain_center_mass_non_isotropic_spacing(mock_sequence, mock_non_isotropic_spacing):
     """Test the calculation of brain center of mass with non-isotropic spacing."""
     spatial_features = SpatialFeatures(mock_sequence, mock_non_isotropic_spacing)
-    result = spatial_features.calculate_brain_center_mass()
+    result = spatial_features.calculate_anatomical_center_mass()
 
     # Expected center of mass, scaled by non-isotropic spacing
     expected_result = {
@@ -61,7 +61,7 @@ def test_calculate_brain_center_mass_non_isotropic_spacing(mock_sequence, mock_n
 def test_calculate_brain_center_mass_no_sequence():
     """Test the calculation of brain center of mass when sequence is None."""
     spatial_features = SpatialFeatures(None)
-    result = spatial_features.calculate_brain_center_mass()
+    result = spatial_features.calculate_anatomical_center_mass()
 
     expected_result = {
         "axial_brain_centre_mass": np.nan,

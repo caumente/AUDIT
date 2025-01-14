@@ -85,7 +85,7 @@ class TumorFeatures:
 
         return pixels_dict
 
-    def calculate_lesion_size(self):
+    def calculate_whole_lesion_size(self):
         """
         Calculates the lesion size in the segmentation.
 
@@ -95,10 +95,10 @@ class TumorFeatures:
             A dictionary containing the lesion size.
         """
         if self.segmentation is None:
-            return {"lesion_size": np.nan}
+            return {"lesion_size_whole": np.nan}
 
         lesion_size = (self.segmentation > 0).sum() * np.prod(self.spacing)
-        return {"lesion_size": lesion_size}
+        return {"lesion_size_whole": lesion_size}
 
     def get_tumor_center_mass(self, label=None):
         """
@@ -159,9 +159,9 @@ class TumorFeatures:
 
     def calculate_tumor_slices(self):
         if self.segmentation is None:
-            return {f"{k}_tumor_slice": np.nan for k, v in dict(zip(self.planes, self.get_tumor_slices())).items()}
+            return {f"{k}_tumor_slices": np.nan for k, v in dict(zip(self.planes, self.get_tumor_slices())).items()}
 
-        return {f"{k}_tumor_slice": len(v) for k, v in dict(zip(self.planes, self.get_tumor_slices())).items()}
+        return {f"{k}_tumor_slices": len(v) for k, v in dict(zip(self.planes, self.get_tumor_slices())).items()}
 
     def calculate_position_tumor_slices(self):
         position_tumor_slices = {}
@@ -182,8 +182,15 @@ class TumorFeatures:
         if self.segmentation is None:
             return {f"lesion_size_{k.lower()}": np.nan for k in self.mapping_names.values()}
 
+        # calculating number of pixels per label. If some of them does not exist, will be defined to 0 by default
         number_pixels = self.count_tumor_pixels()
+        number_pixels.update(
+            {label.lower(): 0 for label in self.mapping_names.values() if label.lower() not in number_pixels})
+
+        # removing background from labels
         number_pixels.pop("bkg", None)
+
+        # applying spacing to turn pixels into mm3
         number_pixels = {key: int(value * self.spacing.prod()) for key, value in number_pixels.items()}
         self.number_pixels = add_prefix_dict(number_pixels, prefix="lesion_size_")
 
@@ -244,7 +251,7 @@ class TumorFeatures:
         self.number_pixels = self.calculate_tumor_pixel()
 
         # calculate lesion size
-        self.lesion_size = self.calculate_lesion_size()
+        self.lesion_size = self.calculate_whole_lesion_size()
 
         # Combine all features into a single dictionary
         return {

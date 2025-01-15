@@ -9,9 +9,9 @@ from PIL import Image
 
 from audit.utils.commons.file_manager import load_config_file
 from audit.app.util.pages.Home_Page import HomePage
-# from audit.app.util.pages.Longitudinal_Measurements import LongitudinalMeasurements
+from audit.app.util.pages.Longitudinal_Measurements import LongitudinalMeasurements
 from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
-# from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
+from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
 from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
 from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
 from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
@@ -35,8 +35,8 @@ class AUDIT:
             {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config)},
             {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config)},
             {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config)},
-            # {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config, constants)},
-            # {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config, constants)},
+            {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config)},
+            {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config)},
             # {"title": "Subjects Exploration", "page": SubjectsExploration(config, constants)}
         ]
 

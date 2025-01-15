@@ -15,7 +15,7 @@ from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPe
 from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
 from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
 from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
-# from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
+from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
 from audit.app.util.pages.Univariate_Feature_Analysis import UnivariateFeatureAnalysis
 from audit.app.util.constants.features import Features
 
@@ -37,7 +37,7 @@ class AUDIT:
             {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config)},
             {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config)},
             {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config)},
-            # {"title": "Subjects Exploration", "page": SubjectsExploration(config, constants)}
+            {"title": "Subjects Exploration", "page": SubjectsExploration(config)}
         ]
 
     def add_page(self, title, page_instance):

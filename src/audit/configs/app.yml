@@ -1,3 +1,10 @@
+# Sequences available. First of them will be used to compute properties like spacing
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
+
 # Mapping of labels to their numeric values
 labels:
   BKG: 0

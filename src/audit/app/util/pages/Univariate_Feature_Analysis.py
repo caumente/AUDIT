@@ -1,3 +1,4 @@
+import numpy as np
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
@@ -82,19 +83,31 @@ class UnivariateFeatureAnalysis(BasePage):
         self.manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)
 
     def histogram_logic(self, data, plot_type, feature, n_bins, bins_size):
+        fig = None
         if plot_type == "Probability":
-            fig = custom_distplot(data, x_axis=feature, color_var="set", histnorm="probability")
+            try:
+                fig = custom_distplot(data, x_axis=feature, color_var="set", histnorm="probability")
+            except np.linalg.LinAlgError as e:
+                st.write(":red[Error generating the histogram: KDE failed due to singular covariance matrix.]")
+                st.write(":red[This may happen when the data has low variance or is nearly constant.]")
+                st.write(":red[Consider removing filters or datasets]")
+                fig = None
+            except Exception as e:
+                st.write(":red[An unexpected error occurred while generating the histogram.]")
+                st.write(f"Details: {str(e)}")
+                fig = None
         else:
             if n_bins:
                 fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=n_bins)
             elif bins_size:
                 fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size)
             else:
-                st.write(":red[Please, select the number of bins or bins size]",)
+                st.write(":red[Please, select the number of bins or bins size]")
 
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-        download_plot(fig, label="Data Distribution", filename="distribution")
-        st.markdown(self.descriptions.description)
+        if fig is not None:
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            download_plot(fig, label="Data Distribution", filename="distribution")
+            st.markdown(self.descriptions.description)
 
     @staticmethod
     def render_boxplot(data, feature, plot_type, highlight_subject):

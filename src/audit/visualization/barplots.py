@@ -40,7 +40,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
     for case in data.ID.unique():
         df = data[data.ID == case]
         lesion_location = round(df["whole_tumor_location"].unique()[0], 2)
-        lesion_size = df["lesion_size"].unique()[0]
+        lesion_size = df["lesion_size_whole"].unique()[0]
         performance_baseline = float(df[baseline_model].unique()[0])
         performance_benchmark_model = float(df[benchmark_model].unique()[0])
 
@@ -71,7 +71,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
             f"Lesion location: {lesion_location}mm - "
             f"Lesion size: {lesion_size:,} voxels<br>"
             f"Average performance baseline: {performance_baseline:.3f} - "
-            f"Avergage performance benchmark model: {performance_benchmark_model:.3f}",
+            f"Average performance benchmark model: {performance_benchmark_model:.3f}",
         )
 
         figures.append(fig)

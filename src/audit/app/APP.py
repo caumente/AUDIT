@@ -13,7 +13,7 @@ from audit.app.util.pages.Home_Page import HomePage
 from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
 # from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
 from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
-# from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
+from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
 from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
 # from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
 from audit.app.util.pages.Univariate_Feature_Analysis import UnivariateFeatureAnalysis
@@ -34,7 +34,7 @@ class AUDIT:
             {"title": "Multivariate Analysis", "page": MultivariateFeatureAnalysis(config)},
             {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config)},
             {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config)},
-            # {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config, constants)},
+            {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config)},
             # {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config, constants)},
             # {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config, constants)},
             # {"title": "Subjects Exploration", "page": SubjectsExploration(config, constants)}

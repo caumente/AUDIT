@@ -118,9 +118,13 @@ class ModelPerformanceAnalysis(BasePage):
                 selected_case = filtered_set_data.iloc[point["pointIndex"]]["ID"]
 
                 # Add or remove the selected case
-                if selected_case not in st.session_state.highlighted_subjects:
-                    st.session_state.dict_cases[(f"{point['x']}", f"{point['y']}")] = selected_case
-                    st.session_state.highlighted_subjects.append(selected_case)
+                try:
+                    if selected_case not in st.session_state.highlighted_subjects:
+                        st.session_state.dict_cases[(f"{point['x']}", f"{point['y']}")] = selected_case
+                        st.session_state.highlighted_subjects.append(selected_case)
+                except KeyError:
+                    st.markdown(":red[Please, click on 'Reset highlighted cases' button below.]")
+
             else:
                 selected_case = st.session_state.dict_cases[(f"{point['x']}", f"{point['y']}")]
                 st.session_state.highlighted_subjects.remove(selected_case)

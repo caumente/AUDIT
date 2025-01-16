@@ -38,7 +38,7 @@ class LongitudinalMeasurements(BasePage):
                 data=merged,
                 sets=selected_set,
                 models=selected_model,
-                features=["ID", "set", "longitudinal_id", "time_point", "lesion_size", "lesion_size_pred"]
+                features=["ID", "set", "longitudinal_id", "time_point", "lesion_size_whole", "lesion_size_pred"]
             )
 
             # filter subject
@@ -97,5 +97,3 @@ class LongitudinalMeasurements(BasePage):
         fig = plot_longitudinal2(data)
         st.plotly_chart(fig, theme="streamlit", use_container_width=True, scrolling=True)
         download_plot(fig, label="Absolute Difference in Lesion Size Variation", filename="absolute_difference_in_LSV")
-
-

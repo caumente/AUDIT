@@ -157,7 +157,7 @@ def test_calculate_lesion_size_no_segmentation():
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the result contains NaN
-    assert result == {"lesion_size": np.nan}, "Result should be NaN when segmentation is None."
+    assert result == {"lesion_size_whole": np.nan}, "Result should be NaN when segmentation is None."
 
 
 def test_calculate_lesion_size_empty_segmentation():
@@ -167,7 +167,7 @@ def test_calculate_lesion_size_empty_segmentation():
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size is zero for an empty array
-    assert result == {"lesion_size": 0}, "Result should be 0 for an empty segmentation."
+    assert result == {"lesion_size_whole": 0}, "Result should be 0 for an empty segmentation."
 
 
 def test_calculate_lesion_size_all_zero_segmentation(mock_zero_segmentation):
@@ -176,7 +176,7 @@ def test_calculate_lesion_size_all_zero_segmentation(mock_zero_segmentation):
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size is zero for an all-zero segmentation
-    assert result == {"lesion_size": 0}, "Result should be 0 for an all-zero segmentation."
+    assert result == {"lesion_size_whole": 0}, "Result should be 0 for an all-zero segmentation."
 
 
 def test_calculate_lesion_size(mock_segmentation):
@@ -185,7 +185,7 @@ def test_calculate_lesion_size(mock_segmentation):
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the number of non-zero pixels
-    assert result == {"lesion_size": 5}, "Result should match the number of non-zero pixels for unit spacing."
+    assert result == {"lesion_size_whole": 5}, "Result should match the number of non-zero pixels for unit spacing."
 
 
 def test_calculate_lesion_size_with_isotropic_spacing():
@@ -196,7 +196,7 @@ def test_calculate_lesion_size_with_isotropic_spacing():
 
     # Check that the lesion size matches the total number of pixels in the segmentation
     assert result == {
-        "lesion_size": 1000 * 2 ** 3
+        "lesion_size_whole": 1000 * 2 ** 3
     }, "Result should match the total number of pixels for a full segmentation."
 
 
@@ -208,7 +208,7 @@ def test_calculate_lesion_size_with_non_isotropic_spacing():
 
     # Check that the lesion size is scaled correctly by the voxel spacing
     assert result == {
-        "lesion_size": 1000 * 0.5 ** 2 * 4
+        "lesion_size_whole": 1000 * 0.5 ** 2 * 4
     }, "Result should be scaled by the product of the voxel spacing."
 
 
@@ -218,7 +218,7 @@ def test_calculate_lesion_size_partial_lesion(mock_segmentation):
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the number of non-zero pixels
-    assert result == {"lesion_size": 5}, "Result should count only non-zero pixels."
+    assert result == {"lesion_size_whole": 5}, "Result should count only non-zero pixels."
 
 
 def test_calculate_lesion_size_mixed_values(mock_segmentation_multiple_labels):
@@ -227,7 +227,7 @@ def test_calculate_lesion_size_mixed_values(mock_segmentation_multiple_labels):
     result = tumor_features.calculate_whole_lesion_size()
 
     # Check that the lesion size matches the total number of non-zero pixels
-    assert result == {"lesion_size": 6}, "Result should count all non-zero pixels, regardless of label values."
+    assert result == {"lesion_size_whole": 6}, "Result should count all non-zero pixels, regardless of label values."
 
 
 def test_get_tumor_center_mass(mock_segmentation):

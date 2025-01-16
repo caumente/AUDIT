@@ -48,36 +48,6 @@ def list_files(path: str) -> list:
         return []
 
 
-# def load_config_file(path: str) -> dict:
-#     """
-#     Loads a configuration file in YAML format and returns its contents as a dictionary.
-#
-#     Args:
-#         path: The file path to the YAML configuration file.
-#
-#     Returns:
-#         dict: The contents of the YAML file as a dictionary.
-#     """
-#
-#     def replace_variables(config, variables):
-#         def replace(match):
-#             return variables.get(match.group(1), match.group(0))
-#
-#         for key, value in config.items():
-#             if isinstance(value, str):
-#                 config[key] = re.sub(r"\$\{(\w+)\}", replace, value)
-#             elif isinstance(value, dict):
-#                 replace_variables(value, variables)
-#
-#     with open(path, "r") as file:
-#         config = yaml.safe_load(file)
-#
-#     variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
-#     replace_variables(config, variables)
-#
-#     return config
-
-
 def load_config_file(relative_path: str) -> dict:
     """
     Loads a configuration file in YAML format and returns its contents as a dictionary.
@@ -391,6 +361,100 @@ def organize_files_into_folders(folder_path, extension='.nii.gz', verbose=False,
         print(f"Total files organized: {organized_files}")
 
 
+def organize_subfolders_into_named_folders(folder_path, join_char="-", verbose=False, safe_mode: bool = True):
+    """
+    Organizes subfolders into combined named folders.
+    Dynamically combines parent folder names and their subfolder names into a single folder per subfolder.
+    Useful for longitudinal data:
+    Input:
+        DATASET_images/
+        └── Patient-002/
+            ├── timepoint-000/
+            │   ├── t1.nii.gz
+            │   ├── ..
+            ├── timepoint-001/
+            │   ├── t1.nii.gz
+            │   ├── ..
+            ├── timepoint-002/
+            │   ├── t1.nii.gz
+
+    Output:
+        DATASET_images/
+        ├── Patient-002-timepoint-000/
+        │   ├── t1.nii.gz
+        │   ├── ..
+        ├── Patient-002-timepoint-001/
+        │   ├── t1.nii.gz
+        │   ├── ..
+        ├── Patient-002-timepoint-002/
+        │   ├── t1.nii.gz
+
+        Args:
+        folder_path (str): Path to the folder containing the parent folders.
+        join_char (str): The character to use when joining the parent folder and subfolder names (default is "-").
+        verbose (bool): If True, prints detailed logs about each folder being organized.
+        safe_mode (bool): If True, simulates the folder organization without making changes.
+    """
+    if not os.path.exists(folder_path):
+        raise ValueError(f"The directory '{folder_path}' does not exist.")
+
+    # List all subdirectories in the main folder
+    parent_directories = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
+
+    for parent_dir in parent_directories:
+        parent_dir_path = os.path.join(folder_path, parent_dir)
+
+        # List all subdirectories under the parent directory
+        subdirectories = [d for d in os.listdir(parent_dir_path) if os.path.isdir(os.path.join(parent_dir_path, d))]
+
+        for subdir in subdirectories:
+            subdir_path = os.path.join(parent_dir_path, subdir)
+
+            # Create the new folder name using the specified join character
+            new_folder_name = f"{parent_dir}{join_char}{subdir}"
+            new_folder_path = os.path.join(folder_path, new_folder_name)
+
+            if not os.path.exists(new_folder_path):
+                if not safe_mode:
+                    os.makedirs(new_folder_path)  # Create the folder if not in safe_mode
+                if verbose:
+                    print(f"Created folder: {new_folder_path}")
+
+            # Move all contents from the subfolder to the new folder
+            for item in os.listdir(subdir_path):
+                item_path = os.path.join(subdir_path, item)
+                new_item_path = os.path.join(new_folder_path, item)
+
+                if safe_mode:
+                    print(f"[SAFE MODE] Would move: {item_path} -> {new_item_path}")
+                else:
+                    try:
+                        shutil.move(item_path, new_item_path)
+                        if verbose:
+                            print(f"Moved: {item_path} -> {new_item_path}")
+                    except Exception as e:
+                        print(f"Error moving {item_path}: {e}")
+
+            # Remove the now-empty subfolder if not in safe_mode
+            if not safe_mode:
+                try:
+                    os.rmdir(subdir_path)
+                    if verbose:
+                        print(f"Removed empty folder: {subdir_path}")
+                except Exception as e:
+                    print(f"Error removing folder {subdir_path}: {e}")
+
+        # After processing all subfolders, remove the now-empty parent directory
+        if not safe_mode:
+            try:
+                if not os.listdir(parent_dir_path):  # Check if the folder is empty
+                    os.rmdir(parent_dir_path)
+                    if verbose:
+                        print(f"Removed empty parent folder: {parent_dir_path}")
+            except Exception as e:
+                print(f"Error removing parent folder {parent_dir_path}: {e}")
+
+
 def add_suffix_to_files(folder_path, suffix='_pred', ext='.nii.gz', verbose=False, safe_mode: bool = True):
     """
     Adds a suffix to all files with a specific extension in a folder and its subdirectories.
@@ -439,7 +503,7 @@ def add_suffix_to_files(folder_path, suffix='_pred', ext='.nii.gz', verbose=Fals
     print("Renaming completed.")
 
 
-def add_string_filenames(folder_path, prefix="", suffix="", ext=None, verbose=False):
+def add_string_filenames(folder_path, prefix="", suffix="", ext=None, verbose=False, safe_mode=True):
     """
     Adds a prefix and/or suffix to all files in the specified folder and its subfolders.
 
@@ -449,6 +513,7 @@ def add_string_filenames(folder_path, prefix="", suffix="", ext=None, verbose=Fa
         suffix (str): The suffix to be added to the file names (before the extension).
         ext (str): File extension to filter by (e.g., '.nii.gz'). If None, all files are processed.
         verbose (bool): Whether to print verbose output for each rename operation.
+        safe_mode (bool): If True, simulates the renaming without applying changes.
     """
     # Walk through all subfolders and files in the given folder
     for root, dirs, files in os.walk(folder_path):
@@ -458,24 +523,34 @@ def add_string_filenames(folder_path, prefix="", suffix="", ext=None, verbose=Fa
                 # Construct the old file path
                 old_file_path = os.path.join(root, file)
 
-                # Split the file name and apply the prefix/suffix
-                name, file_ext = os.path.splitext(file)
+                # Properly split the filename and extension
                 if ext and file.endswith(ext):
-                    name = name[: -len(ext)]
+                    name = file[: -len(ext)]  # Extract the name without the custom extension
                     file_ext = ext
+                else:
+                    name, file_ext = os.path.splitext(file)  # Use regular splitting for standard extensions
 
+                # Apply the prefix and/or suffix
                 new_file_name = f"{prefix}{name}{suffix}{file_ext}"
 
                 # Construct the new file path
                 new_file_path = os.path.join(root, new_file_name)
 
-                # Rename the file
-                os.rename(old_file_path, new_file_path)
+                if safe_mode:
+                    print(f"[SAFE MODE] Would rename: {old_file_path} -> {new_file_path}")
+                else:
+                    # Perform the actual renaming
+                    try:
+                        os.rename(old_file_path, new_file_path)
+                        if verbose:
+                            print(f"Renamed: {old_file_path} -> {new_file_path}")
+                    except Exception as e:
+                        print(f"Error renaming {old_file_path}: {e}")
 
-                if verbose:
-                    print(f"Renaming file: {old_file_path} to {new_file_path}")
-
-    print("Renaming completed.")
+    if safe_mode:
+        print("Safe mode enabled: No files were renamed.")
+    else:
+        print("Renaming completed.")
 
 
 def concatenate_csv_files(directory: str, output_file: str):

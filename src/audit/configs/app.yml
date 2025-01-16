@@ -23,6 +23,7 @@ raw_datasets:
   BraTS2024_SSA: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_images"
   BraTS2024_PED: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_images"
   UCSF: "${datasets_path}/UCSF/UCSF_images"
+  LUMIERE: "${datasets_path}/LUMIERE/LUMIERE_images"
 
 # Paths for feature extraction CSV files
 features:
@@ -30,12 +31,14 @@ features:
   BraTS2024_SSA: "${features_path}/extracted_information_BraTS2024_SSA.csv"
   BraTS2024_PED: "${features_path}/extracted_information_BraTS2024_PED.csv"
   UCSF: "${features_path}/extracted_information_UCSF.csv"
+  LUMIERE: "${features_path}/extracted_information_LUMIERE.csv"
 
 # Paths for metric extraction CSV files
 metrics:
   BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS_SSA.csv"
   BraTS2024_PED: "${metrics_path}/extracted_information_BraTS_PED.csv"
   UCSF: "${metrics_path}/extracted_information_UCSF.csv"
+  LUMIERE: "${metrics_path}/extracted_information_LUMIERE.csv"
 
 # Paths for models predictions
 predictions:

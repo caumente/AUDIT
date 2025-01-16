@@ -31,7 +31,8 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
     features_to_extract = [key for key, value in config_file["features"].items() if value]
     available_sequences = config_file.get("sequences")
-    seq_reference = available_sequences[0].replace("_", "")
+    # seq_reference = available_sequences[0].replace("_", "")
+    seq_reference = available_sequences[0]
 
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
     subjects_list = list_dirs(path_images)
@@ -73,7 +74,7 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
             # calculate spatial features (dimensions and center mass)
             if 'spatial' in features_to_extract:
-                sf = SpatialFeatures(sequence=sequences.get(seq_reference), spacing=sequences_spacing)
+                sf = SpatialFeatures(sequence=sequences.get(seq_reference.replace("_", "")), spacing=sequences_spacing)
                 spatial_features = sf.extract_features()
 
             # calculate tumor features

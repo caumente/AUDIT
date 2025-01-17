@@ -1,8 +1,17 @@
 # Paths to all the datasets
 data_paths:
-  BraTS2020_____: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2020/BraTS2020_images'
-#  BraTS2024_PED: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
-#  BraTS2024_SSA: '/home/carlos/Documentos/proyectos/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
+  BraTS2020: '/home/usr/AUDIT/datasets/BraTS2020/BraTS2020_images'
+  BraTS2024_PED: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
+  BraTS2024_SSA: '/home/usr/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
+  UCSF: '/home/usr/AUDIT/datasets/UCSF/UCSF_images'
+  LUMIERE: '/home/usr/AUDIT/datasets/LUMIERE/LUMIERE_images'
+
+# Sequences available
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
 
 # Mapping of labels to their numeric values
 labels:
@@ -22,10 +31,13 @@ features:
 longitudinal:
   UCSF:
     pattern: "_"            # Pattern used for splitting filename
-    longitudinal_id: 1      # Index position for the subject ID after splitting the filename
-    time_point: 2           # Index position for the time point after splitting the filename
-
+    longitudinal_id: 1      # Index position for the subject ID after splitting the filename. Starting by 0
+    time_point: 2           # Index position for the time point after splitting the filename. Starting by 0
+  LUMIERE:
+    pattern: "-"
+    longitudinal_id: 1
+    time_point: 3
 
 # Path where extracted features will be saved
-output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/features'
-logs_path: '/home/carlos/Documentos/proyectos/AUDIT/logs/features'
+output_path: '/home/usr/AUDIT/outputs/features'
+logs_path: '/home/usr/AUDIT/logs/features'

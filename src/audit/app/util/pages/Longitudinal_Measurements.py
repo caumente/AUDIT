@@ -6,11 +6,10 @@ from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_sidebar_longitudinal_subject
 from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
 from audit.app.util.commons.sidebars import setup_sidebar_single_model
-from audit.app.util.commons.utils import download_plot
+from audit.app.util.commons.utils import download_longitudinal_plot
 from audit.app.util.constants.descriptions import LongitudinalAnalysisPage
 from audit.utils.commons.file_manager import read_datasets_from_dict
-from audit.visualization.time_series import plot_longitudinal
-from audit.visualization.time_series import plot_longitudinal2
+from audit.visualization.time_series import plot_longitudinal_lesions
 
 
 class LongitudinalMeasurements(BasePage):
@@ -88,12 +87,8 @@ class LongitudinalMeasurements(BasePage):
 
     def plot_visualization(self, data):
         data = data.reset_index(drop=True)
-        fig = plot_longitudinal(data)
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True, scrolling=True)
-        download_plot(fig, label="Relative Error in Lesion Size Estimation", filename="relative_error_in_LSE")
 
-        # Description
         st.markdown(self.descriptions.description)
-        fig = plot_longitudinal2(data)
+        fig = plot_longitudinal_lesions(data)
         st.plotly_chart(fig, theme="streamlit", use_container_width=True, scrolling=True)
-        download_plot(fig, label="Absolute Difference in Lesion Size Variation", filename="absolute_difference_in_LSV")
+        download_longitudinal_plot(fig, label="longitudinal analysis", filename="longitudinal_analysis")

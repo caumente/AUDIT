@@ -21,12 +21,13 @@ extracting relevant features, and visualizing model performance and biases in pr
 following features:
 
 
-- **Data management**: Easily work with MRI data from various sources.
-- **Feature extraction**: Extract relevant features from MRI images and their segmentations for analysis.
-- **Visualization**: Visualize model performance, including false positives and negatives, using interactive plots.
-- **Model robustness**: Assess the robustness of the model by evaluating its performance across different datasets and conditions.
-- **Bias detection**: Identify potential biases in model predictions and performance.
-- **Longitudinal analysis**: Track your model performance over different time points.
+- **Data management**: Easily work and preprocess MRIs from various sources.
+- **Feature extraction**: Extract relevant features from the images and their segmentations for analysis.
+- **Model robustness**: Assess model generalization by evaluating its performance across several experiments
+                        and conditions.
+- **Bias detection**: Identify potential biases either in model predictions and performance or on your data.
+- **Longitudinal analysis**: Track the model performance over different time points.
+- **High compatibility**: Provides connection with tools like ITK-SNAP and other external tools.
 
 Details of our work are provided in [*our paper*](...........), **AUDIT**. We hope that 
 users will use *AUDIT* to gain novel insights into brain tumor segmentation field. 
@@ -34,33 +35,32 @@ users will use *AUDIT* to gain novel insights into brain tumor segmentation fiel
 
 ## Usage
 - **Home Page**: The main landing page of the tool.
-- **Univariate Analysis**: Analysis of individual variables to understand their distributions and characteristics.
-- **Multivariate Analysis**: Examination of multiple variables simultaneously to explore relationships and patterns.
-- **Segmentation Error Matrix**: A table displaying the errors associated with different segmentation tasks.
+- **Univariate Analysis**: Exploration of individual variables to understand their distributions and discover
+                           outliers in it.
+- **Multivariate Analysis**: Examination of multiple variables simultaneously to explore relationships and
+                             hidden patterns.
+- **Segmentation Error Matrix**: A pseudo-confusion matrix displaying the errors associated with the
+                                 segmentation tasks.
 - **Model Performance Analysis**: Evaluation of the effectiveness and accuracy of a single model.
-- **Pairwise Model Performance Comparison**: Comparison of performance metrics between two different models.
+- **Pairwise Model Performance Comparison**: Perform pair-wise comparisons between models to find statistical
+                                             significant differences.
 - **Multi-model Performance Comparison**: Comparative analysis of performance metrics across multiple models.
-- **Longitudinal Measurements**: Analysis of data collected over time to observe trends and changes.
+- **Longitudinal Measurements**: Analysis of data collected over time to observe trends and changes on model
+                                 accuracy.
 - **Subjects Exploration**: Detailed examination of individual subjects within the dataset.
-
 
 ## Web AUDIT
 
-Last released version of **AUDIT** is hosted at https://audit.streamlitapp.com for an online overview of its functionalities.
+Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
 
 
 ## Getting Started
 
-### 1.1 Installation via PIP installer (Not available yet)
+For a more detailed exploration of AUDIT, please check our [*official documentation*](https://github.com/caumente/AUDIT)
 
-```bash
-pip install audit
-```
+### 1 Installation 
 
-### 1.2. Installation via AUDIT repository 
-
-### 1.2.1. Using Anaconda
-(Recommended) Create an isolated Anaconda environment:
+Create an isolated Anaconda environment:
 
 ```bash
 conda create -n audit_env python=3.10
@@ -78,30 +78,9 @@ Install the required packages:
  pip install -r requirements.txt
  ```
 
-### 1.2.2 Using Poetry
-
-The library _poetry_ must be installed in your environment to follow this via of installation.
-
-Clone the repository:
- ```bash
- git clone git@github.com:caumente/AUDIT.git
- cd AUDIT
-```
-
-Install the dependencies:
-```bash
-poetry install
-```
-
-Activate virtual environment:
-```bash
-poetry shell
-```
-
-
 ### 2. Configuration
 
-Edit the config files in `./src/configs/` directory to set up the paths for data loading and other configurations:
+Edit the config files in `./src/audit/configs/` directory to set up the paths for data loading and other configurations:
 
 
 <details>
@@ -112,6 +91,13 @@ Edit the config files in `./src/configs/` directory to set up the paths for data
 data_paths:
   dataset_1: '/home/user/AUDIT/datasets/dataset_1/dataset_1_images'
   dataset_N: '/home/user/AUDIT/datasets/dataset_N/dataset_N_images'
+
+# Sequences available
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
 
 # Mapping of labels to their numeric values
 labels:
@@ -136,7 +122,8 @@ features:
 
 
 # Path where extracted features will be saved
-output_path: '/home/user/AUDIT/outputs/features'
+output_path: '/home/usr/AUDIT/outputs/features'
+logs_path: '/home/usr/AUDIT/logs/features'
 ```
 </details>
 
@@ -176,9 +163,8 @@ calculate_stats: false
 
 # Path where output metrics will be saved
 output_path: '/home/user/AUDIT/outputs/metrics'
-
-# Filename for the extracted information
-filename: 'dataset_1'
+filename: 'LUMIERE'
+logs_path: '/home/user/AUDIT/logs/metric'
 ```
 </details>
 
@@ -187,6 +173,13 @@ filename: 'dataset_1'
   <summary><strong>2.3. APP config</strong></summary>
 
 ```yaml
+# Sequences available. First of them will be used to compute properties like spacing
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
+
 # Mapping of labels to their numeric values
 labels:
   BKG: 0
@@ -231,11 +224,11 @@ predictions:
 Use the following commands to run the *Feature extractor* and *Metric extractor* scripts:
 
 ```bash
-python src/feature_extractor.py
+python src/audit/feature_extractor.py
 ```
 
 ```bash
-python src/metric_extractor.py
+python src/audit/metric_extractor.py
 ```
 
 A _logs_ folder will be created after running each of the scripts to keep track of the execution. All the output files 
@@ -246,7 +239,7 @@ will be stored in the folder defined in the corresponding config file (by defaul
 Use the following streamlit command to run the APP and start the data exploration:
 
 ```bash
-streamlit run src/app/APP.py
+python python src/audit/app/launcher.py
 ```
 
 ### 5. Additional configurations

@@ -37,7 +37,7 @@ This documentation is structured to help you get the most out of AUDIT:
 - **[Getting Started](Getting_started/getting_started.md)**: Learn how to install AUDIT and set up your first project.
 - **[API Reference](API_reference/features/feature_extractor.md)**: Detailed reference for all library classes and methods.
 - **[Dashboard](app/APP.md)**: Explore the dashboard included in the web app.
-- **[Tutorials](tutorials/postprocess_outputs.md)**: Hands-on examples demonstrating common use cases.
+- **[Tutorials](tutorials/postprocessing_segmentations)**: Hands-on examples demonstrating common use cases.
 - **[About](about/release-notes.md)**: Check latest AUDIT release and license terms.
 
 

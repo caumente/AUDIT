@@ -52,8 +52,8 @@ nav:
     - Univariate page: app/univariate.md
     - Multivariate page: app/multivariate.md
   - Tutorials:
-      - Postprocess predictions: tutorials/postprocess_outputs.md
-      - Others: tutorials/tutorials.md
+      - Preprocessing dataset: tutorials/preprocessing.md
+      - Postprocessing segmentations: tutorials/postprocessing_segmentations.md
   - About:
     - License: about/LICENSE.md
     - Release Notes: about/release-notes.md

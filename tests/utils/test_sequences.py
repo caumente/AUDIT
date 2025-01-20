@@ -116,10 +116,10 @@ def test_read_sequences_dict_with_missing_sequences():
 
 
 def test_read_sequences_dict_invalid_parameters():
-    with pytest.raises(ValueError, match="Both 'root path' and 'subject id' must be non-empty strings."):
-        read_sequences_dict("", "subject_1")  # Empty root
+    with pytest.raises(ValueError, match="Both 'root_dir path' and 'subject id' must be non-empty strings."):
+        read_sequences_dict("", "subject_1")  # Empty root_dir
 
-    with pytest.raises(ValueError, match="Both 'root path' and 'subject id' must be non-empty strings."):
+    with pytest.raises(ValueError, match="Both 'root_dir path' and 'subject id' must be non-empty strings."):
         read_sequences_dict("/mock/path", "")  # Empty subject_id
 
 

@@ -44,15 +44,15 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
         fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
         logger.info(f"Starting metric extraction for model {model_name}")
 
-        # loop over all the elements in the root folder
+        # loop over all the elements in the root_dir folder
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
             for n, ID in enumerate(subjects_list):
                 pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{ID}{Fore.CYAN}")
                 pbar.update(1)
 
                 # read ground truth segmentation and prediction
-                gt = load_nii_by_subject_id(root=path_ground_truth_dataset, subject_id=ID, as_array=True)
-                pred = load_nii_by_subject_id(root=path_predictions, subject_id=ID, seq="_pred", as_array=True)
+                gt = load_nii_by_subject_id(root_dir=path_ground_truth_dataset, subject_id=ID, as_array=True)
+                pred = load_nii_by_subject_id(root_dir=path_predictions, subject_id=ID, seq="_pred", as_array=True)
                 spacing = get_spacing(load_nii_by_subject_id(path_predictions, ID, seq="_pred"))
 
                 # making the segmentations binary (one hot encoding for each region)
@@ -205,7 +205,7 @@ def extract_pymia_metrics(config_file):
         fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
         logger.info(f"Starting metric extraction for model {model_name}")
 
-        # loop over all the elements in the root folder
+        # loop over all the elements in the root_dir folder
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
             for n, subject_id in enumerate(subjects_list):
 

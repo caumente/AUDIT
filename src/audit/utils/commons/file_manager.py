@@ -163,12 +163,12 @@ def rename_files(root_dir: str, old_name: str = "_t1ce", new_name: str = "_t1c",
     """
     Renames files in a path and its subdirectories by replacing a specific substring in the filenames.
 
-    This function recursively walks through all files in a specified root path and its subdirectories,
+    This function recursively walks through all files in a specified root_dir path and its subdirectories,
     identifies files containing a specified old extension substring, and renames them by replacing
     the old extension with a new one.
 
     Args:
-        root_dir: The root path containing the files to be renamed.
+        root_dir: The root_dir path containing the files to be renamed.
         old_name: The substring in filenames that needs to be replaced. Defaults to "_t1ce".
         new_name: The substring that will replace the old extension. Defaults to "_t1c".
         verbose: Whether print the log
@@ -268,7 +268,7 @@ def delete_files_by_extension(root_dir: str, ext: str, verbose=False, safe_mode:
     Deletes all files with a specific extension in a path and its subdirectories.
 
     Args:
-        root_dir (str): The root path where the search will start.
+        root_dir (str): The root_dir path where the search will start.
         ext (str): The file extension of the files to be deleted.
         safe_mode (bool): If True, simulates the deletion without actually removing the files.
         verbose (bool): If True, prints detailed logs for each file deletion operation.
@@ -312,7 +312,7 @@ def delete_folders_by_pattern(root_dir: str, pattern: str, verbose=False, safe_m
     Deletes all folders that match a given pattern in a path and its subdirectories.
 
     Args:
-        root_dir (str): The root path where the search will start.
+        root_dir (str): The root_dir path where the search will start.
         pattern (str): The pattern to match folder names (supports regular expressions).
         safe_mode (bool): If True, simulates the deletion without actually removing the folders.
         verbose (bool): If True, prints detailed logs for each folder deletion operation.
@@ -355,7 +355,7 @@ def move_files_to_parent(root_dir: str, levels_up: int = 1, ext: str = None, ver
     Move all files or files with a specific extension from subdirectories to a specified parent level path.
 
     Args:
-        root_dir (str): The root path where the search will start.
+        root_dir (str): The root_dir path where the search will start.
         levels_up (int): Number of parent levels up to move the files.
         ext (str): Specific file extension to move (e.g., ".txt"). If None, moves all files.
         verbose (bool): If True, prints detailed logs for each file move operation.
@@ -602,11 +602,10 @@ def add_suffix_to_files(root_dir, suffix='_pred', ext='.nii.gz', verbose=False, 
                         print(f"Error renaming {old_file_path}: {e}")
 
     # After all operations, print a summary
-    if renamed_files == 0 and verbose:
+    if renamed_files == 0:
         print(f"No files with the extension '{ext}' were found to rename.")
-    elif verbose:
+    else:
         print(f"Total files renamed: {renamed_files}")
-    print("Renaming completed.")
 
 
 def add_string_filenames(root_dir, prefix="", suffix="", ext=None, verbose=False, safe_mode=True):
@@ -614,7 +613,7 @@ def add_string_filenames(root_dir, prefix="", suffix="", ext=None, verbose=False
     Adds a prefix and/or suffix to all files in the specified folder and its subfolders.
 
     Args:
-        root_dir (str): Path to the root folder containing files to rename.
+        root_dir (str): Path to the root_dir folder containing files to rename.
         prefix (str): The prefix to be added to the file names.
         suffix (str): The suffix to be added to the file names (before the extension).
         ext (str): File extension to filter by (e.g., '.nii.gz'). If None, all files are processed.

@@ -40,14 +40,14 @@ def load_nii(path_folder: str, as_array: bool = False) -> SimpleITK.Image:
         return None
 
 
-def load_nii_by_subject_id(root: str, subject_id: str, seq: str = "_seg", as_array: bool = False) -> SimpleITK.Image:
+def load_nii_by_subject_id(root_dir: str, subject_id: str, seq: str = "_seg", as_array: bool = False) -> SimpleITK.Image:
     """  This function loads a specific sequence from a NIfTI file by subject ID."""
 
-    # Check if root or subject_id is None or empty
-    if not root or not subject_id:
+    # Check if root_dir or subject_id is None or empty
+    if not root_dir or not subject_id:
         raise ValueError("Invalid path or subject ID provided. Both must be non-empty strings.")
 
-    nii_path = os.path.join(root, subject_id, f"{subject_id}{seq}.nii.gz")
+    nii_path = os.path.join(root_dir, subject_id, f"{subject_id}{seq}.nii.gz")
 
     if not os.path.exists(nii_path):
         logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
@@ -56,12 +56,12 @@ def load_nii_by_subject_id(root: str, subject_id: str, seq: str = "_seg", as_arr
     return load_nii(nii_path, as_array=as_array)
 
 
-def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str]] = None) -> dict:
+def read_sequences_dict(root_dir: str, subject_id: str, sequences: Optional[List[str]] = None) -> dict:
     """
-    Reads a dictionary of NIfTI sequences for a given subject from the specified root directory.
+    Reads a dictionary of NIfTI sequences for a given subject from the specified root_dir directory.
 
     Parameters:
-        root (str): The root directory where subject data is stored.
+        root_dir (str): The root_dir directory where subject data is stored.
         subject_id (str): The subject's ID used to locate the NIfTI files.
         sequences (List[str], optional): A list of sequences to load. Defaults to ["_t1", "_t1ce", "_t2", "_flair"].
 
@@ -73,13 +73,13 @@ def read_sequences_dict(root: str, subject_id: str, sequences: Optional[List[str
     if sequences is None:
         sequences = ["_t1", "_t1ce", "_t2", "_flair"]
 
-    # Ensure root and subject_id are valid
-    if not root or not subject_id:
-        raise ValueError("Both 'root path' and 'subject id' must be non-empty strings.")
+    # Ensure root_dir and subject_id are valid
+    if not root_dir or not subject_id:
+        raise ValueError("Both 'root_dir path' and 'subject id' must be non-empty strings.")
 
     out = {}
     for seq in sequences:
-        nii_path = os.path.join(root, subject_id, f"{subject_id}{seq}.nii.gz")
+        nii_path = os.path.join(root_dir, subject_id, f"{subject_id}{seq}.nii.gz")
 
         # Check if the NIfTI file exists
         if not os.path.isfile(nii_path):
@@ -167,12 +167,12 @@ def iterative_labels_replacement(
     """
     Iteratively replaces labels in segmentation files within a directory and its subdirectories.
 
-    This function walks through all files in a specified root directory and its subdirectories,
+    This function walks through all files in a specified root_dir directory and its subdirectories,
     identifies files containing a specified extension (e.g., "_seg" or "_pred"), loads each file as a 3D image array,
     replaces the labels based on provided mappings, and saves the modified image back to its original location.
 
     Args:
-        root_dir: The root directory containing the segmentation files.
+        root_dir: The root_dir directory containing the segmentation files.
         original_labels: A list of original labels present in the segmentation arrays.
         new_labels: A list of new labels that will replace the original labels.
         ext: The file extension pattern to identify segmentation files. Defaults to "_seg".

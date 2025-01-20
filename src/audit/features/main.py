@@ -37,7 +37,7 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
     subjects_list = list_dirs(path_images)
 
-    # loop over all the elements in the root folder
+    # loop over all the elements in the root_dir folder
     data = pd.DataFrame()
 
     with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
@@ -49,8 +49,8 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
             pbar.update(1)
 
             # read sequences and segmentation
-            sequences = read_sequences_dict(root=path_images, subject_id=subject_id, sequences=available_sequences)
-            seg = load_nii_by_subject_id(root=path_images, subject_id=subject_id, as_array=True)
+            sequences = read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
+            seg = load_nii_by_subject_id(root_dir=path_images, subject_id=subject_id, as_array=True)
 
             # calculating spacing
             sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, seq_reference))

@@ -118,8 +118,8 @@ class SegmentationErrorMatrix(BasePage):
         """
         accumulated = None
         for subject_id in stqdm(subjects_in_path, desc=f"Calculating confusion matrix for {len(subjects_in_path)} subjects"):
-            seg = load_nii_by_subject_id(root=gt_path, subject_id=subject_id, seq="_seg", as_array=True)
-            pred = load_nii_by_subject_id(root=predictions_path, subject_id=subject_id, seq="_pred", as_array=True)
+            seg = load_nii_by_subject_id(root_dir=gt_path, subject_id=subject_id, seq="_seg", as_array=True)
+            pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=subject_id, seq="_pred", as_array=True)
             cm = errors_per_class(seg, pred, list(labels))
             if accumulated is None:
                 accumulated = np.zeros_like(cm)
@@ -138,8 +138,8 @@ class SegmentationErrorMatrix(BasePage):
             normalized (bool): Whether to normalize the confusion matrix.
         """
         classes, labels = list(labels_dict.keys()), list(labels_dict.values())
-        seg = load_nii_by_subject_id(root=gt_path, subject_id=selected_id, seq="_seg", as_array=True)
-        pred = load_nii_by_subject_id(root=predictions_path, subject_id=selected_id, seq="_pred", as_array=True)
+        seg = load_nii_by_subject_id(root_dir=gt_path, subject_id=selected_id, seq="_seg", as_array=True)
+        pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=selected_id, seq="_pred", as_array=True)
 
         cm = self.compute_confusion_matrix(seg, pred, labels, normalized)
         self.visualize_confusion_matrix(cm, classes, normalized)

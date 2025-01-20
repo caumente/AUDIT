@@ -116,7 +116,7 @@ class TumorFeatures:
         """
         if self.segmentation is None:
             logger.warning("Segmentation is required to calculate the tumor center of mass. Assigning (nan, nan, nan)")
-            return np.array([np.nan] * 3)
+            return np.array([np.nan] * 3)  # assuming 3-d MRI
 
         if label is not None and not np.any(self.segmentation == label):
             logger.warning(f"Label {label} not found in segmentation.")
@@ -166,15 +166,17 @@ class TumorFeatures:
     def calculate_position_tumor_slices(self):
         position_tumor_slices = {}
         if self.segmentation is None:
-            position_tumor_slices.update({f"lower_{k}_tumor_slice": np.nan for k, v in
-                                          dict(zip(self.planes, self.get_tumor_slices())).items()})
-            position_tumor_slices.update({f"upper_{k}_tumor_slice": np.nan for k, v in
-                                          dict(zip(self.planes, self.get_tumor_slices())).items()})
+            position_tumor_slices.update({f"lower_{k}_tumor_slice": np.nan for k in self.planes})
+            position_tumor_slices.update({f"upper_{k}_tumor_slice": np.nan for k in self.planes})
         else:
-            position_tumor_slices.update({f"lower_{k}_tumor_slice": np.min(v) for k, v in
-                                          dict(zip(self.planes, self.get_tumor_slices())).items()})
-            position_tumor_slices.update({f"upper_{k}_tumor_slice": np.max(v) for k, v in
-                                          dict(zip(self.planes, self.get_tumor_slices())).items()})
+            tumor_slices = dict(zip(self.planes, self.get_tumor_slices()))
+            for plane, slices in tumor_slices.items():
+                if len(slices) == 0:  # Si no hay cortes tumorales
+                    position_tumor_slices[f"lower_{plane}_tumor_slice"] = np.nan
+                    position_tumor_slices[f"upper_{plane}_tumor_slice"] = np.nan
+                else:
+                    position_tumor_slices[f"lower_{plane}_tumor_slice"] = np.min(slices)
+                    position_tumor_slices[f"upper_{plane}_tumor_slice"] = np.max(slices)
 
         return position_tumor_slices
 

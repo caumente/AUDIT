@@ -1,6 +1,8 @@
+import os
 import pandas as pd
 from colorama import Fore
 from loguru import logger
+from multiprocessing import Pool, Manager, Lock
 
 from audit.features.spatial import SpatialFeatures
 from audit.features.statistical import StatisticalFeatures
@@ -11,6 +13,119 @@ from audit.utils.commons.strings import fancy_tqdm
 from audit.utils.sequences.sequences import get_spacing
 from audit.utils.sequences.sequences import load_nii_by_subject_id
 from audit.utils.sequences.sequences import read_sequences_dict
+
+
+def initializer(shared_df, lock):
+    """Initialize shared variables for multiprocessing"""
+    global shared_dataframe, dataframe_lock
+    shared_dataframe = shared_df
+    dataframe_lock = lock
+
+
+def process_subject(data: pd.DataFrame, params: dict) -> pd.DataFrame:
+    """Process a single subject to extract features"""
+    path_images = params.get('path_images')
+    subject_id = params.get('subject_id')
+    available_sequences = params.get('available_sequences')
+    seq_reference = params.get('seq_reference')
+    features_to_extract = params.get('features_to_extract')
+    numeric_label = params.get('numeric_label')
+    label_names = params.get('label_names')
+    spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
+
+    def store_subject_information(
+            subject_id: str,
+            spatial_features: dict,
+            tumor_features: dict,
+            stats_features: dict,
+            texture_feats: dict
+    ) -> pd.DataFrame:
+        """
+        Stores the extracted features for a single subject in a DataFrame.
+
+        Args:
+            subject_id (str): The ID of the subject.
+            spatial_features (dict): A dictionary containing spatial features extracted from the subject's images.
+            tumor_features (dict): A dictionary containing tumor features extracted from the subject's segmentation.
+            stats_features (dict): A dictionary containing statistical features extracted from the subject's images.
+            texture_feats (dict): A dictionary containing texture features extracted from the subject's images.
+
+        Returns:
+            pd.DataFrame: A DataFrame with the subject's ID and all extracted features, structured as a single row.
+        """
+
+        # storing information about subject
+        subject_info = {"ID": subject_id}
+
+        # including spatial information
+        subject_info.update(spatial_features)
+
+        # including tumor information
+        subject_info.update(tumor_features)
+
+        # including stats information
+        for seq, dict_stats in stats_features.items():
+            prefixed_stats = {f"{seq}_{k}": v for k, v in dict_stats.items()}
+            subject_info.update(prefixed_stats)
+
+        # including texture information
+        for seq, dict_stats in texture_feats.items():
+            prefixed_textures = {f"{seq}_{k}": v for k, v in dict_stats.items()}
+            subject_info.update(prefixed_textures)
+
+        # from dict to dataframe
+        subject_info_df = pd.DataFrame(subject_info, index=[0])
+
+        return subject_info_df
+
+    # read sequences and segmentation
+    sequences = read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
+    seg = load_nii_by_subject_id(root_dir=path_images, subject_id=subject_id, as_array=True)
+
+    # calculating spacing
+    sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, seq_reference))
+    seg_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_seg"))
+
+    # extract first order (statistical) information from sequences
+    if 'statistical' in features_to_extract:
+        stats_features = {
+            key: StatisticalFeatures(seq[seq > 0]).extract_features()
+            for key, seq in sequences.items()
+            if seq is not None
+        }
+
+    # extract second order (texture) information from sequences
+    if 'texture' in features_to_extract:
+        texture_feats = {
+            key: TextureFeatures(seq, remove_empty_planes=True).extract_features()
+            for key, seq in sequences.items()
+            if seq is not None
+        }
+
+    # calculate spatial features (dimensions and center mass)
+    if 'spatial' in features_to_extract:
+        sf = SpatialFeatures(sequence=sequences.get(seq_reference.replace("_", "")), spacing=sequences_spacing)
+        spatial_features = sf.extract_features()
+
+    # calculate tumor features
+    if 'tumor' in features_to_extract:
+        tf = TumorFeatures(
+            segmentation=seg, spacing=seg_spacing, mapping_names=dict(zip(numeric_label, label_names))
+        )
+        tumor_features = tf.extract_features(sf.center_mass.values() if 'spatial' in features_to_extract else {})
+
+    # Add info to the main df
+    subject_info_df = store_subject_information(
+        subject_id,
+        spatial_features,
+        tumor_features,
+        stats_features,
+        texture_feats
+    )
+    with dataframe_lock:
+        data[subject_id] = subject_info_df
+
+    return data
 
 
 @logger.catch
@@ -34,77 +149,46 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     # seq_reference = available_sequences[0].replace("_", "")
     seq_reference = available_sequences[0]
 
-    spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
     subjects_list = list_dirs(path_images)
 
-    # loop over all the elements in the root_dir folder
+    manager = Manager()
+    shared_data = manager.dict()
+    lock = Lock()
+
+    with Pool(processes=os.cpu_count(), initializer=initializer, initargs=(shared_data, lock)) as pool:
+        with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+            results = []
+
+            for subject_id in subjects_list:
+                params = {
+                    'path_images': path_images,
+                    'subject_id': subject_id,
+                    'label_names': label_names,
+                    'numeric_label': numeric_label,
+                    'seq_reference': seq_reference,
+                    'features_to_extract': features_to_extract,
+                    'available_sequences': available_sequences
+                }
+                results.append(pool.apply_async(process_subject, args=(shared_data, params)))
+
+            for result in results:
+                result.wait()
+                pbar.update(1)
+
     data = pd.DataFrame()
+    for subject_id, subject_info_df in shared_data.items():
+        data = pd.concat([data, subject_info_df], ignore_index=True)
 
-    with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-        for n, subject_id in enumerate(subjects_list):
-            logger.info(f"Processing subject: {subject_id}")
-
-            # updating progress bar
-            pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
-            pbar.update(1)
-
-            # read sequences and segmentation
-            sequences = read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
-            seg = load_nii_by_subject_id(root_dir=path_images, subject_id=subject_id, as_array=True)
-
-            # calculating spacing
-            sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, seq_reference))
-            seg_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_seg"))
-
-            # extract first order (statistical) information from sequences
-            if 'statistical' in features_to_extract:
-                stats_features = {
-                    key: StatisticalFeatures(seq[seq > 0]).extract_features()
-                    for key, seq in sequences.items()
-                    if seq is not None
-                }
-
-            # extract second order (texture) information from sequences
-            if 'texture' in features_to_extract:
-                texture_feats = {
-                    key: TextureFeatures(seq, remove_empty_planes=True).extract_features()
-                    for key, seq in sequences.items()
-                    if seq is not None
-                }
-
-            # calculate spatial features (dimensions and center mass)
-            if 'spatial' in features_to_extract:
-                sf = SpatialFeatures(sequence=sequences.get(seq_reference.replace("_", "")), spacing=sequences_spacing)
-                spatial_features = sf.extract_features()
-
-            # calculate tumor features
-            if 'tumor' in features_to_extract:
-                tf = TumorFeatures(
-                    segmentation=seg, spacing=seg_spacing, mapping_names=dict(zip(numeric_label, label_names))
-                )
-                tumor_features = tf.extract_features(sf.center_mass.values() if 'spatial' in features_to_extract else {})
-
-            # Add info to the main df
-            subject_info_df = store_subject_information(
-                subject_id,
-                spatial_features,
-                tumor_features,
-                stats_features,
-                texture_feats
-            )
-            data = pd.concat([data, subject_info_df], ignore_index=True)
-
-        data = extract_longitudinal_info(config_file, data, dataset_name)
-
-        return data
+    data = extract_longitudinal_info(config_file, data, dataset_name)
+    return data
 
 
 def store_subject_information(
-    subject_id: str,
-    spatial_features: dict,
-    tumor_features: dict,
-    stats_features: dict,
-    texture_feats: dict
+        subject_id: str,
+        spatial_features: dict,
+        tumor_features: dict,
+        stats_features: dict,
+        texture_feats: dict
 ) -> pd.DataFrame:
     """
     Stores the extracted features for a single subject in a DataFrame.

@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 from colorama import Fore
 from loguru import logger
@@ -22,7 +23,7 @@ def initializer(shared_df, lock):
     dataframe_lock = lock
 
 
-def process_subject(data: pd.DataFrame, params: dict) -> pd.DataFrame:
+def process_subject(data: pd.DataFrame, params: dict, cpu_count: int) -> pd.DataFrame:
     """Process a single subject to extract features"""
     path_images = params.get('path_images')
     subject_id = params.get('subject_id')
@@ -32,51 +33,6 @@ def process_subject(data: pd.DataFrame, params: dict) -> pd.DataFrame:
     numeric_label = params.get('numeric_label')
     label_names = params.get('label_names')
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
-
-    def store_subject_information(
-            subject_id: str,
-            spatial_features: dict,
-            tumor_features: dict,
-            stats_features: dict,
-            texture_feats: dict
-    ) -> pd.DataFrame:
-        """
-        Stores the extracted features for a single subject in a DataFrame.
-
-        Args:
-            subject_id (str): The ID of the subject.
-            spatial_features (dict): A dictionary containing spatial features extracted from the subject's images.
-            tumor_features (dict): A dictionary containing tumor features extracted from the subject's segmentation.
-            stats_features (dict): A dictionary containing statistical features extracted from the subject's images.
-            texture_feats (dict): A dictionary containing texture features extracted from the subject's images.
-
-        Returns:
-            pd.DataFrame: A DataFrame with the subject's ID and all extracted features, structured as a single row.
-        """
-
-        # storing information about subject
-        subject_info = {"ID": subject_id}
-
-        # including spatial information
-        subject_info.update(spatial_features)
-
-        # including tumor information
-        subject_info.update(tumor_features)
-
-        # including stats information
-        for seq, dict_stats in stats_features.items():
-            prefixed_stats = {f"{seq}_{k}": v for k, v in dict_stats.items()}
-            subject_info.update(prefixed_stats)
-
-        # including texture information
-        for seq, dict_stats in texture_feats.items():
-            prefixed_textures = {f"{seq}_{k}": v for k, v in dict_stats.items()}
-            subject_info.update(prefixed_textures)
-
-        # from dict to dataframe
-        subject_info_df = pd.DataFrame(subject_info, index=[0])
-
-        return subject_info_df
 
     # read sequences and segmentation
     sequences = read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
@@ -122,6 +78,10 @@ def process_subject(data: pd.DataFrame, params: dict) -> pd.DataFrame:
         stats_features,
         texture_feats
     )
+
+    if cpu_count == 1:
+        return subject_info_df
+
     with dataframe_lock:
         data[subject_id] = subject_info_df
 
@@ -148,18 +108,20 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     available_sequences = config_file.get("sequences")
     # seq_reference = available_sequences[0].replace("_", "")
     seq_reference = available_sequences[0]
-
     subjects_list = list_dirs(path_images)
+    cpu_count = config_file.get("cpu_count", os.cpu_count())
 
-    manager = Manager()
-    shared_data = manager.dict()
-    lock = Lock()
+    if cpu_count == 1:
+        data = pd.DataFrame()
 
-    with Pool(processes=os.cpu_count(), initializer=initializer, initargs=(shared_data, lock)) as pool:
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-            results = []
+            for n, subject_id in enumerate(subjects_list):
+                logger.info(f"Processing subject: {subject_id}")
 
-            for subject_id in subjects_list:
+                # updating progress bar
+                pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
+                pbar.update(1)
+
                 params = {
                     'path_images': path_images,
                     'subject_id': subject_id,
@@ -169,18 +131,44 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     'features_to_extract': features_to_extract,
                     'available_sequences': available_sequences
                 }
-                results.append(pool.apply_async(process_subject, args=(shared_data, params)))
 
-            for result in results:
-                result.wait()
-                pbar.update(1)
+                subject_info_df = process_subject(data, params, cpu_count)
+                data = pd.concat([data, subject_info_df], ignore_index=True)
 
-    data = pd.DataFrame()
-    for subject_id, subject_info_df in shared_data.items():
-        data = pd.concat([data, subject_info_df], ignore_index=True)
+    if cpu_count > 1:
 
-    data = extract_longitudinal_info(config_file, data, dataset_name)
-    return data
+        manager = Manager()
+        shared_data = manager.dict()
+        lock = Lock()
+
+        with Pool(processes=os.cpu_count(), initializer=initializer, initargs=(shared_data, lock)) as pool:
+            with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+                results = []
+
+                for subject_id in subjects_list:
+                    params = {
+                        'path_images': path_images,
+                        'subject_id': subject_id,
+                        'label_names': label_names,
+                        'numeric_label': numeric_label,
+                        'seq_reference': seq_reference,
+                        'features_to_extract': features_to_extract,
+                        'available_sequences': available_sequences
+                    }
+                    results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_count)))
+
+                for result in results:
+                    result.wait()
+                    pbar.update(1)
+
+        data = pd.DataFrame()
+        for subject_id, subject_info_df in shared_data.items():
+            data = pd.concat([data, subject_info_df], ignore_index=True)
+
+        data = extract_longitudinal_info(config_file, data, dataset_name)
+        return data
+
+    raise ValueError("Invalid cpu_count value in feature_extractor.yml file. Remove it or set it to greater than 0")
 
 
 def store_subject_information(

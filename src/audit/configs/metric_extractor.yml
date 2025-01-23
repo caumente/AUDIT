@@ -32,3 +32,4 @@ calculate_stats: false
 output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
 filename: 'UCSF'
 logs_path: '/home/carlos/Documentos/proyectos/AUDIT/logs/metric'
+logger: null  # null -> default logger file, 'DEBUG', 'INFO' -> console logger

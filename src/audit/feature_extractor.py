@@ -14,6 +14,7 @@ from audit.features.main import extract_features
 from audit.utils.commons.file_manager import load_config_file
 from audit.utils.commons.strings import configure_logging
 from audit.utils.commons.strings import fancy_print
+from audit.utils.commons.config_checks import check_feature_extractor_config
 
 
 def run_feature_extractor(config_path):
@@ -24,6 +25,8 @@ def run_feature_extractor(config_path):
         logger.error(f"Failed to load config file from {config_path}: {e}")
         sys.exit(1)
 
+    check_feature_extractor_config(config)
+
     # config variables
     data_paths = config["data_paths"]
     output_path, logs_path = config["output_path"], config["logs_path"]
@@ -32,6 +35,8 @@ def run_feature_extractor(config_path):
 
     # initializing log
     logger.remove()
+    if config.get('logger') is not None:
+        logger.add(sink=sys.stdout, level=config['logger'])
     current_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     configure_logging(log_filename=f"{logs_path}/{current_time}.log")
     logger.info(f"Config file: \n{pformat(config)}")

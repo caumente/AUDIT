@@ -14,6 +14,7 @@ from audit.metrics.main import extract_custom_metrics
 from audit.metrics.main import extract_pymia_metrics
 from audit.utils.commons.file_manager import load_config_file
 from audit.utils.commons.strings import configure_logging
+from audit.utils.commons.config_checks import check_metric_extractor_config
 
 
 def run_metric_extractor(config_path):
@@ -24,6 +25,8 @@ def run_metric_extractor(config_path):
         logger.error(f"Failed to load config file from {config_path}: {e}")
         sys.exit(1)
 
+    check_metric_extractor_config(config)
+
     # config variables
     output_path, logs_path = config["output_path"], config["logs_path"]
     Path(output_path).mkdir(parents=True, exist_ok=True)
@@ -31,6 +34,8 @@ def run_metric_extractor(config_path):
 
     # initializing log
     logger.remove()
+    if config.get('logger') is not None:
+        logger.add(sink=sys.stdout, level=config['logger'])
     current_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     configure_logging(log_filename=f"{logs_path}/{current_time}.log")
     logger.info(f"Config file: \n{pformat(config)}")
@@ -46,7 +51,8 @@ def run_metric_extractor(config_path):
     logger.info(f"Finishing metric extraction")
 
     # store information
-    extracted_metrics.to_csv(f"{output_path}/extracted_information_{config['filename']}.csv", index=False)
+    file_path = os.path.join(output_path, f"extracted_information_{config['filename']}.csv")
+    extracted_metrics.to_csv(file_path, index=False)
     logger.info(f"Results exported to CSV file")
 
 

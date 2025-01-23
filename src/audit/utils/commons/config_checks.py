@@ -82,12 +82,12 @@ def check_metric_extractor_config(config: dict) -> None:
 def check_app_config(config: dict) -> None:
     """Check the configuration for the app."""
     raw_datasets = config.get("raw_datasets")
-    if raw_datasets is None:
-        logger.error("Missing raw_datasets in the app.yml file")
-        sys.exit(1)
-
-    for dataset_name, src_path in raw_datasets.items():
-        check_path_existence(src_path, dataset_name, "raw_datasets")
+    if raw_datasets is not None:
+        for dataset_name, src_path in raw_datasets.items():
+            if dataset_name is None or src_path is None:
+                logger.error(f"Not set features: {dataset_name}: {src_path} in the app.yml file")
+                sys.exit(1)
+            check_path_existence(src_path, dataset_name, "raw_datasets")
 
     features = config.get("features")
     if features is not None:

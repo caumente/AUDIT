@@ -41,4 +41,3 @@ longitudinal:
 # Path where extracted features will be saved
 output_path: '/home/usr/AUDIT/outputs/features'
 logs_path: '/home/usr/AUDIT/logs/features'
-logger: null  # null -> default logger file, 'DEBUG', 'INFO' -> console logger

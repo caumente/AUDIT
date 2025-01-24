@@ -35,7 +35,7 @@ def run_feature_extractor(config_path):
 
     # initializing log
     logger.remove()
-    if config.get('logger') is not None:
+    if config.get('logger', None):
         logger.add(sink=sys.stdout, level=config['logger'])
     current_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     configure_logging(log_filename=f"{logs_path}/{current_time}.log")

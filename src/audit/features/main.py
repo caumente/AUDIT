@@ -23,7 +23,7 @@ def initializer(shared_df, lock):
     dataframe_lock = lock
 
 
-def process_subject(data: pd.DataFrame, params: dict, cpu_count: int) -> pd.DataFrame:
+def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.DataFrame:
     """Process a single subject to extract features"""
     path_images = params.get('path_images')
     subject_id = params.get('subject_id')
@@ -79,7 +79,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_count: int) -> pd.Data
         texture_feats
     )
 
-    if cpu_count == 1:
+    if cpu_cores == 1:
         return subject_info_df
 
     with dataframe_lock:
@@ -109,13 +109,13 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     # seq_reference = available_sequences[0].replace("_", "")
     seq_reference = available_sequences[0]
     subjects_list = list_dirs(path_images)
-    cpu_count = config_file.get("cpu_count", os.cpu_count())
+    cpu_cores = config_file.get("cpu_cores", os.cpu_count())
 
-    if cpu_count == 1:
+    if cpu_cores == 1:
         data = pd.DataFrame()
 
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-            for n, subject_id in enumerate(subjects_list):
+            for subject_id in subjects_list:
                 logger.info(f"Processing subject: {subject_id}")
 
                 # updating progress bar
@@ -132,16 +132,19 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     'available_sequences': available_sequences
                 }
 
-                subject_info_df = process_subject(data, params, cpu_count)
+                subject_info_df = process_subject(data, params, cpu_cores)
                 data = pd.concat([data, subject_info_df], ignore_index=True)
 
-    if cpu_count > 1:
+        data =  extract_longitudinal_info(config_file, data, dataset_name)
+        return data
+
+    if cpu_cores > 1:
 
         manager = Manager()
         shared_data = manager.dict()
         lock = Lock()
 
-        with Pool(processes=os.cpu_count(), initializer=initializer, initargs=(shared_data, lock)) as pool:
+        with Pool(processes=cpu_cores, initializer=initializer, initargs=(shared_data, lock)) as pool:
             with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
                 results = []
 
@@ -155,7 +158,7 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                         'features_to_extract': features_to_extract,
                         'available_sequences': available_sequences
                     }
-                    results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_count)))
+                    results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 
                 for result in results:
                     result.wait()
@@ -165,10 +168,11 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
         for subject_id, subject_info_df in shared_data.items():
             data = pd.concat([data, subject_info_df], ignore_index=True)
 
+        data = data.sort_values(by=data.columns[0]).reset_index(drop=True)
         data = extract_longitudinal_info(config_file, data, dataset_name)
         return data
 
-    raise ValueError("Invalid cpu_count value in feature_extractor.yml file. Remove it or set it to greater than 0")
+    raise ValueError("Invalid cpu_cores value in feature_extractor.yml file. Remove it or set it to greater than 0")
 
 
 def store_subject_information(

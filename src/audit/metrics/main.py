@@ -31,7 +31,7 @@ def initializer(shared_df, lock):
     dataframe_lock = lock
 
 
-def process_subject(data: pd.DataFrame, params: dict, cpu_count: int) -> pd.DataFrame:
+def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.DataFrame:
     """Process a single subject"""
     path_ground_truth_dataset = params["path_ground_truth_dataset"]
     path_predictions = params["path_predictions"]
@@ -66,7 +66,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_count: int) -> pd.Data
     # add model info
     subject_info_df["model"] = model_name
 
-    if cpu_count == 1:
+    if cpu_cores == 1:
         return subject_info_df
 
     with dataframe_lock:
@@ -87,9 +87,9 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
     # load paths to predictions
     models = config_file["model_predictions_paths"]
     raw_metrics = pd.DataFrame()
-    cpu_count = config_file.get("cpu_count", os.cpu_count())
+    cpu_cores = config_file.get("cpu_cores", os.cpu_count())
 
-    if cpu_count == 1:
+    if cpu_cores == 1:
         for model_name, path_predictions in models.items():
             fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
             logger.info(f"Starting metric extraction for model {model_name}")
@@ -111,20 +111,20 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
                     }
 
                     data = pd.DataFrame()
-                    subject_info_df = process_subject(data, params, cpu_count)
+                    subject_info_df = process_subject(data, params, cpu_cores)
                     raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
 
             logger.info(f"Finishing metric extraction for model {model_name}")
-
+        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
         return raw_metrics
 
-    if cpu_count > 1:
+    if cpu_cores > 1:
 
         manager = Manager()
         shared_data = manager.dict()
         lock = Lock()
 
-        with Pool(processes=cpu_count, initializer=initializer, initargs=(shared_data, lock)) as pool:
+        with Pool(processes=cpu_cores, initializer=initializer, initargs=(shared_data, lock)) as pool:
             for model_name, path_predictions in models.items():
                 fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
                 logger.info(f"Starting metric extraction for model {model_name}")
@@ -141,7 +141,7 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
                         "model_name": model_name
                     }
 
-                    tasks.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_count)))
+                    tasks.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 
                 with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
                     for task in tasks:
@@ -153,9 +153,10 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
 
                 logger.info(f"Finishing metric extraction for model {model_name}")
 
+        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
         return raw_metrics
 
-    raise ValueError("Invalid cpu_count value in metric_extractor.yml file. Remove it or set it to greater than 0")
+    raise ValueError("Invalid cpu_cores value in metric_extractor.yml file. Remove it or set it to greater than 0")
 
 
 """

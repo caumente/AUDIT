@@ -16,6 +16,22 @@ from audit.utils.sequences.sequences import load_nii_by_subject_id
 from audit.utils.sequences.sequences import read_sequences_dict
 
 
+@logger.catch
+def check_multiprocessing(config_file):
+    cpu_cores = config_file.get("cpu_cores")
+
+    if cpu_cores is None or cpu_cores == "None":
+        logger.info("cpu_cores not specified or invalid in feature_extractor.yml file, defaulting to os.cpu_count()")
+        cpu_cores = os.cpu_count()
+
+    if not isinstance(cpu_cores, int) or cpu_cores <= 0:
+        logger.info(f"Invalid cpu_cores value: {cpu_cores} in feature_extractor.yml file, defaulting to os.cpu_count()")
+        cpu_cores = os.cpu_count()
+
+    logger.info(f"Using {cpu_cores} CPU cores for processing")
+    return cpu_cores
+
+
 def initializer(shared_df, lock):
     """Initialize shared variables for multiprocessing"""
     global shared_dataframe, dataframe_lock
@@ -106,10 +122,9 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
     features_to_extract = [key for key, value in config_file["features"].items() if value]
     available_sequences = config_file.get("sequences")
-    # seq_reference = available_sequences[0].replace("_", "")
     seq_reference = available_sequences[0]
     subjects_list = list_dirs(path_images)
-    cpu_cores = config_file.get("cpu_cores", os.cpu_count())
+    cpu_cores = check_multiprocessing(config_file)
 
     if cpu_cores == 1:
         data = pd.DataFrame()
@@ -135,8 +150,9 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                 subject_info_df = process_subject(data, params, cpu_cores)
                 data = pd.concat([data, subject_info_df], ignore_index=True)
 
-        data =  extract_longitudinal_info(config_file, data, dataset_name)
-        return data
+        data = extract_longitudinal_info(config_file, data, dataset_name)
+
+        return data.sort_values(by="ID")
 
     if cpu_cores > 1:
 
@@ -170,9 +186,8 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
         data = data.sort_values(by=data.columns[0]).reset_index(drop=True)
         data = extract_longitudinal_info(config_file, data, dataset_name)
-        return data
 
-    raise ValueError("Invalid cpu_cores value in feature_extractor.yml file. Remove it or set it to greater than 0")
+        return data.sort_values(by="ID")
 
 
 def store_subject_information(

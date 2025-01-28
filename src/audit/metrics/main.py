@@ -24,6 +24,19 @@ CUSTOM METRICS
 """
 
 
+@logger.catch
+def check_multiprocessing(config_file):
+    cpu_cores = config_file.get("cpu_cores")
+    if cpu_cores is None or cpu_cores == "None":
+        logger.info("cpu_cores not specified or invalid in metric_extractor.yml file, defaulting to os.cpu_count()")
+        cpu_cores = os.cpu_count()
+    if not isinstance(cpu_cores, int) or cpu_cores <= 0:
+        logger.info(f"Invalid cpu_cores value: {cpu_cores} in metric_extractor.yml file, defaulting to os.cpu_count()")
+        cpu_cores = os.cpu_count()
+    logger.info(f"Using {cpu_cores} CPU cores for processing")
+    return cpu_cores
+
+
 def initializer(shared_df, lock):
     """Initialize shared variables for multiprocessing"""
     global shared_dataframe, dataframe_lock
@@ -87,7 +100,7 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
     # load paths to predictions
     models = config_file["model_predictions_paths"]
     raw_metrics = pd.DataFrame()
-    cpu_cores = config_file.get("cpu_cores", os.cpu_count())
+    cpu_cores = check_multiprocessing(config_file)
 
     if cpu_cores == 1:
         for model_name, path_predictions in models.items():
@@ -115,8 +128,8 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
                     raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
 
             logger.info(f"Finishing metric extraction for model {model_name}")
-        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
-        return raw_metrics
+
+        return raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
 
     if cpu_cores > 1:
 
@@ -153,10 +166,7 @@ def extract_custom_metrics(config_file) -> pd.DataFrame:
 
                 logger.info(f"Finishing metric extraction for model {model_name}")
 
-        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
-        return raw_metrics
-
-    raise ValueError("Invalid cpu_cores value in metric_extractor.yml file. Remove it or set it to greater than 0")
+        return raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
 
 
 """

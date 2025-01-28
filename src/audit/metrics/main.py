@@ -9,6 +9,7 @@ from colorama import Fore
 from loguru import logger
 from pymia.evaluation.metric import metric
 from pymia.evaluation.writer import CSVStatisticsWriter
+from multiprocessing import Pool, Manager, Lock
 
 from audit.metrics.segmentation_metrics import calculate_metrics
 from audit.metrics.segmentation_metrics import one_hot_encoding
@@ -23,64 +24,139 @@ CUSTOM METRICS
 """
 
 
+def initializer(shared_df, lock):
+    """Initialize shared variables for multiprocessing"""
+    global shared_dataframe, dataframe_lock
+    shared_dataframe = shared_df
+    dataframe_lock = lock
+
+
+def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.DataFrame:
+    """Process a single subject"""
+    path_ground_truth_dataset = params["path_ground_truth_dataset"]
+    path_predictions = params["path_predictions"]
+    numeric_label = params["numeric_label"]
+    subject_id = params["subject_id"]
+    label_names = params["label_names"]
+    metrics_to_extract = params["metrics_to_extract"]
+    model_name = params["model_name"]
+
+    # read ground truth segmentation and prediction
+    gt = load_nii_by_subject_id(root_dir=path_ground_truth_dataset, subject_id=subject_id, as_array=True)
+    pred = load_nii_by_subject_id(root_dir=path_predictions, subject_id=subject_id, seq="_pred", as_array=True)
+    spacing = get_spacing(load_nii_by_subject_id(path_predictions, subject_id, seq="_pred"))
+
+    # making the segmentations binary (one hot encoding for each region)
+    gt = one_hot_encoding(gt, numeric_label)
+    pred = one_hot_encoding(pred, numeric_label)
+
+    # compute metrics
+    metrics = calculate_metrics(
+        ground_truth=gt,
+        segmentation=pred,
+        subject=subject_id,
+        regions=label_names,
+        metrics=metrics_to_extract,
+        spacing=spacing
+    )
+
+    # from list of dict to dataframe
+    subject_info_df = pd.DataFrame(metrics)
+
+    # add model info
+    subject_info_df["model"] = model_name
+
+    if cpu_cores == 1:
+        return subject_info_df
+
+    with dataframe_lock:
+        data[subject_id] = subject_info_df
+
+    return data
+
+
 @logger.catch
 def extract_custom_metrics(config_file) -> pd.DataFrame:
-    label_names, numeric_label = (
-        list(config_file["labels"].keys()),
-        list(config_file["labels"].values()),
-    )
+    label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
 
     # load paths to test data
     path_ground_truth_dataset = config_file["data_path"]
     metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
     subjects_list = list_dirs(path_ground_truth_dataset)
 
-    # initializing output metrics
-    raw_metrics = pd.DataFrame()
-
     # load paths to predictions
     models = config_file["model_predictions_paths"]
-    for model_name, path_predictions in models.items():
-        fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
-        logger.info(f"Starting metric extraction for model {model_name}")
+    raw_metrics = pd.DataFrame()
+    cpu_cores = config_file.get("cpu_cores", os.cpu_count())
 
-        # loop over all the elements in the root_dir folder
-        with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
-            for n, ID in enumerate(subjects_list):
-                pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{ID}{Fore.CYAN}")
-                pbar.update(1)
+    if cpu_cores == 1:
+        for model_name, path_predictions in models.items():
+            fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
+            logger.info(f"Starting metric extraction for model {model_name}")
 
-                # read ground truth segmentation and prediction
-                gt = load_nii_by_subject_id(root_dir=path_ground_truth_dataset, subject_id=ID, as_array=True)
-                pred = load_nii_by_subject_id(root_dir=path_predictions, subject_id=ID, seq="_pred", as_array=True)
-                spacing = get_spacing(load_nii_by_subject_id(path_predictions, ID, seq="_pred"))
+            # loop over all the elements in the root_dir folder
+            with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+                for subject_id in subjects_list:
+                    pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
+                    pbar.update(1)
 
-                # making the segmentations binary (one hot encoding for each region)
-                gt = one_hot_encoding(gt, numeric_label)
-                pred = one_hot_encoding(pred, numeric_label)
+                    params = {
+                        "path_ground_truth_dataset": path_ground_truth_dataset,
+                        "path_predictions": path_predictions,
+                        "numeric_label": numeric_label,
+                        "subject_id": subject_id,
+                        "label_names": label_names,
+                        "metrics_to_extract": metrics_to_extract,
+                        "model_name": model_name
+                    }
 
-                # compute metrics
-                metrics = calculate_metrics(
-                    ground_truth=gt,
-                    segmentation=pred,
-                    subject=ID,
-                    regions=label_names,
-                    metrics=metrics_to_extract,
-                    spacing=spacing
-                )
+                    data = pd.DataFrame()
+                    subject_info_df = process_subject(data, params, cpu_cores)
+                    raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
 
-                # from list of dict to dataframe
-                subject_info_df = pd.DataFrame(metrics)
+            logger.info(f"Finishing metric extraction for model {model_name}")
+        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
+        return raw_metrics
 
-                # add model info
-                subject_info_df["model"] = model_name
+    if cpu_cores > 1:
 
-                # Add info to the main df
-                raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
+        manager = Manager()
+        shared_data = manager.dict()
+        lock = Lock()
 
-        logger.info(f"Finishing metric extraction for model {model_name}")
+        with Pool(processes=cpu_cores, initializer=initializer, initargs=(shared_data, lock)) as pool:
+            for model_name, path_predictions in models.items():
+                fancy_print(f"\nStarting metric extraction for model {model_name}", Fore.LIGHTMAGENTA_EX, "✨")
+                logger.info(f"Starting metric extraction for model {model_name}")
 
-    return raw_metrics
+                tasks = []
+                for subject_id in subjects_list:
+                    params = {
+                        "path_ground_truth_dataset": path_ground_truth_dataset,
+                        "path_predictions": path_predictions,
+                        "numeric_label": numeric_label,
+                        "subject_id": subject_id,
+                        "label_names": label_names,
+                        "metrics_to_extract": metrics_to_extract,
+                        "model_name": model_name
+                    }
+
+                    tasks.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
+
+                with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
+                    for task in tasks:
+                        task.wait()
+                        pbar.update(1)
+
+                for subject_id, subject_info_df in shared_data.items():
+                    raw_metrics = pd.concat([raw_metrics, subject_info_df], ignore_index=True)
+
+                logger.info(f"Finishing metric extraction for model {model_name}")
+
+        raw_metrics = raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
+        return raw_metrics
+
+    raise ValueError("Invalid cpu_cores value in metric_extractor.yml file. Remove it or set it to greater than 0")
 
 
 """

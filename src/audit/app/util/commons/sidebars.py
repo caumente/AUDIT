@@ -71,6 +71,8 @@ def setup_sidebar_pairwise_models(data, selected_set):
     with st.sidebar.expander("Models", expanded=True):
         # models_available = [capitalizer(pretty_string(m)) for m in data[data.set == selected_set].model.unique()]
         models_available = data[data.set == selected_set].model.unique()
+        if len(models_available) < 2:
+            st.error("Pairwise comparison requires metrics from at least two different models", icon="🚨")
         baseline_model = st.selectbox("Select the baseline model:", options=models_available, index=0)
         benchmark_model = st.selectbox("Select the benchmark model:", options=models_available, index=1)
         if baseline_model == benchmark_model:

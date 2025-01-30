@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 import streamlit as st
 from PIL import Image
+from streamlit_theme import st_theme
 
 from audit.utils.commons.file_manager import load_config_file
 from audit.app.util.pages.Home_Page import HomePage
@@ -58,6 +59,9 @@ class AUDIT:
         # Resolve the absolute path for the logo
         base_dir = Path(__file__).resolve().parent
         audit_logo_path = base_dir / "util/images/AUDIT_transparent.png"
+        theme = st_theme(key="app_theme")
+        if theme is not None and theme.get("base", None) == "dark":
+            audit_logo_path = base_dir / "util/images/AUDIT_DM_transparent.png"
 
         # Load and display the logo
         if audit_logo_path.exists():

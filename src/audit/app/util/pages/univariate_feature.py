@@ -25,7 +25,6 @@ class UnivariateFeature(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = UnivariatePage()
-        self.template = "light"
 
     def run(self):
         theme = st_theme(key="univariate_theme")

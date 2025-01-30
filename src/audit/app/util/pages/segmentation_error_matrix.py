@@ -1,4 +1,5 @@
 import os
+from streamlit_theme import st_theme
 
 import numpy as np
 import streamlit as st
@@ -9,7 +10,7 @@ from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
 from audit.metrics.error_matrix import errors_per_class, normalize_matrix_per_row
 from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap
 from audit.utils.sequences.sequences import load_nii_by_subject_id
-from audit.visualization.confusion_matrices import plt_confusion_matrix_plotly
+from audit.visualization.confusion_matrices import plt_confusion_matrix
 
 
 class SegmentationErrorMatrix(BasePage):
@@ -18,6 +19,10 @@ class SegmentationErrorMatrix(BasePage):
         self.descriptions = SegmentationErrorMatrixPage()
 
     def run(self):
+        theme = st_theme(key="univariate_theme")
+        if theme is not None:
+            self.template = theme.get("base")
+
         # Load configuration
         labels_dict = self.config.get("labels")
         predictions = self.config.get("predictions", {})
@@ -70,8 +75,7 @@ class SegmentationErrorMatrix(BasePage):
 
         return selected_dataset, selected_model, selected_id, ground_truth_path, predictions_path, subjects_in_path
 
-    @staticmethod
-    def visualize_confusion_matrix(cm, classes, normalized):
+    def visualize_confusion_matrix(self, cm, classes, normalized):
         """
         Visualize the confusion matrix using Plotly.
 
@@ -80,7 +84,8 @@ class SegmentationErrorMatrix(BasePage):
             classes (list): List of class labels.
             normalized (bool): Whether the confusion matrix is normalized.
         """
-        fig = plt_confusion_matrix_plotly(cm, classes, normalized)
+
+        fig = plt_confusion_matrix(cm, classes, theme=self.template, normalized=normalized)
         st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
     @staticmethod

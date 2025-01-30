@@ -11,7 +11,7 @@ from audit.app.util.commons.sidebars import setup_highlight_subject
 from audit.app.util.commons.sidebars import setup_histogram_options
 from audit.app.util.commons.sidebars import setup_sidebar_features
 from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
-from audit.app.util.commons.sidebars import setup_sidebar_plot_customization
+from audit.app.util.commons.sidebars import update_plot_customization
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import UnivariatePage
 from audit.utils.commons.file_manager import read_datasets_from_dict
@@ -124,24 +124,7 @@ class UnivariateFeatureAnalysis(BasePage):
 
         # Column 2: Customization panel
         with col2:
-            show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key="boxplot")
-
-            # Update the legend layout
-            boxplot_fig.update_layout(
-                    legend=dict(
-                        x=leg_x,
-                        y=leg_y,
-                        xanchor=leg_xanc,
-                        yanchor=leg_yanc,
-                    )
-            )
-
-            boxplot_fig.update_layout(
-                showlegend=show_leg,  # Show or hide the legend
-                xaxis_title=xlabel,
-                yaxis_title=ylabel,
-                title=dict(text=title, x=0.5),  # Center the title
-            )
+            update_plot_customization(boxplot_fig, key="boxplot")
 
         # Render the adjusted plot in the main column
         with col1:
@@ -176,44 +159,27 @@ class UnivariateFeatureAnalysis(BasePage):
         # Column 1: Display the plot
         with col1:
             try:
-                distplot = custom_distplot(data, x_axis=feature, color_var="set", histnorm="probability",
+                distplot_fig = custom_distplot(data, x_axis=feature, color_var="set", histnorm="probability",
                                            template=self.template)
             except np.linalg.LinAlgError as e:
                 st.write(":red[Error generating the histogram: KDE failed due to singular covariance matrix.]")
                 st.write(":red[This may happen when the data has low variance or is nearly constant.]")
                 st.write(":red[Consider removing filters or datasets]")
-                distplot = None
+                distplot_fig = None
             except Exception as e:
                 st.write(":red[An unexpected error occurred while generating the histogram.]")
                 st.write(f"Details: {str(e)}")
-                distplot = None
+                distplot_fig = None
 
         # Column 2: Customization panel
         with col2:
-            show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key="distplot")
-            if distplot is not None:
-                # Update the legend layout
-                distplot.update_layout(
-                    legend=dict(
-                        x=leg_x,
-                        y=leg_y,
-                        xanchor=leg_xanc,
-                        yanchor=leg_yanc,
-                    )
-                )
-
-                distplot.update_layout(
-                    showlegend=show_leg,  # Show or hide the legend
-                    xaxis_title=xlabel,
-                    yaxis_title=ylabel,
-                    title=dict(text=title, x=0.5),  # Center the title
-                )
+            update_plot_customization(distplot_fig, key="distplot")
 
         # Render the adjusted plot in the main column
         with col1:
-            if distplot is not None:
-                st.plotly_chart(distplot, theme="streamlit", use_container_width=True)
-                download_plot(distplot, label="Data Distribution", filename="distribution")
+            if distplot_fig is not None:
+                st.plotly_chart(distplot_fig, theme="streamlit", use_container_width=True)
+                download_plot(distplot_fig, label="Data Distribution", filename="distribution")
                 st.markdown(self.descriptions.description)
 
     def render_histogram(self, data, feature, n_bins, bins_size):
@@ -240,39 +206,22 @@ class UnivariateFeatureAnalysis(BasePage):
         with col1:
             histogram = None
             if n_bins:
-                histogram = custom_histogram(data, x_axis=feature, color_var="set", n_bins=n_bins, template=self.template)
+                histogram_fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=n_bins, template=self.template)
             elif bins_size:
-                histogram = custom_histogram(data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size,
-                                       template=self.template)
+                histogram_fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size,
+                                                 template=self.template)
             else:
                 st.write(":red[Please, select the number of bins or bins size]")
 
         # Column 2: Customization panel
         with col2:
-            show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key="histogram")
-            if histogram is not None:
-                # Update the legend layout
-                histogram.update_layout(
-                    legend=dict(
-                        x=leg_x,
-                        y=leg_y,
-                        xanchor=leg_xanc,
-                        yanchor=leg_yanc,
-                    )
-                )
-
-                histogram.update_layout(
-                    showlegend=show_leg,  # Show or hide the legend
-                    xaxis_title=xlabel,
-                    yaxis_title=ylabel,
-                    title=dict(text=title, x=0.5),  # Center the title
-                )
+            update_plot_customization(histogram_fig, key="histogram")
 
         # Render the adjusted plot in the main column
         with col1:
-            if histogram is not None:
-                st.plotly_chart(histogram, theme="streamlit", use_container_width=True)
-                download_plot(histogram, label="Data Distribution", filename="distribution")
+            if histogram_fig is not None:
+                st.plotly_chart(histogram_fig, theme="streamlit", use_container_width=True)
+                download_plot(histogram_fig, label="Data Distribution", filename="distribution")
                 st.markdown(self.descriptions.description)
 
     def histogram_logic(self, data, plot_type, feature, n_bins, bins_size, customization='Standard visualization'):

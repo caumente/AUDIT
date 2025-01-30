@@ -359,3 +359,27 @@ def setup_sidebar_plot_customization(key=None):
         plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
 
     return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title
+
+
+def update_plot_customization(fig, key=None):
+    show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key=key)
+
+    if fig is not None:
+        # Update the legend layout
+        fig.update_layout(
+            legend=dict(
+                x=leg_x,
+                y=leg_y,
+                xanchor=leg_xanc,
+                yanchor=leg_yanc,
+            )
+        )
+
+        fig.update_layout(
+            showlegend=show_leg,  # Show or hide the legend
+            xaxis_title=xlabel,
+            yaxis_title=ylabel,
+            title=dict(text=title, x=0.5),  # Center the title
+        )
+
+    return fig

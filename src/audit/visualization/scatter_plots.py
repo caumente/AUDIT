@@ -75,6 +75,7 @@ def multivariate_features_highlighter(
     log_y=False,
     legend_title=None,
     highlight_point=None,
+    template='light'
 ):
 
     if y_label is None:
@@ -85,6 +86,8 @@ def multivariate_features_highlighter(
 
     if legend_title is None:
         legend_title = f"{pretty_string(color)}"
+
+    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
 
     # define the scatterplot
     if color == "Dataset":
@@ -117,7 +120,7 @@ def multivariate_features_highlighter(
         )
 
     # set up light_theme
-    fig.update_layout(template=constants.light_theme, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
+    fig.update_layout(template=template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
 
     if highlight_point is not None:
         point = data[data.ID == highlight_point]

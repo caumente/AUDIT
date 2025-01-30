@@ -49,8 +49,8 @@ def multivariate_features(
             )
         )
 
-    # set up template
-    fig.update_layout(template=constants.template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
+    # set up light_theme
+    fig.update_layout(template=constants.light_theme, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
 
     # set up traces and markers
     fig.update_traces(
@@ -116,8 +116,8 @@ def multivariate_features_highlighter(
             )
         )
 
-    # set up template
-    fig.update_layout(template=constants.template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
+    # set up light_theme
+    fig.update_layout(template=constants.light_theme, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
 
     if highlight_point is not None:
         point = data[data.ID == highlight_point]
@@ -181,7 +181,7 @@ def multivariate_metric_feature(
     )
 
     fig.update_layout(
-        template=constants.template,
+        template=constants.light_theme,
         height=600,
         width=1000,
         showlegend=True,
@@ -209,13 +209,13 @@ def multivariate_metric_feature(
     if highlighted_subjects is not None:
         highlighted_data = data[data["ID"].isin(highlighted_subjects)]
 
-        # Prepare custom data for hover template
+        # Prepare custom data for hover light_theme
         customdata = ["ID", x_axis, y_axis, highlighted_data["model"].apply(pretty_string).apply(capitalizer)]
 
         # Define marker properties
         marker_props = dict(size=12, line=dict(width=2, color="#444"), color="#e31231")
 
-        # Define hover template
+        # Define hover light_theme
         hover_template = (
             "ID: %{customdata[0]}<br>"
             f"{x_label}:" + "%{customdata[1]:,.2f}<br>"

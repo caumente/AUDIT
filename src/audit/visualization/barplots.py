@@ -25,7 +25,7 @@ def aggregated_pairwise_model_performance(data, improvement_type, selected_metri
     )
     fig.update_xaxes(showline=False)
     fig.update_traces(width=constants.bar_width)
-    fig.update_layout(template=constants.template, height=300, width=800, showlegend=False, margin=dict(b=20, t=20))
+    fig.update_layout(template=constants.light_theme, height=300, width=800, showlegend=False, margin=dict(b=20, t=20))
 
     return fig
 
@@ -61,7 +61,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
         fig.update_xaxes(showline=False)
         fig.update_traces(width=constants.bar_width)
         fig.update_layout(
-            template=constants.template,
+            template=constants.light_theme,
             height=300,
             width=800,
             showlegend=False,

@@ -167,7 +167,7 @@ def setup_histogram_options(plot_type):
                 )
             elif option == "Bins size":
                 bins_size = st.number_input(
-                    "Select bins size", min_value=1, max_value=None, value=1, step=1, placeholder="Type a number..."
+                    "Select bins size", min_value=1, max_value=None, value=1000, step=1, placeholder="Type a number..."
                 )
 
     return n_bins, bins_size
@@ -333,16 +333,17 @@ def setup_sidebar_single_subjects(data):
     return subject_selected
 
 
-def setup_sidebar_plot_customization():
+def setup_sidebar_plot_customization(key=None):
     with st.expander("Customize Plot", expanded=False):
         # Legend position selection, only shown if "Show Legend" is checked
-        show_legend = st.checkbox("Show Legend", value=True)
+        show_legend = st.checkbox("Show Legend", value=True, key=f"{key}_check")
         legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor = None, None, None, None, None
         if show_legend:
             legend_position = st.selectbox(
                 "Legend Position",
                 options=["top left", "top right", "bottom left", "bottom right"],
                 index=1,
+                key=f"{key}_select"
             )
         if legend_position:
             legend_x = 0 if "left" in legend_position else 1
@@ -351,10 +352,10 @@ def setup_sidebar_plot_customization():
             legend_yanchor = "top" if "top" in legend_position else "bottom"
 
         # Customize axis labels
-        x_axis_label = st.text_input("X-axis Label", value="Feature name")
-        y_axis_label = st.text_input("Y-axis Label", value="Datasets")
+        x_axis_label = st.text_input("X-axis Label", value="Feature name", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="Datasets", key=f"{key}_ylab")
 
         # Customize the plot title
-        plot_title = st.text_input("Plot Title", value=f"Plot")
+        plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
 
     return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title

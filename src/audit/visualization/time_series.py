@@ -64,7 +64,7 @@ constants = Dashboard()
 #     # Layout general
 #     fig.update_layout(
 #         title="Longitudinal Analysis of Lesion Sizes",
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -120,7 +120,7 @@ constants = Dashboard()
 #         )
 #
 #     fig.update_layout(
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -178,7 +178,7 @@ constants = Dashboard()
 #         )
 #
 #     fig.update_layout(
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -317,7 +317,7 @@ def plot_longitudinal_lesions(df):
     # Finalize layout
     fig.update_layout(
         title="",
-        template=constants.template,
+        template=constants.light_theme,
         height=600,
         width=1000,
         yaxis_title="Lesion Size (mm³)",

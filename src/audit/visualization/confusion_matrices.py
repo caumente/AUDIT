@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
-from matplotlib.colors import LinearSegmentedColormap
 
 
 def create_custom_cmap(theme='light'):

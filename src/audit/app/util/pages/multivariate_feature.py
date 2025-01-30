@@ -9,12 +9,12 @@ from audit.app.util.commons.sidebars import setup_highlight_subject
 from audit.app.util.commons.sidebars import setup_sidebar_color
 from audit.app.util.commons.sidebars import setup_sidebar_features
 from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
-from audit.app.util.commons.sidebars import update_plot_customization
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import MultivariatePage
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.scatter_plots import multivariate_features_highlighter
+from audit.visualization.commons import update_plot_customization
 
 
 class MultivariateFeature(BasePage):
@@ -72,7 +72,6 @@ class MultivariateFeature(BasePage):
         return selected_points, highlight_subject
 
     def render_scatter_plot(self, data, x_axis, y_axis, color_axis):
-        st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
         highlight_subject = setup_highlight_subject(data)
 
         fig = multivariate_features_highlighter(
@@ -93,7 +92,6 @@ class MultivariateFeature(BasePage):
         return selected_points, highlight_subject
 
     def render_scatter_plot_with_customization(self, data, x_axis, y_axis, color_axis):
-        st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
         highlight_subject = setup_highlight_subject(data)
 
         # Create a layout with two columns: one for the plot and another for the customization panel
@@ -156,8 +154,11 @@ class MultivariateFeature(BasePage):
                     st.write(f"Opened case {selected_case} in ITK-SNAP")
 
     def handle_selection(self, data, datasets_root_path, x_axis, y_axis, color_axis, labels):
-
-        customization_scatter = st.selectbox(label="Customize visualization",
+        col1, col2 = st.columns([2, 2], gap="small")
+        with col1:
+            st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
+        with col2:
+            customization_scatter = st.selectbox(label="Customize visualization",
                                              options=["Standard visualization", "Custom visualization"], index=0,
                                              key="scatter")
         selected_points, highlight_subject = self.scatter_plot_logic(data, x_axis, y_axis, color_axis, customization_scatter)

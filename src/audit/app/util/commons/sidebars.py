@@ -361,25 +361,19 @@ def setup_sidebar_plot_customization(key=None):
     return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title
 
 
-def update_plot_customization(fig, key=None):
-    show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key=key)
+def setup_sidebar_matrix_customization(classes, key=None):
+    with st.expander("Customize Confusion Matrix Plot", expanded=False):
 
-    if fig is not None:
-        # Update the legend layout
-        fig.update_layout(
-            legend=dict(
-                x=leg_x,
-                y=leg_y,
-                xanchor=leg_xanc,
-                yanchor=leg_yanc,
-            )
-        )
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Predicted Labels", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="True Labels", key=f"{key}_ylab")
 
-        fig.update_layout(
-            showlegend=show_leg,  # Show or hide the legend
-            xaxis_title=xlabel,
-            yaxis_title=ylabel,
-            title=dict(text=title, x=0.5),  # Center the title
-        )
+        # Allow free text input for each class label
+        class_labels = []
+        for cls in list(classes):
+            class_label = st.text_input(f"Class {cls} label", value=f"{cls}", key=f"{key}_{cls}_label")
+            class_labels.append(class_label)
 
-    return fig
+    return x_axis_label, y_axis_label, class_labels
+
+

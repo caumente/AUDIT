@@ -5,7 +5,7 @@ import streamlit as st
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
 from audit.app.util.commons.sidebars import setup_sidebar_single_subjects

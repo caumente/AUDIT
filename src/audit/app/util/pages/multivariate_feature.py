@@ -2,7 +2,7 @@ import os
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_highlight_subject
@@ -16,7 +16,7 @@ from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.scatter_plots import multivariate_features_highlighter
 
 
-class MultivariateFeatureAnalysis(BasePage):
+class MultivariateFeature(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = MultivariatePage()

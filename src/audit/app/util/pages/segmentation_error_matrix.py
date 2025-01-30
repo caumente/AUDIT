@@ -4,7 +4,7 @@ import numpy as np
 import streamlit as st
 from stqdm import stqdm
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
 from audit.metrics.error_matrix import errors_per_class, normalize_matrix_per_row
 from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap

@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_sidebar_longitudinal_subject
 from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
@@ -12,7 +12,7 @@ from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.visualization.time_series import plot_longitudinal_lesions
 
 
-class LongitudinalMeasurements(BasePage):
+class Longitudinal(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = LongitudinalAnalysisPage()

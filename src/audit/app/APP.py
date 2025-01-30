@@ -9,15 +9,15 @@ from PIL import Image
 from streamlit_theme import st_theme
 
 from audit.utils.commons.file_manager import load_config_file
-from audit.app.util.pages.Home_Page import HomePage
-from audit.app.util.pages.Longitudinal_Measurements import LongitudinalMeasurements
-from audit.app.util.pages.Model_Performance_Analysis import ModelPerformanceAnalysis
-from audit.app.util.pages.Multi_Model_Performance_Comparison import MultiModelPerformanceComparison
-from audit.app.util.pages.Multivariate_Feature_Analysis import MultivariateFeatureAnalysis
-from audit.app.util.pages.Pairwise_Model_Performance_Comparison import PairwiseModelPerformanceComparison
-from audit.app.util.pages.Segmentation_Error_Matrix import SegmentationErrorMatrix
-from audit.app.util.pages.Subjects_Exploration import SubjectsExploration
-from audit.app.util.pages.Univariate_Feature_Analysis import UnivariateFeatureAnalysis
+from audit.app.util.pages.home_page import HomePage
+from audit.app.util.pages.longitudinal import Longitudinal
+from audit.app.util.pages.single_model_performance import SingleModelPerformance
+from audit.app.util.pages.multi_model_performance import MultiModelPerformance
+from audit.app.util.pages.multivariate_feature import MultivariateFeature
+from audit.app.util.pages.pairwise_model_performance import PairwiseModelPerformance
+from audit.app.util.pages.segmentation_error_matrix import SegmentationErrorMatrix
+from audit.app.util.pages.subject_exploration import SubjectsExploration
+from audit.app.util.pages.univariate_feature import UnivariateFeature
 from audit.app.util.constants.features import Features
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -30,15 +30,15 @@ class AUDIT:
 
         # Instantiate pages
         self.pages = [
-            {"title": "Home Page", "page": HomePage(config)},
-            {"title": "Univariate Analysis", "page": UnivariateFeatureAnalysis(config)},
-            {"title": "Multivariate Analysis", "page": MultivariateFeatureAnalysis(config)},
-            {"title": "Segmentation Error Matrix", "page": SegmentationErrorMatrix(config)},
-            {"title": "Model Performance Analysis", "page": ModelPerformanceAnalysis(config)},
-            {"title": "Pairwise Model Performance Comparison", "page": PairwiseModelPerformanceComparison(config)},
-            {"title": "Multi-model Performance Comparison", "page": MultiModelPerformanceComparison(config)},
-            {"title": "Longitudinal Measurements", "page": LongitudinalMeasurements(config)},
-            {"title": "Subjects Exploration", "page": SubjectsExploration(config)}
+            {"title": "Home page", "page": HomePage(config)},
+            {"title": "Univariate analysis", "page": UnivariateFeature(config)},
+            {"title": "Multivariate analysis", "page": MultivariateFeature(config)},
+            {"title": "Segmentation error matrix", "page": SegmentationErrorMatrix(config)},
+            {"title": "Single model performance", "page": SingleModelPerformance(config)},
+            {"title": "Pairwise model performance", "page": PairwiseModelPerformance(config)},
+            {"title": "Multi-model performance", "page": MultiModelPerformance(config)},
+            {"title": "Longitudinal analysis", "page": Longitudinal(config)},
+            {"title": "Subjects exploration", "page": SubjectsExploration(config)}
         ]
 
     def add_page(self, title, page_instance):

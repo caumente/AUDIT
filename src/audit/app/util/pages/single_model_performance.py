@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from streamlit_plotly_events import plotly_events
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import dataset_sanity_check
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_aggregation_button
@@ -19,7 +19,7 @@ from audit.utils.commons.strings import pretty_string
 from audit.visualization.scatter_plots import multivariate_metric_feature
 
 
-class ModelPerformanceAnalysis(BasePage):
+class SingleModelPerformance(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = ModelPerformanceAnalysisPage()

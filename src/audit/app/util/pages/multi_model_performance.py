@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_aggregation_button
 from audit.app.util.commons.sidebars import setup_sidebar_multi_metrics
@@ -15,7 +15,7 @@ from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.visualization.boxplot import models_performance_boxplot
 
 
-class MultiModelPerformanceComparison(BasePage):
+class MultiModelPerformance(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = MultiModelPerformanceComparisonsPage()

@@ -3,7 +3,7 @@ import streamlit as st
 from streamlit_plotly_events import plotly_events
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_filtering_options
@@ -21,7 +21,7 @@ from audit.visualization.histograms import custom_distplot
 from audit.visualization.histograms import custom_histogram
 
 
-class UnivariateFeatureAnalysis(BasePage):
+class UnivariateFeature(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = UnivariatePage()

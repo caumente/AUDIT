@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 from streamlit_plotly_events import plotly_events
+from streamlit_theme import st_theme
 
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import dataset_sanity_check
@@ -17,6 +18,7 @@ from audit.app.util.commons.utils import download_plot
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
 from audit.visualization.scatter_plots import multivariate_metric_feature
+from audit.visualization.commons import update_plot_customization
 
 
 class SingleModelPerformance(BasePage):
@@ -26,6 +28,10 @@ class SingleModelPerformance(BasePage):
         self.metrics = Metrics().get_metrics()
 
     def run(self):
+        theme = st_theme(key="single_model_theme")
+        if theme is not None:
+            self.template = theme.get("base")
+
         # Load configuration file
         metrics_paths = self.config.get("metrics")
         features_paths = self.config.get("features")
@@ -37,8 +43,15 @@ class SingleModelPerformance(BasePage):
         # Load the data
         features_df = read_datasets_from_dict(features_paths)
         metrics_df = read_datasets_from_dict(metrics_paths)
-        agg = setup_aggregation_button()
-        st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
+
+        col1, col2 = st.columns([2, 2], gap="small")
+        with col1:
+            agg = setup_aggregation_button()
+            st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
+        with col2:
+            customization_scatter = st.selectbox(label="Customize visualization",
+                                                 options=["Standard visualization", "Custom visualization"], index=0,
+                                                 key="scatter_metric")
         merged_data = self.merge_features_and_metrics(features=features_df, metrics=metrics_df, aggregate=agg)
 
         # Setup sidebar
@@ -50,11 +63,12 @@ class SingleModelPerformance(BasePage):
         else:
             df = processing_data(merged_data, sets=selected_sets, models=selected_model, regions=selected_regions,
                                  features=['ID', 'model', feature, self.metrics.get(metric, None), 'set', 'region'])
-            self.visualize_data(
+            self.scatter_plot_logic(
                 data=df,
                 x_axis=feature,
                 y_axis=metric,
                 aggregated=agg,
+                customization=customization_scatter
             )
 
             st.markdown(self.descriptions.description)
@@ -99,12 +113,41 @@ class SingleModelPerformance(BasePage):
             color="Dataset",
             facet_col="region" if not aggregated else None,
             highlighted_subjects=st.session_state.highlighted_subjects,
+            template=self.template
         )
         if not aggregated:
             fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
         selected_points = plotly_events(fig, click_event=True, override_height=None)
         download_plot(fig, label="Univariate Analysis", filename="univariate_analysis")
+
+        return selected_points
+
+    def render_scatter_plot_with_customization(self, data, x_axis, y_axis, aggregated):
+        # Create a layout with two columns: one for the plot and another for the customization panel
+        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+
+        # Column 1: Display the plot
+        with col1:
+            scatter_metric = multivariate_metric_feature(
+                data=data,
+                x_axis=x_axis,
+                y_axis=self.metrics.get(y_axis),
+                x_label=pretty_string(x_axis),
+                y_label=y_axis,
+                color="Dataset",
+                facet_col="region" if not aggregated else None,
+                highlighted_subjects=st.session_state.highlighted_subjects,
+                template=self.template
+            )
+            if not aggregated:
+                scatter_metric.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+        with col2:
+            update_plot_customization(scatter_metric, key="scatter_metric")
+
+        with col1:
+            selected_points = plotly_events(scatter_metric, click_event=True, override_height=None)
+            download_plot(scatter_metric, label="Univariate Analysis", filename="univariate_analysis")
 
         return selected_points
 
@@ -134,14 +177,17 @@ class SingleModelPerformance(BasePage):
                 "'Reset highlighted cases' button below.]"
             )
 
-    def visualize_data(self, data, x_axis, y_axis, aggregated):
+    def scatter_plot_logic(self, data, x_axis, y_axis, aggregated, customization):
 
         # Initialize session state for highlighted subjects
         if "highlighted_subjects" not in st.session_state:
             st.session_state.highlighted_subjects = []
             st.session_state.dict_cases = {}
 
-        selected_points = self.render_scatter_plot(data, x_axis, y_axis, aggregated)
+        if customization == 'Standard visualization':
+            selected_points = self.render_scatter_plot(data, x_axis, y_axis, aggregated)
+        else:
+            selected_points = self.render_scatter_plot_with_customization(data, x_axis, y_axis, aggregated)
 
         self.get_case_from_point(selected_points, data, aggregated)
 

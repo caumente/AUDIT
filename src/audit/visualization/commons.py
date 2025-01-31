@@ -3,11 +3,12 @@ from audit.app.util.commons.sidebars import setup_sidebar_matrix_customization
 
 
 def update_plot_customization(fig, key=None):
-    show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title = setup_sidebar_plot_customization(key=key)
+    show_leg, leg_pos, leg_x, leg_y, leg_xanc, leg_yanc, xlabel, ylabel, title, font_size = setup_sidebar_plot_customization(key=key)
 
     if fig is not None:
         # Update the legend layout
         fig.update_layout(
+            showlegend=show_leg,
             legend=dict(
                 x=leg_x,
                 y=leg_y,
@@ -15,14 +16,33 @@ def update_plot_customization(fig, key=None):
                 yanchor=leg_yanc,
             )
         )
-
+        # title
         fig.update_layout(
-            showlegend=show_leg,  # Show or hide the legend
-            xaxis_title=xlabel,
-            yaxis_title=ylabel,
-            title=dict(text=title, x=0.5),  # Center the title
+            title=dict(text=title, x=0.5),
+            title_font=dict(size=font_size)
         )
-
+        # axes
+        fig.for_each_xaxis(lambda x: x.update(title_text=xlabel))
+        fig.for_each_yaxis(lambda y: y.update(title_text=ylabel))
+        fig.update_layout(
+            xaxis=dict(
+                title_font=dict(size=font_size),  # Increase x-axis title font size
+                tickfont=dict(size=font_size)  # Increase x-axis tick font size
+            ),
+            yaxis=dict(
+                title_font=dict(size=font_size),  # Increase y-axis title font size
+                tickfont=dict(size=font_size)  # Increase y-axis tick font size
+            ),
+            legend=dict(
+                font=dict(size=font_size)  # Increase legend font size
+            )
+        )
+        # annotations
+        fig.update_layout(
+            annotations=[dict(
+                font=dict(size=font_size),
+            ) for anno in fig.layout.annotations]
+        )
     return fig
 
 

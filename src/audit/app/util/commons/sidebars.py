@@ -358,7 +358,10 @@ def setup_sidebar_plot_customization(key=None):
         # Customize the plot title
         plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
 
-    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title
+        # Customize the plot title
+        font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
+
+    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title, font_size
 
 
 def setup_sidebar_matrix_customization(classes, key=None):

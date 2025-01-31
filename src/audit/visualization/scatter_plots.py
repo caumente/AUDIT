@@ -158,6 +158,7 @@ def multivariate_metric_feature(
     color: str = "Dataset",
     facet_col: str = None,
     highlighted_subjects: list = None,
+    template='light'
 ):
 
     if y_label is None:
@@ -172,6 +173,7 @@ def multivariate_metric_feature(
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette
+    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
 
     fig = px.scatter(
         data,
@@ -179,19 +181,19 @@ def multivariate_metric_feature(
         y=y_axis,
         color=color_axis,
         facet_col=facet_col,
-        custom_data=["ID", x_axis, y_axis, data["model"].apply(pretty_string).apply(capitalizer)],
+        custom_data=["ID", x_axis, y_axis, data["model"]],
         color_discrete_sequence=color_palette,
     )
 
     fig.update_layout(
-        template=constants.light_theme,
+        template=template,
         height=600,
         width=1000,
         showlegend=True,
         xaxis_title=x_label,
         yaxis_title=y_label,
         legend_title=color,
-        # legend=dict(yanchor="top", xanchor="right")
+        legend=dict(yanchor="top", xanchor="right")
     )
 
     fig.for_each_xaxis(lambda x: x.update(title_text=x_label))
@@ -205,8 +207,6 @@ def multivariate_metric_feature(
         f"{y_label}: " + "%{customdata[2]:,.3f}<br>"
         "Model: %{customdata[3]}",
     )
-
-    # fig.for_each_yaxis(lambda y: pretty_string(y_label))
 
     # Highlight specific subjects
     if highlighted_subjects is not None:

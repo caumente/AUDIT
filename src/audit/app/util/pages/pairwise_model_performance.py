@@ -25,6 +25,7 @@ from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.visualization.barplots import aggregated_pairwise_model_performance
 from audit.visualization.barplots import individual_pairwise_model_performance
 from audit.visualization.histograms import plot_histogram
+from streamlit_theme import st_theme
 
 
 class PairwiseModelPerformance(BasePage):
@@ -34,6 +35,10 @@ class PairwiseModelPerformance(BasePage):
         self.metrics = Metrics()
 
     def run(self):
+        theme = st_theme(key="univariate_theme")
+        if theme is not None:
+            self.template = theme.get("base")
+
         # Load configuration files
         metrics_paths = self.config.get("metrics")
         features_paths = self.config.get("features")
@@ -132,8 +137,7 @@ class PairwiseModelPerformance(BasePage):
 
         return out
 
-    @staticmethod
-    def run_individualized(data, baseline_model, benchmark_model, improvement_type, selected_sorted, selected_order, num_max_subjects):
+    def run_individualized(self, data, baseline_model, benchmark_model, improvement_type, selected_sorted, selected_order, num_max_subjects):
         # Sort dataset
         l = data[data.region == 'Average'].sort_values(by=selected_sorted, ascending=selected_order)['ID']
         data['ID'] = pd.Categorical(data['ID'], categories=l, ordered=True)
@@ -148,13 +152,12 @@ class PairwiseModelPerformance(BasePage):
         if clip_low is not None and clip_up is not None:
             data[improvement_type] = data[improvement_type].clip(clip_low, clip_up)
 
-        all_figures = individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type)
+        all_figures = individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type, self.template)
         for fig in all_figures:
             st.plotly_chart(fig, theme="streamlit", use_container_width=False, scrolling=True)
 
-    @staticmethod
-    def run_aggregated(data, improvement_type, selected_metric, selected_set):
-        fig = aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set)
+    def run_aggregated(self, data, improvement_type, selected_metric, selected_set):
+        fig = aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set, self.template)
         st.plotly_chart(fig, theme="streamlit", use_container_width=False, scrolling=True)
         download_plot(fig, label="Aggregated Pairwise Model Performance", filename="agg_pairwise_model_performance")
 

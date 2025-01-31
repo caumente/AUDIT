@@ -87,7 +87,7 @@ def multivariate_features_highlighter(
     if legend_title is None:
         legend_title = f"{pretty_string(color)}"
 
-    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     # define the scatterplot
     if color == "Dataset":
@@ -173,7 +173,7 @@ def multivariate_metric_feature(
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette
-    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     fig = px.scatter(
         data,
@@ -205,7 +205,7 @@ def multivariate_metric_feature(
         hovertemplate="ID: %{customdata[0]}<br>"
         f"{x_label}: " + "%{customdata[1]:,.2f}<br>"
         f"{y_label}: " + "%{customdata[2]:,.3f}<br>"
-        "Model: %{customdata[3]}",
+        "Model: %{customdata[3]}<extra></extra>",
     )
 
     # Highlight specific subjects

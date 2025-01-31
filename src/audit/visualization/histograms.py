@@ -63,7 +63,7 @@ def custom_histogram(data, x_axis, color_var, n_bins, bins_size=None, y_label=No
         # Compute bin size
         bin_size = (data[x_axis].max() - data[x_axis].min()) / n_bins
 
-    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette
@@ -131,7 +131,7 @@ def custom_distplot(data, x_axis, color_var, y_label=None, x_label=None, histnor
     if x_label is None:
         x_label = f"{pretty_string(x_axis)}"
 
-    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette

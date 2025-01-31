@@ -85,7 +85,7 @@ def boxplot(data, x_axis, color_var, x_label=None, plot_type="Box"):
 def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", highlight_point=None, template='light'):
     if x_label is None:
         x_label = f"{pretty_string(x_axis)}"
-    template = constants.custom_dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     # Map each unique value in color_var to a color from the palette
     color_palette = constants.discrete_color_palette
@@ -121,7 +121,7 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
                     line_color=c,
                     hovertemplate="ID: %{customdata}<br>"
                     + pretty_string(x_axis)
-                    + ": %{x:,.2f}",  # Customize hover information
+                    + ": %{x:,.2f}<extra></extra>",  # Customize hover information
                 )
             )
         elif plot_type == "Box + Points":
@@ -137,7 +137,7 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
                     line_color=c,
                     hovertemplate="ID: %{customdata}<br>"
                     + pretty_string(x_axis)
-                    + ": %{x:,.2f}",  # Customize hover information
+                    + ": %{x:,.2f}<extra></extra>",  # Customize hover information
                 )
             )
         else:
@@ -153,7 +153,7 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
                     line_color=c,
                     hovertemplate="ID: %{customdata}<br>"
                     + pretty_string(x_axis)
-                    + ": %{x:,.2f}",  # Customize hover information
+                    + ": %{x:,.2f}<extra></extra>",  # Customize hover information
                 )
             )
 
@@ -168,6 +168,7 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
                 x=[highlight_x],
                 y=[highlight_y],
                 mode="markers",
+                name="",
                 showlegend=False,
                 marker=dict(color="#C70039", size=8, symbol="circle"),
                 hovertemplate=f"ID: {highlight_point}<br>" + pretty_string(x_axis) + ": %{x:,.2f}",

@@ -1,5 +1,6 @@
 from audit.app.util.commons.sidebars import setup_sidebar_plot_customization
 from audit.app.util.commons.sidebars import setup_sidebar_matrix_customization
+from audit.app.util.commons.sidebars import setup_sidebar_multimodel_plot
 
 
 def update_plot_customization(fig, key=None):
@@ -61,5 +62,39 @@ def update_segmentation_matrix_plot(fig, classes, key="matrix"):
             ticktext=class_labels,
             title_text=y_axis_label
         )
+
+    return fig
+
+
+def update_multimodel_plot(fig, classes, key=None):
+    show_leg, legend_position, leg_x, leg_y, leg_xanc, leg_yanc, class_labels, plot_title, font_size, ylabel, xlabel = setup_sidebar_multimodel_plot(classes, key=key)
+
+    if fig is not None:
+        # Update the legend layout
+        fig.update_layout(
+            showlegend=show_leg,
+            legend=dict(
+                x=leg_x,
+                y=leg_y,
+                xanchor=leg_xanc,
+                yanchor=leg_yanc,
+            )
+        )
+
+        # title
+        fig.update_layout(
+            title=dict(text=plot_title, x=0.5),
+            title_font=dict(size=font_size)
+        )
+
+        for idx, annotation in enumerate(fig.layout.annotations):
+            if idx < len(class_labels):
+                annotation.update(
+                    text=class_labels[idx],
+                    font=dict(size=font_size)
+                )
+
+        fig.for_each_xaxis(lambda x: x.update(title_text=xlabel))
+        fig.for_each_yaxis(lambda y: y.update(title_text=ylabel))
 
     return fig

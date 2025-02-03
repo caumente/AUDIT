@@ -192,10 +192,11 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
     return fig
 
 
-def models_performance_boxplot(data, points="outliers", aggregated=None):
+def models_performance_boxplot(data, points="outliers", aggregated=None, template='light'):
     facet_row, height = None, 500
     if not aggregated:
         facet_row, height = "region", 800
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     fig = px.box(
         data,
@@ -205,7 +206,7 @@ def models_performance_boxplot(data, points="outliers", aggregated=None):
         facet_row=facet_row,
         points=points,
         custom_data=["model", "metric", "score"],
-        title="Average models' performance" if aggregated else "Models' performance by region",
+        title="Average models performance" if aggregated else "Models performance by region",
         color_discrete_sequence=constants.discrete_color_palette,
     )
 
@@ -213,7 +214,7 @@ def models_performance_boxplot(data, points="outliers", aggregated=None):
     fig.update_xaxes(showline=False)
     fig.update_yaxes(title_text="")
     fig.update_layout(
-        template=constants.light_theme,
+        template=template,
         height=height,
         width=1000,
         margin=dict(t=120),

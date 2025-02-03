@@ -35,7 +35,7 @@ class PairwiseModelPerformance(BasePage):
         self.metrics = Metrics()
 
     def run(self):
-        theme = st_theme(key="univariate_theme")
+        theme = st_theme(key="pairwise_theme")
         if theme is not None:
             self.template = theme.get("base")
 

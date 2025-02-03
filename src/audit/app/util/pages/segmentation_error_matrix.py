@@ -20,7 +20,7 @@ class SegmentationErrorMatrix(BasePage):
         self.descriptions = SegmentationErrorMatrixPage()
 
     def run(self):
-        theme = st_theme(key="univariate_theme")
+        theme = st_theme(key="matrix_theme")
         if theme is not None:
             self.template = theme.get("base")
 
@@ -58,7 +58,7 @@ class SegmentationErrorMatrix(BasePage):
             customization_matrix = st.selectbox(label="Customize visualization",
                                                  options=["Standard visualization", "Custom visualization"],
                                                  index=0,
-                                                 key="scatter")
+                                                 key="matrix")
 
         if customization_matrix == "Custom visualization":
             col1, col2 = st.columns([4, 1], gap="small")

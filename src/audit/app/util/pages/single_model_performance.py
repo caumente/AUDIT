@@ -51,7 +51,7 @@ class SingleModelPerformance(BasePage):
         with col2:
             customization_scatter = st.selectbox(label="Customize visualization",
                                                  options=["Standard visualization", "Custom visualization"], index=0,
-                                                 key="scatter_metric")
+                                                 key="single_model")
         merged_data = self.merge_features_and_metrics(features=features_df, metrics=metrics_df, aggregate=agg)
 
         # Setup sidebar
@@ -143,7 +143,7 @@ class SingleModelPerformance(BasePage):
             if not aggregated:
                 scatter_metric.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         with col2:
-            update_plot_customization(scatter_metric, key="scatter_metric")
+            update_plot_customization(scatter_metric, key="single_model")
 
         with col1:
             selected_points = plotly_events(scatter_metric, click_event=True, override_height=None)

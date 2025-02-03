@@ -1,6 +1,7 @@
 from audit.app.util.commons.sidebars import setup_sidebar_plot_customization
 from audit.app.util.commons.sidebars import setup_sidebar_matrix_customization
 from audit.app.util.commons.sidebars import setup_sidebar_multimodel_plot
+from audit.app.util.commons.sidebars import setup_sidebar_longitudinal_plot
 
 
 def update_plot_customization(fig, key=None):
@@ -96,5 +97,46 @@ def update_multimodel_plot(fig, classes, key=None):
 
         fig.for_each_xaxis(lambda x: x.update(title_text=xlabel))
         fig.for_each_yaxis(lambda y: y.update(title_text=ylabel))
+
+    return fig
+
+
+def update_longitudinal_plot(fig, key=None):
+    show_leg, plot_title, font_size, ylabel, xlabel = setup_sidebar_longitudinal_plot(key=key)
+
+    if fig is not None:
+        # Update the legend layout
+        fig.update_layout(
+            showlegend=show_leg
+        )
+
+        # title
+        fig.update_layout(
+            title=dict(text=plot_title, x=0.5),
+            title_font=dict(size=font_size)
+        )
+
+        fig.for_each_xaxis(lambda x: x.update(title_text=xlabel))
+        fig.for_each_yaxis(lambda y: y.update(title_text=ylabel))
+
+        fig.update_layout(
+            xaxis=dict(
+                title_font=dict(size=font_size),  # Increase x-axis title font size
+                tickfont=dict(size=font_size)  # Increase x-axis tick font size
+            ),
+            yaxis=dict(
+                title_font=dict(size=font_size),  # Increase y-axis title font size
+                tickfont=dict(size=font_size)  # Increase y-axis tick font size
+            ),
+            legend=dict(
+                font=dict(size=font_size)  # Increase legend font size
+            )
+        )
+        # annotations
+        fig.update_layout(
+            annotations=[dict(
+                font=dict(size=font_size),
+            ) for anno in fig.layout.annotations]
+        )
 
     return fig

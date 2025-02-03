@@ -418,3 +418,21 @@ def setup_sidebar_multimodel_plot(classes, key=None):
         y_axis_label = st.text_input("Y-axis Label", value="X axis label", key=f"{key}_ylab")
 
     return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, class_labels, plot_title, font_size, y_axis_label, x_axis_label
+
+
+def setup_sidebar_longitudinal_plot(key=None):
+    with st.expander("Customize Plot", expanded=False):
+        # Legend position selection, only shown if "Show Legend" is checked
+        show_legend = st.checkbox("Show Legend", value=True, key=f"{key}_check")
+
+        # Customize the plot title
+        plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
+
+        # Customize the plot title
+        font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
+
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Y axis label", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="X axis label", key=f"{key}_ylab")
+
+    return show_legend, plot_title, font_size, y_axis_label, x_axis_label

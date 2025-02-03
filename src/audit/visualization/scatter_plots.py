@@ -49,8 +49,8 @@ def multivariate_features(
             )
         )
 
-    # set up template
-    fig.update_layout(template=constants.template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
+    # set up light_theme
+    fig.update_layout(template=constants.light_theme, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
 
     # set up traces and markers
     fig.update_traces(
@@ -75,6 +75,7 @@ def multivariate_features_highlighter(
     log_y=False,
     legend_title=None,
     highlight_point=None,
+    template='light'
 ):
 
     if y_label is None:
@@ -85,6 +86,8 @@ def multivariate_features_highlighter(
 
     if legend_title is None:
         legend_title = f"{pretty_string(color)}"
+
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     # define the scatterplot
     if color == "Dataset":
@@ -116,8 +119,8 @@ def multivariate_features_highlighter(
             )
         )
 
-    # set up template
-    fig.update_layout(template=constants.template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
+    # set up light_theme
+    fig.update_layout(template=template, height=600, width=1000, xaxis_title=x_label, yaxis_title=y_label)
 
     if highlight_point is not None:
         point = data[data.ID == highlight_point]
@@ -155,6 +158,7 @@ def multivariate_metric_feature(
     color: str = "Dataset",
     facet_col: str = None,
     highlighted_subjects: list = None,
+    template='light'
 ):
 
     if y_label is None:
@@ -169,6 +173,7 @@ def multivariate_metric_feature(
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     fig = px.scatter(
         data,
@@ -176,19 +181,19 @@ def multivariate_metric_feature(
         y=y_axis,
         color=color_axis,
         facet_col=facet_col,
-        custom_data=["ID", x_axis, y_axis, data["model"].apply(pretty_string).apply(capitalizer)],
+        custom_data=["ID", x_axis, y_axis, data["model"]],
         color_discrete_sequence=color_palette,
     )
 
     fig.update_layout(
-        template=constants.template,
+        template=template,
         height=600,
         width=1000,
         showlegend=True,
         xaxis_title=x_label,
         yaxis_title=y_label,
         legend_title=color,
-        # legend=dict(yanchor="top", xanchor="right")
+        legend=dict(yanchor="top", xanchor="right")
     )
 
     fig.for_each_xaxis(lambda x: x.update(title_text=x_label))
@@ -200,22 +205,20 @@ def multivariate_metric_feature(
         hovertemplate="ID: %{customdata[0]}<br>"
         f"{x_label}: " + "%{customdata[1]:,.2f}<br>"
         f"{y_label}: " + "%{customdata[2]:,.3f}<br>"
-        "Model: %{customdata[3]}",
+        "Model: %{customdata[3]}<extra></extra>",
     )
-
-    # fig.for_each_yaxis(lambda y: pretty_string(y_label))
 
     # Highlight specific subjects
     if highlighted_subjects is not None:
         highlighted_data = data[data["ID"].isin(highlighted_subjects)]
 
-        # Prepare custom data for hover template
+        # Prepare custom data for hover light_theme
         customdata = ["ID", x_axis, y_axis, highlighted_data["model"].apply(pretty_string).apply(capitalizer)]
 
         # Define marker properties
         marker_props = dict(size=12, line=dict(width=2, color="#444"), color="#e31231")
 
-        # Define hover template
+        # Define hover light_theme
         hover_template = (
             "ID: %{customdata[0]}<br>"
             f"{x_label}:" + "%{customdata[1]:,.2f}<br>"

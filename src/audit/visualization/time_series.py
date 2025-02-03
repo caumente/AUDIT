@@ -64,7 +64,7 @@ constants = Dashboard()
 #     # Layout general
 #     fig.update_layout(
 #         title="Longitudinal Analysis of Lesion Sizes",
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -120,7 +120,7 @@ constants = Dashboard()
 #         )
 #
 #     fig.update_layout(
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -178,7 +178,7 @@ constants = Dashboard()
 #         )
 #
 #     fig.update_layout(
-#         template=constants.template,
+#         light_theme=constants.light_theme,
 #         height=600,
 #         width=1000,
 #         xaxis_title=pretty_string(temporal_axis),
@@ -221,7 +221,7 @@ def plot_lines_with_markers(df, x_col, line_cols, colors):
 
 
 # Add annotations for percentage difference between observed and predicted values
-def add_percentage_differences(df, x_col, line_cols, fig):
+def add_percentage_differences(df, x_col, line_cols, fig, color="#005f73"):
     x_vals = df[x_col]
     y_observed = df[line_cols[0]]
     y_predicted = df[line_cols[1]]
@@ -236,7 +236,7 @@ def add_percentage_differences(df, x_col, line_cols, fig):
             y=[y_observed[i], y_predicted[i]],
             mode='lines',
             name=f"Relative difference in size estimation (%): {diff_pct}",
-            line=dict(dash='dot', color="#005f73", width=1),
+            line=dict(dash='dot', color=color, width=1),
             showlegend=False,
             hoverinfo="text",
             hovertext=f"Relative difference: {diff_pct:.1f}%"
@@ -249,14 +249,14 @@ def add_percentage_differences(df, x_col, line_cols, fig):
             mode='text',
             text=[f'{diff_pct:.0f}%'],
             showlegend=False,
-            textfont=dict(color="#005f73", size=12, family="Arial Black"),
+            textfont=dict(color=color, size=12, family="Arial Black"),
             hoverinfo="skip"
         ))
     fig.add_trace(go.Scatter(
         x=[None],  # Placeholder for legend only
         y=[None],
         mode='lines',
-        line=dict(dash='dot', color="#005f73", width=3),  # Wider line for legend
+        line=dict(dash='dot', color=color, width=3),  # Wider line for legend
         name="Relative difference in size estimation",
         showlegend=True,
         hoverinfo="skip"
@@ -265,7 +265,7 @@ def add_percentage_differences(df, x_col, line_cols, fig):
 
 
 # Add annotations for tumor growth percentage between time points
-def add_tumor_growth_annotations(df, x_col, line_cols, fig):
+def add_tumor_growth_annotations(df, x_col, line_cols, fig, colors=["#9c5c2a", "#8a6b1e"]):
     def calculate_growth_and_positions(column):
         growth = [
             (df[column].iloc[i] - df[column].iloc[i - 1]) / df[column].iloc[i - 1]
@@ -277,7 +277,7 @@ def add_tumor_growth_annotations(df, x_col, line_cols, fig):
         ]
         return growth, y_positions
 
-    for col, color, custom_label in zip(line_cols, ["#9c5c2a", "#8a6b1e"], ["Observed tumor growth", "Predicted tumor growth"]):
+    for col, color, custom_label in zip(line_cols, colors, ["Observed tumor growth", "Predicted tumor growth"]):
         growth_rates, y_positions = calculate_growth_and_positions(col)
         x_positions = (df[x_col].iloc[1:].values + df[x_col].iloc[:-1].values) / 2
 
@@ -301,23 +301,31 @@ def add_tumor_growth_annotations(df, x_col, line_cols, fig):
 
 
 # Main function to generate the lesion size plot
-def plot_longitudinal_lesions(df):
-    colors = ['#f4a261', '#e9c46a']  # Define custom colors
-    # Layout settings (add nticks instead of showticks)
+def plot_longitudinal_lesions(df, template='light'):
+    if template == 'dark':
+        template = constants.dark_theme
+        lines_colors = ['#2a6a4f', '#8f2d56']
+        perc_diff_color = "#029ebf"
+        annotation_colors = ["#a5e6ba", "#f2b5d4"]
+    else:
+        template = constants.light_theme
+        lines_colors = ['#f4a261', '#e9c46a']
+        perc_diff_color = "#005f73"
+        annotation_colors = ["#9c5c2a", "#8a6b1e"]
 
     # Step 1: Plot observed and predicted lesion sizes
-    fig = plot_lines_with_markers(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], colors)
+    fig = plot_lines_with_markers(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], lines_colors)
 
     # Step 2: Add percentage differences between observed and predicted sizes
-    fig = add_percentage_differences(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], fig)
+    fig = add_percentage_differences(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], fig, perc_diff_color)
 
     # Step 3: Add tumor growth annotations
-    fig = add_tumor_growth_annotations(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], fig)
+    fig = add_tumor_growth_annotations(df, 'time_point', ['lesion_size_whole', 'lesion_size_pred'], fig, annotation_colors)
 
     # Finalize layout
     fig.update_layout(
         title="",
-        template=constants.template,
+        template=template,
         height=600,
         width=1000,
         yaxis_title="Lesion Size (mm³)",

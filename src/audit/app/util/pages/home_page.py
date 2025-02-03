@@ -17,7 +17,7 @@
 from pathlib import Path
 from PIL import Image
 import streamlit as st
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from streamlit_theme import st_theme
 
 

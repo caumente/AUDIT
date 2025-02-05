@@ -1,8 +1,8 @@
-import os
 import streamlit as st
 from streamlit_plotly_events import plotly_events
+from streamlit_theme import st_theme
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_highlight_subject
@@ -14,14 +14,19 @@ from audit.app.util.constants.descriptions import MultivariatePage
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.scatter_plots import multivariate_features_highlighter
+from audit.visualization.commons import update_plot_customization
 
 
-class MultivariateFeatureAnalysis(BasePage):
+class MultivariateFeature(BasePage):
     def __init__(self, config):
         super().__init__(config)
         self.descriptions = MultivariatePage()
 
     def run(self):
+        theme = st_theme(key="univariate_theme")
+        if theme is not None:
+            self.template = theme.get("base")
+
         datasets_root_path = self.config.get("datasets_path")
         features_information = self.config.get("features")
         labels = self.config.get("labels")
@@ -58,8 +63,15 @@ class MultivariateFeatureAnalysis(BasePage):
                 "color_axis": setup_sidebar_color(data, name="Color feature", key="feat_col"),
             }
 
+    def scatter_plot_logic(self, data, x_axis, y_axis, color_axis, customization):
+        if customization == 'Standard visualization':
+            selected_points, highlight_subject = self.render_scatter_plot(data, x_axis, y_axis, color_axis)
+        else:
+            selected_points, highlight_subject = self.render_scatter_plot_with_customization(data, x_axis, y_axis, color_axis)
+
+        return selected_points, highlight_subject
+
     def render_scatter_plot(self, data, x_axis, y_axis, color_axis):
-        st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
         highlight_subject = setup_highlight_subject(data)
 
         fig = multivariate_features_highlighter(
@@ -71,10 +83,40 @@ class MultivariateFeatureAnalysis(BasePage):
             y_label=self.features.get_pretty_feature_name(y_axis),
             legend_title=self.features.get_pretty_feature_name(y_axis) if color_axis != "Dataset" else None,
             highlight_point=highlight_subject,
+            template=self.template
         )
 
         selected_points = plotly_events(fig, click_event=True, override_height=None)
         download_plot(fig, label="Multivariate Analysis", filename="multivariate_analysis")
+
+        return selected_points, highlight_subject
+
+    def render_scatter_plot_with_customization(self, data, x_axis, y_axis, color_axis):
+        highlight_subject = setup_highlight_subject(data)
+
+        # Create a layout with two columns: one for the plot and another for the customization panel
+        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+
+        # Column 1: Display the plot
+        with col1:
+            scatter_fig = multivariate_features_highlighter(
+                data=data,
+                x_axis=x_axis,
+                y_axis=y_axis,
+                color=color_axis,
+                x_label=self.features.get_pretty_feature_name(x_axis),
+                y_label=self.features.get_pretty_feature_name(y_axis),
+                legend_title=self.features.get_pretty_feature_name(y_axis) if color_axis != "Dataset" else None,
+                highlight_point=highlight_subject,
+                template=self.template
+            )
+        # Column 2: Customization panel
+        with col2:
+            update_plot_customization(scatter_fig, key="scatter")
+
+        with col1:
+            selected_points = plotly_events(scatter_fig, click_event=True, override_height=None)
+            download_plot(scatter_fig, label="Multivariate analysis", filename="multivariate_analysis")
 
         return selected_points, highlight_subject
 
@@ -112,6 +154,13 @@ class MultivariateFeatureAnalysis(BasePage):
                     st.write(f"Opened case {selected_case} in ITK-SNAP")
 
     def handle_selection(self, data, datasets_root_path, x_axis, y_axis, color_axis, labels):
-        selected_points, highlight_subject = self.render_scatter_plot(data, x_axis, y_axis, color_axis)
+        col1, col2 = st.columns([2, 2], gap="small")
+        with col1:
+            st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
+        with col2:
+            customization_scatter = st.selectbox(label="Customize visualization",
+                                             options=["Standard visualization", "Custom visualization"], index=0,
+                                             key="scatter")
+        selected_points, highlight_subject = self.scatter_plot_logic(data, x_axis, y_axis, color_axis, customization_scatter)
         selected_case = self.get_case_from_point(data, selected_points, highlight_subject)
         self.manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)

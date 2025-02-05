@@ -69,8 +69,10 @@ def setup_sidebar_multi_model(data):
 
 def setup_sidebar_pairwise_models(data, selected_set):
     with st.sidebar.expander("Models", expanded=True):
-        # models_available = [capitalizer(pretty_string(m)) for m in data[data.set == selected_set].model.unique()]
         models_available = data[data.set == selected_set].model.unique()
+        if len(models_available) < 2:
+            st.error("Pairwise comparison requires metrics from at least two different models. Please, select other dataset", icon="🚨")
+            return None, None
         baseline_model = st.selectbox("Select the baseline model:", options=models_available, index=0)
         benchmark_model = st.selectbox("Select the benchmark model:", options=models_available, index=1)
         if baseline_model == benchmark_model:
@@ -165,7 +167,7 @@ def setup_histogram_options(plot_type):
                 )
             elif option == "Bins size":
                 bins_size = st.number_input(
-                    "Select bins size", min_value=1, max_value=None, value=1, step=1, placeholder="Type a number..."
+                    "Select bins size", min_value=1, max_value=None, value=1000, step=1, placeholder="Type a number..."
                 )
 
     return n_bins, bins_size
@@ -331,16 +333,17 @@ def setup_sidebar_single_subjects(data):
     return subject_selected
 
 
-def setup_sidebar_plot_customization():
+def setup_sidebar_plot_customization(key=None):
     with st.expander("Customize Plot", expanded=False):
         # Legend position selection, only shown if "Show Legend" is checked
-        show_legend = st.checkbox("Show Legend", value=True)
+        show_legend = st.checkbox("Show Legend", value=True, key=f"{key}_check")
         legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor = None, None, None, None, None
         if show_legend:
             legend_position = st.selectbox(
                 "Legend Position",
                 options=["top left", "top right", "bottom left", "bottom right"],
                 index=1,
+                key=f"{key}_select"
             )
         if legend_position:
             legend_x = 0 if "left" in legend_position else 1
@@ -349,10 +352,87 @@ def setup_sidebar_plot_customization():
             legend_yanchor = "top" if "top" in legend_position else "bottom"
 
         # Customize axis labels
-        x_axis_label = st.text_input("X-axis Label", value="Feature name")
-        y_axis_label = st.text_input("Y-axis Label", value="Datasets")
+        x_axis_label = st.text_input("X-axis Label", value="Feature name", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="Datasets", key=f"{key}_ylab")
 
         # Customize the plot title
-        plot_title = st.text_input("Plot Title", value=f"Plot")
+        plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
 
-    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title
+        # Customize the plot title
+        font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
+
+    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title, font_size
+
+
+def setup_sidebar_matrix_customization(classes, key=None):
+    with st.expander("Customize Confusion Matrix Plot", expanded=False):
+
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Predicted Labels", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="True Labels", key=f"{key}_ylab")
+
+        # Allow free text input for each class label
+        class_labels = []
+        for cls in list(classes):
+            class_label = st.text_input(f"Class {cls} label", value=f"{cls}", key=f"{key}_{cls}_label")
+            class_labels.append(class_label)
+
+    return x_axis_label, y_axis_label, class_labels
+
+
+def setup_sidebar_multimodel_plot(classes, key=None):
+    with st.expander("Customize Plot", expanded=False):
+        # Legend position selection, only shown if "Show Legend" is checked
+        show_legend = st.checkbox("Show Legend", value=True, key=f"{key}_check")
+        legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor = None, None, None, None, None
+        if show_legend:
+            legend_position = st.selectbox(
+                "Legend Position",
+                options=["top left", "top right", "bottom left", "bottom right"],
+                index=1,
+                key=f"{key}_select"
+            )
+        if legend_position:
+            legend_x = 0 if "left" in legend_position else 1
+            legend_y = 1.13 if "top" in legend_position else -0.13
+            legend_xanchor = "left" if "left" in legend_position else "right"
+            legend_yanchor = "top" if "top" in legend_position else "bottom"
+
+        # to remove bkg from labels
+        classes = {key: val for key, val in classes.items() if val != 0}
+        classes = list(classes.keys())
+
+        class_labels = []
+        for cls in list(classes):
+            class_label = st.text_input(f"Class {cls} label", value=f"{cls}", key=f"{key}_{cls}_label")
+            class_labels.append(class_label)
+
+        # Customize the plot title
+        plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
+
+        # Customize the plot title
+        font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
+
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Y axis label", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="X axis label", key=f"{key}_ylab")
+
+    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, class_labels, plot_title, font_size, y_axis_label, x_axis_label
+
+
+def setup_sidebar_longitudinal_plot(key=None):
+    with st.expander("Customize Plot", expanded=False):
+        # Legend position selection, only shown if "Show Legend" is checked
+        show_legend = st.checkbox("Show Legend", value=True, key=f"{key}_check")
+
+        # Customize the plot title
+        plot_title = st.text_input("Plot Title", value=f"Plot", key=f"{key}_title")
+
+        # Customize the plot title
+        font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
+
+        # Customize axis labels
+        x_axis_label = st.text_input("X-axis Label", value="Y axis label", key=f"{key}_xlab")
+        y_axis_label = st.text_input("Y-axis Label", value="X axis label", key=f"{key}_ylab")
+
+    return show_legend, plot_title, font_size, y_axis_label, x_axis_label

@@ -6,10 +6,11 @@ from audit.visualization.constants import Dashboard
 constants = Dashboard()
 
 
-def aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set):
+def aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set, template='light'):
     units = ""
     if improvement_type == "relative":
         units = "%"
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     fig = go.Figure()
     fig.add_trace(
@@ -17,6 +18,7 @@ def aggregated_pairwise_model_performance(data, improvement_type, selected_metri
             x=data[improvement_type],
             y=data["region"],
             orientation="h",
+            name="",
             marker_color=data["color_bar"],
             marker_line=dict(width=1, color="black"),
             hovertemplate=f"Improvement  {pretty_string(selected_metric)}: " + "%{x:.2f}" + f"{units}" + "<br>"
@@ -25,15 +27,16 @@ def aggregated_pairwise_model_performance(data, improvement_type, selected_metri
     )
     fig.update_xaxes(showline=False)
     fig.update_traces(width=constants.bar_width)
-    fig.update_layout(template=constants.template, height=300, width=800, showlegend=False, margin=dict(b=20, t=20))
+    fig.update_layout(template=template, height=300, width=800, showlegend=False, margin=dict(b=20, t=20))
 
     return fig
 
 
-def individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type):
+def individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type, template='light'):
     units = ""
     if improvement_type == "relative":
         units = "%"
+    template = constants.dark_theme if template == 'dark' else constants.light_theme
 
     figures = []
     metric, set_ = data.metric.unique()[0], data.set.unique()[0]
@@ -52,6 +55,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
                 orientation="h",
                 marker_color=df["color_bar"],
                 marker_line=dict(width=1, color="black"),
+                name="",
                 hovertemplate="subject: "
                 f"{case}"
                 " <br>" + pretty_string(metric) + " : %{x:.2f}" + f"{units}<br>"
@@ -61,7 +65,7 @@ def individual_pairwise_model_performance(data, baseline_model, benchmark_model,
         fig.update_xaxes(showline=False)
         fig.update_traces(width=constants.bar_width)
         fig.update_layout(
-            template=constants.template,
+            template=template,
             height=300,
             width=800,
             showlegend=False,

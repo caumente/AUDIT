@@ -1,15 +1,17 @@
 import os
+from streamlit_theme import st_theme
 
 import numpy as np
 import streamlit as st
 from stqdm import stqdm
 
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
 from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
 from audit.metrics.error_matrix import errors_per_class, normalize_matrix_per_row
 from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap
 from audit.utils.sequences.sequences import load_nii_by_subject_id
-from audit.visualization.confusion_matrices import plt_confusion_matrix_plotly
+from audit.visualization.confusion_matrices import plt_confusion_matrix
+from audit.visualization.commons import update_segmentation_matrix_plot
 
 
 class SegmentationErrorMatrix(BasePage):
@@ -18,6 +20,10 @@ class SegmentationErrorMatrix(BasePage):
         self.descriptions = SegmentationErrorMatrixPage()
 
     def run(self):
+        theme = st_theme(key="matrix_theme")
+        if theme is not None:
+            self.template = theme.get("base")
+
         # Load configuration
         labels_dict = self.config.get("labels")
         predictions = self.config.get("predictions", {})
@@ -29,8 +35,7 @@ class SegmentationErrorMatrix(BasePage):
         st.markdown(self.descriptions.description)
 
         # Setup sidebar
-        selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,
-                                                                                                            raw_datasets)
+        selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,raw_datasets)
 
         # Main visualization logic
         normalized = st.checkbox(
@@ -45,9 +50,41 @@ class SegmentationErrorMatrix(BasePage):
                 value=True,
                 help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
             )
-            self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
+
+        col1, col2 = st.columns([2, 2], gap="small")
+        with col1:
+                st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
+        with col2:
+            customization_matrix = st.selectbox(label="Customize visualization",
+                                                 options=["Standard visualization", "Custom visualization"],
+                                                 index=0,
+                                                 key="matrix")
+
+        if customization_matrix == "Custom visualization":
+            col1, col2 = st.columns([4, 1], gap="small")
+            with col1:
+                if selected_id == "All":
+                    fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged,
+                                              normalized)
+                else:
+                    fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+            with col2:
+                update_segmentation_matrix_plot(fig, list(labels_dict.keys()), key="matrix")
+            with col1:
+                st.plotly_chart(fig, theme="streamlit", use_container_width=True)
         else:
-            self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+            if selected_id == "All":
+                fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
+            else:
+                fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+
+            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+
+        if selected_id != "All":
+            # run itk-snap
+            visualize_itk = st.button("Visualize it in ITK-SNAP")
+            if visualize_itk:
+                run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
 
     @staticmethod
     def setup_sidebar(predictions, raw_datasets):
@@ -70,18 +107,6 @@ class SegmentationErrorMatrix(BasePage):
 
         return selected_dataset, selected_model, selected_id, ground_truth_path, predictions_path, subjects_in_path
 
-    @staticmethod
-    def visualize_confusion_matrix(cm, classes, normalized):
-        """
-        Visualize the confusion matrix using Plotly.
-
-        Args:
-            cm (np.array): Confusion matrix.
-            classes (list): List of class labels.
-            normalized (bool): Whether the confusion matrix is normalized.
-        """
-        fig = plt_confusion_matrix_plotly(cm, classes, normalized)
-        st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
     @staticmethod
     def compute_confusion_matrix(seg, pred, labels, normalized):
@@ -142,12 +167,9 @@ class SegmentationErrorMatrix(BasePage):
         pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=selected_id, seq="_pred", as_array=True)
 
         cm = self.compute_confusion_matrix(seg, pred, labels, normalized)
-        self.visualize_confusion_matrix(cm, classes, normalized)
+        fig = plt_confusion_matrix(cm, classes, theme=self.template, normalized=normalized)
 
-        # run itk-snap
-        visualize_itk = st.button("Visualize it in ITK-SNAP")
-        if visualize_itk:
-            run_comparison_segmentation_itk_snap(gt_path, predictions_path, selected_id, labels_dict)
+        return fig
 
     def visualize_aggregated(self, gt_path, predictions_path, subjects_in_path, labels_dict, averaged, normalized):
         """
@@ -170,5 +192,6 @@ class SegmentationErrorMatrix(BasePage):
         if normalized:
             accumulated = normalize_matrix_per_row(accumulated)
 
-        self.visualize_confusion_matrix(accumulated, classes, normalized)
+        fig = plt_confusion_matrix(accumulated, classes, theme=self.template, normalized=normalized)
 
+        return fig

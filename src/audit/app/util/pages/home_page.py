@@ -17,7 +17,8 @@
 from pathlib import Path
 from PIL import Image
 import streamlit as st
-from audit.app.util.pages.BasePage import BasePage
+from audit.app.util.pages.base_page import BasePage
+from streamlit_theme import st_theme
 
 
 class HomePage(BasePage):
@@ -27,6 +28,10 @@ class HomePage(BasePage):
         self.audit_schema_path = Path(__file__).parent.parent / "images/audit_schema.png"
 
     def run(self):
+        theme = st_theme(key="home_theme")  # here because it cannot be defined in __init__
+        if theme is not None and theme.get("base", None) == "dark":
+            self.audit_logo_path = Path(__file__).parent.parent / "images/AUDIT_DM_transparent.png"
+
         # Load images
         audit_logo = self._load_image(self.audit_logo_path)
         audit_schema = self._load_image(self.audit_schema_path)
@@ -126,7 +131,7 @@ class HomePage(BasePage):
 
             ##### Mauricio Reyes
             ##### Michael Müller
-            ##### Jorge Diez
+            ##### Jorge Díez
             ##### Beatriz Remeseiro
 
             Please feel free to contact us with any issues, comments, or questions. [Contact Us](mailto:UO297103@uniovi.es)
@@ -155,4 +160,4 @@ class HomePage(BasePage):
     def _render_footer(self):
         """Render the footer with copyright information."""
         st.markdown("---")
-        st.write("© 2024 AUDIT project")
+        st.write("© 2025 AUDIT project")

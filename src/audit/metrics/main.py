@@ -87,9 +87,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
 
     return data
 
-
-@logger.catch
-def extract_custom_metrics(config_file) -> pd.DataFrame:
+def extract_audit_metrics(config_file) -> pd.DataFrame:
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
 
     # load paths to test data

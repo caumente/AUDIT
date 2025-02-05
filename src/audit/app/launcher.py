@@ -1,6 +1,12 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from pathlib import Path
 import argparse
+
+from audit.utils.commons.file_manager import load_config_file
+from audit.utils.commons.config_checks import check_app_config
 
 
 def run_streamlit_app(config):
@@ -13,7 +19,7 @@ def run_streamlit_app(config):
         raise FileNotFoundError(f"Streamlit app not found at: {app_path}")
 
     # Build the command to launch Streamlit with the provided config
-    command = f"streamlit run {app_path} -- --config {config}"
+    command = f"streamlit run {app_path} --server.fileWatcherType none -- --config {config}"
 
     # Print and execute the command
     print(f"Running command: {command}")
@@ -30,6 +36,9 @@ def main():
         help="Path to the configuration file for web app."
     )
     args = parser.parse_args()
+
+    config = load_config_file(args.config)
+    check_app_config(config)
 
     run_streamlit_app(args.config)
 

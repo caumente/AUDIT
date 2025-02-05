@@ -13,9 +13,9 @@ labels:
   NEC: 2
 
 # Root path for datasets, features extracted, and metrics extracted
-datasets_path: '/home/usr/AUDIT/datasets'
-features_path: '/home/usr/AUDIT/outputs/features'
-metrics_path: '/home/usr/AUDIT/outputs/metrics'
+datasets_path: './datasets'  # '/home/usr/AUDIT/datasets'
+features_path: './outputs/features'  # '/home/usr/AUDIT/outputs/features'
+metrics_path: './outputs/metrics'  # '/home/usr/AUDIT/outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:

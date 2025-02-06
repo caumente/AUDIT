@@ -1,9 +1,9 @@
-[//]: # (::: src.feature_extractor)
+[//]: # (::: src.feature_extraction)
 
 
 This `feature extraction` pipeline is designed to process medical imaging datasets, specifically MRI scans, to extract a 
 wide range of features including spatial, tumor-related, statistical, and texture-based characteristics. The pipeline 
-is composed of two core components: the feature_extractor.py script, which orchestrates the entire process, and the 
+is composed of two core components: the feature_extraction.py script, which orchestrates the entire process, and the 
 underlying feature extraction logic contained in src.features.main.py.
 
 The pipeline operates as follows:

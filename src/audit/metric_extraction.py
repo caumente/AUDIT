@@ -63,8 +63,8 @@ def main():
     parser.add_argument(
         '--config',
         type=str,
-        default='./configs/metric_extractor.yml',  # Path relative to the script location
-        help="Path to the configuration file for metric extraction (default is './configs/metric_extractor.yml')."
+        default='./configs/metric_extraction.yml',  # Path relative to the script location
+        help="Path to the configuration file for metric extraction (default is './configs/metric_extraction.yml')."
     )
     args = parser.parse_args()
 

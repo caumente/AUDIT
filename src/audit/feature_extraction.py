@@ -62,8 +62,8 @@ def main():
     parser.add_argument(
         '--config',
         type=str,
-        default='./configs/feature_extractor.yml',  # Path relative to the script location
-        help="Path to the configuration file for feature extraction (default is './configs/feature_extractor.yml')."
+        default='./configs/feature_extraction.yml',  # Path relative to the script location
+        help="Path to the configuration file for feature extraction (default is './configs/feature_extraction.yml')."
     )
     args = parser.parse_args()
 

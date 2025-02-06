@@ -3,7 +3,7 @@
 
 This `metric extraction` pipeline processes MRI segmentation data by comparing ground truth segmentations with model 
 predictions to compute a variety of metrics. The pipeline supports both custom metrics and Pymia-based metrics, with 
-the ability to handle multiple models and datasets. The two main components of the pipeline are metric_extractor.py, 
+the ability to handle multiple models and datasets. The two main components of the pipeline are metric_extraction.py, 
 which serves as the entry point, and main.py, which contains the core logic for metric computation.
 
 The pipeline operates as follows:

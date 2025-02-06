@@ -1,4 +1,4 @@
-[//]: # (::: src.metric_extractor)
+[//]: # (::: src.metric_extraction)
 
 # Metrics Computed
 

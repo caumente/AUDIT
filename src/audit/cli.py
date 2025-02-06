@@ -1,7 +1,7 @@
 import click
 from audit.app.launcher import run_streamlit_app
-from audit.feature_extractor import run_feature_extractor
-from audit.metric_extractor import run_metric_extractor
+from audit.feature_extraction import run_feature_extraction
+from audit.metric_extraction import run_metric_extraction
 
 
 @click.group()
@@ -24,22 +24,22 @@ def run_app(config):
 @click.option(
     '--config',
     type=str,
-    default='./configs/feature_extractor.yml',
+    default='./configs/feature_extraction.yml',
     help="Path to the configuration file for feature extraction."
 )
-def feature_extractor(config):
-    run_feature_extractor(config)
+def feature_extraction(config):
+    run_feature_extraction(config)
 
 
 @cli.command()
 @click.option(
     '--config',
     type=str,
-    default='./configs/metric_extractor.yml',
+    default='./configs/metric_extraction.yml',
     help="Path to the configuration file for metric extraction."
 )
-def metric_extractor(config):
-    run_metric_extractor(config)
+def metric_extraction(config):
+    run_metric_extraction(config)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,10 @@
 # Path to the raw dataset
-data_path: '/home/carlos/Documentos/proyectos/AUDIT/datasets_all/UCSF/UCSF_images'
+data_path: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
 
 # Paths to model predictions
 model_predictions_paths:
-#  BTSUnet: '/home/carlos/Documentos/proyectos/AUDIT/datasets_all/UCSF/UCSF_seg/BTSUnet'
-#  nnUnet: '/home/carlos/Documentos/proyectos/AUDIT/datasets_all/UCSF/UCSF_seg/nnUnet'
-  SegResNet: '/home/carlos/Documentos/proyectos/AUDIT/datasets_all/UCSF/UCSF_seg/SegResNet'
+  nnUnet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
+  SegResNet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/SegResNet'
 
 # Mapping of labels to their numeric values
 labels:
@@ -29,9 +28,9 @@ metrics:
 package: audit
 
 # Path where output metrics will be saved
-output_path: '/home/carlos/Documentos/proyectos/AUDIT/outputs/metrics'
-filename: 'UCSF'
-logs_path: '/home/carlos/Documentos/proyectos/AUDIT//logs/metric'
+output_path: '/home/usr/AUDIT/outputs/metrics'
+filename: 'BraTS2024_PED'
+logs_path: '/home/usr/AUDIT/logs/metric'
 
 # others
 cpu_cores: 12

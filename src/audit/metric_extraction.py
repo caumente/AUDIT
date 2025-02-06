@@ -14,10 +14,10 @@ from audit.metrics.main import extract_audit_metrics
 from audit.metrics.main import extract_pymia_metrics
 from audit.utils.commons.file_manager import load_config_file
 from audit.utils.commons.strings import configure_logging
-from audit.utils.commons.config_checks import check_metric_extractor_config
+from audit.utils.commons.config_checks import check_metric_extraction_config
 
 
-def run_metric_extractor(config_path):
+def run_metric_extraction(config_path):
     # Load the configuration file
     try:
         config = load_config_file(config_path)
@@ -25,7 +25,7 @@ def run_metric_extractor(config_path):
         logger.error(f"Failed to load config file from {config_path}: {e}")
         sys.exit(1)
 
-    check_metric_extractor_config(config)
+    check_metric_extraction_config(config)
 
     # config variables
     output_path, logs_path = config["output_path"], config["logs_path"]
@@ -68,7 +68,7 @@ def main():
     )
     args = parser.parse_args()
 
-    run_metric_extractor(args.config)
+    run_metric_extraction(args.config)
 
 
 if __name__ == "__main__":

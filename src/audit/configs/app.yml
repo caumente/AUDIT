@@ -35,8 +35,8 @@ features:
 
 # Paths for metric extraction CSV files
 metrics:
-  BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS_SSA.csv"
-  BraTS2024_PED: "${metrics_path}/extracted_information_BraTS_PED.csv"
+  BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS2024_SSA.csv"
+  BraTS2024_PED: "${metrics_path}/extracted_information_BraTS2024_PED.csv"
   UCSF: "${metrics_path}/extracted_information_UCSF.csv"
   LUMIERE: "${metrics_path}/extracted_information_LUMIERE.csv"
 

@@ -21,12 +21,12 @@ def check_path_existence(path: str, name: str, group_1: str = None, group_2: str
         sys.exit(1)
 
 
-def check_feature_extractor_config(config: dict) -> None:
-    """Check the configuration for the feature extractor."""
+def check_feature_extraction_config(config: dict) -> None:
+    """Check the configuration for the feature extraction."""
     # check input data
     data_paths = config.get("data_paths")
     if data_paths is None:
-        logger.error("Missing data_paths in the feature_extractor.yml file")
+        logger.error("Missing data_paths in the feature_extraction.yml file")
         sys.exit(1)
     for dataset_name, src_path in data_paths.items():
         check_path_existence(src_path, dataset_name, "data_paths")
@@ -34,44 +34,44 @@ def check_feature_extractor_config(config: dict) -> None:
     # check feature extraction outputs
     output_path = config.get("output_path")
     if output_path is None:
-        logger.error("Missing output_path in the feature_extractor.yml file")
+        logger.error("Missing output_path in the feature_extraction.yml file")
         sys.exit(1)
     check_path_access(config.get("output_path"), "output_path")
 
     # logs outputs
     logs_path = config.get("logs_path")
     if logs_path is None:
-        logger.error("Missing logs_path in the feature_extractor.yml file")
+        logger.error("Missing logs_path in the feature_extraction.yml file")
         sys.exit(1)
     check_path_access(config.get("logs_path"), "logs_path")
 
     # Ensure features, labels, and sequences are not empty
     if not config.get("features"):
-        logger.error("Missing features key in the feature_extractor.yml file")
+        logger.error("Missing features key in the feature_extraction.yml file")
         sys.exit(1)
 
     if not config.get("labels"):
-        logger.error("Missing labels key in the feature_extractor.yml file")
+        logger.error("Missing labels key in the feature_extraction.yml file")
         sys.exit(1)
 
     if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extractor.yml file")
+        logger.error("Missing sequences key in the feature_extraction.yml file")
         sys.exit(1)
 
 
-def check_metric_extractor_config(config: dict) -> None:
-    """Check the configuration for the metric extractor."""
+def check_metric_extraction_config(config: dict) -> None:
+    """Check the configuration for the metric extraction."""
     # check input data
     data_path = config.get("data_path")
     if data_path is None:
-        logger.error("Missing data_path in the metric_extractor.yml file")
+        logger.error("Missing data_path in the metric_extraction.yml file")
         sys.exit(1)
     check_path_existence(data_path, "data_path")
 
     # check model predictions
     model_predictions_paths = config.get("model_predictions_paths")
     if model_predictions_paths is None:
-        logger.error("Missing model_predictions_paths in the metric_extractor.yml file")
+        logger.error("Missing model_predictions_paths in the metric_extraction.yml file")
         sys.exit(1)
     for model_name, path_predictions in model_predictions_paths.items():
         check_path_existence(path_predictions, model_name, "model_predictions_paths")
@@ -79,32 +79,32 @@ def check_metric_extractor_config(config: dict) -> None:
     # check feature extraction outputs
     output_path = config.get("output_path")
     if output_path is None:
-        logger.error("Missing output_path in the metric_extractor.yml file")
+        logger.error("Missing output_path in the metric_extraction.yml file")
         sys.exit(1)
     check_path_access(config.get("output_path"), "output_path")
 
     # log outputs
     logs_path = config.get("logs_path")
     if logs_path is None:
-        logger.error("Missing logs_path in the metric_extractor.yml file")
+        logger.error("Missing logs_path in the metric_extraction.yml file")
         sys.exit(1)
     check_path_access(config.get("logs_path"), "logs_path")
 
     # Ensure metrics, labels, filename, and package are not empty
     if not config.get("labels"):
-        logger.error("Missing labels key in the metric_extractor.yml file")
+        logger.error("Missing labels key in the metric_extraction.yml file")
         sys.exit(1)
 
     if not config.get("metrics"):
-        logger.error("Missing metrics key in the metric_extractor.yml file")
+        logger.error("Missing metrics key in the metric_extraction.yml file")
         sys.exit(1)
 
     if not config.get("package"):
-        logger.error("Missing package key in the metric_extractor.yml file")
+        logger.error("Missing package key in the metric_extraction.yml file")
         sys.exit(1)
 
     if not config.get("filename"):
-        logger.error("Missing filename key in the metric_extractor.yml file")
+        logger.error("Missing filename key in the metric_extraction.yml file")
         sys.exit(1)
 
 
@@ -148,9 +148,9 @@ def check_app_config(config: dict) -> None:
 
     # Ensure features, labels, and sequences are not empty
     if not config.get("labels"):
-        logger.error("Missing labels key in the feature_extractor.yml file")
+        logger.error("Missing labels key in the feature_extraction.yml file")
         sys.exit(1)
 
     if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extractor.yml file")
+        logger.error("Missing sequences key in the feature_extraction.yml file")
         sys.exit(1)

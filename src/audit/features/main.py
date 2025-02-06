@@ -21,11 +21,11 @@ def check_multiprocessing(config_file):
     cpu_cores = config_file.get("cpu_cores")
 
     if cpu_cores is None or cpu_cores == "None":
-        logger.info("cpu_cores not specified or invalid in feature_extractor.yml file, defaulting to os.cpu_count()")
+        logger.info("cpu_cores not specified or invalid in feature_extraction.yml file, defaulting to os.cpu_count()")
         cpu_cores = os.cpu_count()
 
     if not isinstance(cpu_cores, int) or cpu_cores <= 0:
-        logger.info(f"Invalid cpu_cores value: {cpu_cores} in feature_extractor.yml file, defaulting to os.cpu_count()")
+        logger.info(f"Invalid cpu_cores value: {cpu_cores} in feature_extraction.yml file, defaulting to os.cpu_count()")
         cpu_cores = os.cpu_count()
 
     logger.info(f"Using {cpu_cores} CPU cores for processing")
@@ -111,7 +111,7 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
     Args:
         path_images (str): The path to the directory containing subject image data.
-        config_file (str): Config file 'feature_extractor.yml'
+        config_file (str): Config file 'feature_extraction.yml'
         dataset_name (str): Name of dataset being processed
 
     Returns:

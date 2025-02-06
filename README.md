@@ -83,7 +83,7 @@ Edit the config files in `./src/audit/configs/` directory to set up the paths fo
 
 
 <details>
-  <summary><strong>2.1. Feature extractor config</strong></summary>
+  <summary><strong>2.1. Feature extraction config</strong></summary>
 
 ```yaml
 # Paths to all the datasets
@@ -128,7 +128,7 @@ logs_path: '/home/usr/AUDIT/logs/features'
 
 
 <details>
-  <summary><strong>2.2. Metric extractor config</strong></summary>
+  <summary><strong>2.2. Metric extraction config</strong></summary>
 
 ```yaml
 # Path to the raw dataset
@@ -220,14 +220,14 @@ predictions:
 
 ### 3. Run AUDIT backend
 
-Use the following commands to run the *Feature extractor* and *Metric extractor* scripts:
+Use the following commands to run the *Feature extraction* and *Metric extraction* scripts:
 
 ```bash
-python src/audit/feature_extractor.py
+python src/audit/feature_extraction.py
 ```
 
 ```bash
-python src/audit/metric_extractor.py
+python src/audit/metric_extraction.py
 ```
 
 A _logs_ folder will be created after running each of the scripts to keep track of the execution. All the output files 

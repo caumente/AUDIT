@@ -157,8 +157,8 @@ categorized into features and metrics, ensuring modularity and ease of customiza
 ```
 your_project/
 ├── config/
-│   ├── feature_extractor.yaml
-│   ├── metric_extractor.yaml
+│   ├── feature_extraction.yaml
+│   ├── metric_extraction.yaml
 │   ├── app.yaml
 ```
 
@@ -226,14 +226,14 @@ AUDIT uses configuration files to define paths, settings, and parameters. These 
 the `audit/configs/` directory. However, if the user is not following the developer configuration both files must be
 created.
 
-- **Feature extractor**: Configure MRI features and datasets in `feature_extractor_config.json`.
-- **Metric extractor**: Define evaluation metrics and paths in `metric_extractor_config.json`.
-- **App settings**: Customize web app options in `app_config.json`.
+- **Feature extraction**: Configure MRI features and datasets in `feature_extraction.yml`.
+- **Metric extraction**: Define evaluation metrics and paths in `metric_extraction.yml`.
+- **App settings**: Customize web app options in `app.yml`.
 
 Make sure to adjust other paths and settings according to your environment. Please, find an example of each of the 
 config files in the following link: [dummy config files](https://github.com/caumente/AUDIT/tree/main/src/audit/configs).
 
-### 3.1. Example of feature extractor config file
+### 3.1. Example of feature extraction config file
 
 This configuration file is used to define the settings for feature extraction in the AUDIT library. Each key and its usage is explained below:
 
@@ -292,7 +292,7 @@ longitudinal:
 output_path: '/home/user/AUDIT/outputs/features'
 ```
 
-### 3.2. Example of metric extractor config file
+### 3.2. Example of metric extraction config file
 
 This configuration file is used to define the settings for feature extraction in the AUDIT library. Each key and its 
 usage is explained below:
@@ -432,23 +432,23 @@ command-line commands.
 
 
 ```bash
-auditapp feature-extractor --config path/to/your/feature_extractor/config/file.yaml
-auditapp metric-extractor --config path/to/your/metric_extractor/config/file.yaml
+auditapp feature-extraction --config path/to/your/feature_extraction/config/file.yaml
+auditapp metric-extraction --config path/to/your/metric_extraction/config/file.yaml
 ```
 
 ### 4.2. For developers
 
-If you are using the developer mode of AUDIT (installed via the repository), you can directly run the feature extractor 
-and metric extractor modules as follows:
+If you are using the developer mode of AUDIT (installed via the repository), you can directly run the feature extraction 
+and metric extraction modules as follows:
 
 ```bash
-python src/audit/feature_extractor.py --config path/to/your/feature_extractor/config/file.yml
-python src/audit/metric_extractor.py --config path/to/your/metric_extractor/config/file.yml
+python src/audit/feature_extraction.py --config path/to/your/feature_extraction/config/file.yml
+python src/audit/metric_extraction.py --config path/to/your/metric_extraction/config/file.yml
 ```
 
 In developer mode, specifying the --config parameter is optional. Instead, you can edit the default configuration files
 provided by the library to suit your needs. These files are located at AUDIT/src/audit/configs folder. Simply modify the 
-configuration files (feature_extractor.yml and metric_extractor.yml) to match your requirements before running the commands.
+configuration files (feature_extraction.yml and metric_extraction.yml) to match your requirements before running the commands.
 Additionally, **AUDIT provides config files** that allows users to run de APP by default. Some of the functionalies
 are then limited.
 

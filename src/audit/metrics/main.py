@@ -28,10 +28,10 @@ CUSTOM METRICS
 def check_multiprocessing(config_file):
     cpu_cores = config_file.get("cpu_cores")
     if cpu_cores is None or cpu_cores == "None":
-        logger.info("cpu_cores not specified or invalid in metric_extractor.yml file, defaulting to os.cpu_count()")
+        logger.info("cpu_cores not specified or invalid in metric_extraction.yml file, defaulting to os.cpu_count()")
         cpu_cores = os.cpu_count()
     if not isinstance(cpu_cores, int) or cpu_cores <= 0:
-        logger.info(f"Invalid cpu_cores value: {cpu_cores} in metric_extractor.yml file, defaulting to os.cpu_count()")
+        logger.info(f"Invalid cpu_cores value: {cpu_cores} in metric_extraction.yml file, defaulting to os.cpu_count()")
         cpu_cores = os.cpu_count()
     logger.info(f"Using {cpu_cores} CPU cores for processing")
     return cpu_cores

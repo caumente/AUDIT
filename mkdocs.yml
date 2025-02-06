@@ -34,15 +34,15 @@ nav:
   - AUDIT library: index.md
   - Getting started: Getting_started/getting_started.md
   - API reference:
-    - Feature extractor:
-      - Feature extractor: API_reference/features/feature_extractor.md
+    - Feature extraction:
+      - Feature extraction: API_reference/features/feature_extraction.md
       - Statistical features: API_reference/features/statistical.md
       - Texture features: API_reference/features/texture.md
       - Tumor features: API_reference/features/tumor.md
       - Spatial features: API_reference/features/spatial.md
-    - Metric extractor:
-      - Metric extractor: API_reference/metrics/metric_extractor.md
-      - Custom metrics: API_reference/metrics/custom_metrics.md
+    - Metric extraction:
+      - Metric extraction: API_reference/metrics/metric_extraction.md
+      - Custom metrics: API_reference/metrics/audit_metrics.md
     - Utils:
       - Utils: API_reference/utils/utils.md
       - Sequences: API_reference/utils/sequences.md

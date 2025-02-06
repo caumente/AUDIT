@@ -3,8 +3,8 @@ message: If you use this software, please cite the paper using these metadata.
 authors:
   - family-names: Aumente-Maestro
     given-names: Carlos
-    orcid: ......
-title: "AUDIT"
+    orcid: https://orcid.org/0000-0002-3710-3308
+title: "AUDIT: An open-source Python library for Analysis & evalUation Dashboard of artIficial inTelligence models"
 repository-code: "https://github.com/caumente/AUDIT"
 preferred-citation:
   type: article
@@ -14,7 +14,7 @@ preferred-citation:
     orcid: https://orcid.org/0000-0002-3710-3308
   - family-names: "Müller"
     given-names: "Michael"
-    orcid: ......
+    orcid:
   - family-names: "Remeseiro"
     given-names: "Beatriz"
     orcid: https://orcid.org/0000-0001-9265-253X
@@ -23,11 +23,11 @@ preferred-citation:
     orcid: https://orcid.org/0000-0002-1314-2441
   - family-names: "Reyes"
     given-names: "Mauricio"
-    orcid: .......
+    orcid: https://orcid.org/0000-0002-2434-9990
   doi: "......."
   issn: "......."
   journal: "......."
   pages: "......"
-  title: "AUDIT: ......."
+  title: "AUDIT: An open-source Python library for Analysis & evalUation Dashboard of artIficial inTelligence models."
   url: "https://www.sciencedirect.com/......"
-  year: 2024
+  year: 2025

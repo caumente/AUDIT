@@ -14,10 +14,10 @@ from audit.features.main import extract_features
 from audit.utils.commons.file_manager import load_config_file
 from audit.utils.commons.strings import configure_logging
 from audit.utils.commons.strings import fancy_print
-from audit.utils.commons.config_checks import check_feature_extractor_config
+from audit.utils.commons.config_checks import check_feature_extraction_config
 
 
-def run_feature_extractor(config_path):
+def run_feature_extraction(config_path):
     # Load the configuration file
     try:
         config = load_config_file(config_path)
@@ -25,7 +25,7 @@ def run_feature_extractor(config_path):
         logger.error(f"Failed to load config file from {config_path}: {e}")
         sys.exit(1)
 
-    check_feature_extractor_config(config)
+    check_feature_extraction_config(config)
 
     # config variables
     data_paths = config["data_paths"]
@@ -67,7 +67,7 @@ def main():
     )
     args = parser.parse_args()
 
-    run_feature_extractor(args.config)
+    run_feature_extraction(args.config)
 
 
 if __name__ == "__main__":

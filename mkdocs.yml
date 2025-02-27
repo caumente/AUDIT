@@ -32,7 +32,7 @@ theme:
 
 nav:
   - AUDIT library: index.md
-  - Getting started: Getting_started/getting_started.md
+  - Getting started: getting_started/getting_started.md
   - API reference:
     - Feature extraction:
       - Feature extraction: API_reference/features/feature_extraction.md
@@ -42,21 +42,27 @@ nav:
       - Spatial features: API_reference/features/spatial.md
     - Metric extraction:
       - Metric extraction: API_reference/metrics/metric_extraction.md
-      - Custom metrics: API_reference/metrics/audit_metrics.md
+      - Audit metrics: API_reference/metrics/audit_metrics.md
     - Utils:
-      - Utils: API_reference/utils/utils.md
       - Sequences: API_reference/utils/sequences.md
       - File manager: API_reference/utils/file_manager.md
-  - Dashboard:
-    - Home page: app/APP.md
-    - Univariate page: app/univariate.md
-    - Multivariate page: app/multivariate.md
+  - Analysis modes:
+    - Home page: app/home_page.md
+    - Univariate: app/univariate.md
+    - Multivariate: app/multivariate.md
+    - Segmentation error matrix: app/segmentation_error.md
+    - Single model performance: app/single_model.md
+    - Pairwise model performance: app/pairwise_model.md
+    - Multi-model performance: app/multi_model.md
+    - Longitudinal: app/longitudinal.md
+    - Subjects' exploration: app/subjects_exploration.md
+
   - Tutorials:
       - Preprocessing dataset: tutorials/preprocessing.md
       - Postprocessing segmentations: tutorials/postprocessing_segmentations.md
   - About:
     - License: about/LICENSE.md
-    - Release Notes: about/release-notes.md
+    - Release notes: about/release-notes.md
 
 plugins:
   - social

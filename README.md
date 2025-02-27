@@ -14,11 +14,11 @@
 
 ## Summary
 
-AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence, is a tool designed to analyze,
-visualize, and detect biases in brain MRI data and models. It provides tools for loading and processing MRI data,
-extracting relevant features, and visualizing model performance and biases in predictions. AUDIT presents the 
-following features:
-
+AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence, is a tool designed to provide
+researchers and developers an interactive way to better analyze and explore MRI datasets and segmentation models.
+Given its functionalities to extract the most relevant features and metrics from your several data sources, it
+allows for uncovering biases both intra and inter-dataset as well as within the model predictions. Some of the main
+capabilities of AUDIT are presented below:
 
 - **Data management**: Easily work and preprocess MRIs from various sources.
 - **Feature extraction**: Extract relevant features from the images and their segmentations for analysis.
@@ -29,10 +29,10 @@ following features:
 - **High compatibility**: Provides connection with tools like ITK-SNAP and other external tools.
 
 Details of our work are provided in [*our paper*](...........), **AUDIT**. We hope that 
-users will use *AUDIT* to gain novel insights into brain tumor segmentation field. 
-
+users will use *AUDIT* to gain novel insights into brain tumor segmentation field.
 
 ## Usage
+
 - **Home Page**: The main landing page of the tool.
 - **Univariate Analysis**: Exploration of individual variables to understand their distributions and discover
                            outliers in it.
@@ -48,14 +48,15 @@ users will use *AUDIT* to gain novel insights into brain tumor segmentation fiel
                                  accuracy.
 - **Subjects Exploration**: Detailed examination of individual subjects within the dataset.
 
-## Web AUDIT
+## Web app
 
 Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
 
-
 ## Getting Started
 
-For a more detailed exploration of AUDIT, please check our [*official documentation*](https://github.com/caumente/AUDIT)
+AUDIT library can be installed either from our repository or PYPI repository through the command _pip install auditapp_. 
+Here we will show how to do it following the first approach. For a more detailed exploration of AUDIT, please check our 
+[*official documentation*](https://github.com/caumente/AUDIT).
 
 ### 1 Installation 
 
@@ -83,13 +84,16 @@ Edit the config files in `./src/audit/configs/` directory to set up the paths fo
 
 
 <details>
-  <summary><strong>2.1. Feature extraction config</strong></summary>
+  <summary><strong>2.1. Feature extraction config file</strong></summary>
 
 ```yaml
 # Paths to all the datasets
 data_paths:
-  dataset_1: '/home/user/AUDIT/datasets/dataset_1/dataset_1_images'
-  dataset_N: '/home/user/AUDIT/datasets/dataset_N/dataset_N_images'
+  BraTS2020: '/home/usr/AUDIT/datasets/BraTS2020/BraTS2020_images'
+  BraTS2024_PED: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
+  BraTS2024_SSA: '/home/usr/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
+  UCSF: '/home/usr/AUDIT/datasets/UCSF/UCSF_images'
+  LUMIERE: '/home/usr/AUDIT/datasets/LUMIERE/LUMIERE_images'
 
 # Sequences available
 sequences:
@@ -108,36 +112,42 @@ labels:
 # List of features to extract
 features:
   statistical: true
-  texture: false
-  spatial: false
-  tumor: false
+  texture: true
+  spatial: true
+  tumor: true
 
 # Longitudinal study settings
-#longitudinal:
-#  dataset_N:
-#    pattern: "_"            # Pattern used for splitting filename
-#    longitudinal_id: 1      # Index position for the subject ID after splitting the filename
-#    time_point: 2           # Index position for the time point after splitting the filename
-
+longitudinal:
+  UCSF:
+    pattern: "_"            # Pattern used for splitting filename
+    longitudinal_id: 1      # Index position for the subject ID after splitting the filename. Starting by 0
+    time_point: 2           # Index position for the time point after splitting the filename. Starting by 0
+  LUMIERE:
+    pattern: "-"
+    longitudinal_id: 1
+    time_point: 3
 
 # Path where extracted features will be saved
 output_path: '/home/usr/AUDIT/outputs/features'
 logs_path: '/home/usr/AUDIT/logs/features'
+
+# others
+cpu_cores: 8
 ```
 </details>
 
 
 <details>
-  <summary><strong>2.2. Metric extraction config</strong></summary>
+  <summary><strong>2.2. Metric extraction config file</strong></summary>
 
 ```yaml
 # Path to the raw dataset
-data_path: '/home/carlos/AUDIT/datasets/dataset_1/dataset_1_images'
+data_path: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
 
 # Paths to model predictions
 model_predictions_paths:
-  model_1: '/home/user/AUDIT/datasets/dataset_1/dataset_1_seg/model_1'
-  model_M: '/home/user/AUDIT/datasets/dataset_1/dataset_1_seg/model_M'
+  nnUnet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
+  SegResNet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/SegResNet'
 
 # Mapping of labels to their numeric values
 labels:
@@ -149,27 +159,30 @@ labels:
 # List of metrics to compute
 metrics:
   dice: true
-  jacc: false
-  accu: false
-  prec: false
-  sens: false
-  spec: false
-  haus: false
+  jacc: true
+  accu: true
+  prec: true
+  sens: true
+  spec: true
+  haus: true
+  size: true
 
 # Library used for computing all the metrics
-package: custom
-calculate_stats: false
+package: audit
 
 # Path where output metrics will be saved
-output_path: '/home/user/AUDIT/outputs/metrics'
-filename: 'LUMIERE'
-logs_path: '/home/user/AUDIT/logs/metric'
+output_path: '/home/usr/AUDIT/outputs/metrics'
+filename: 'BraTS2024_PED'
+logs_path: '/home/usr/AUDIT/logs/metric'
+
+# others
+cpu_cores: 8
 ```
 </details>
 
 
 <details>
-  <summary><strong>2.3. APP config</strong></summary>
+  <summary><strong>2.3. APP config file</strong></summary>
 
 ```yaml
 # Sequences available. First of them will be used to compute properties like spacing
@@ -187,40 +200,47 @@ labels:
   NEC: 2
 
 # Root path for datasets, features extracted, and metrics extracted
-datasets_path: '/home/user/AUDIT/datasets'
-features_path: '/home/user/AUDIT/outputs/features'
-metrics_path: '/home/user/AUDIT/outputs/metrics'
+datasets_path: './datasets'  # '/home/usr/AUDIT/datasets'
+features_path: './outputs/features'  # '/home/usr/AUDIT/outputs/features'
+metrics_path: './outputs/metrics'  # '/home/usr/AUDIT/outputs/metrics'
 
 # Paths for raw datasets
 raw_datasets:
-  dataset_1: "${datasets_path}/dataset_1/dataset_1_images"
-  dataset_N: "${datasets_path}/dataset_N/dataset_N_images"
+  BraTS2020: "${datasets_path}/BraTS2020/BraTS2020_images"
+  BraTS2024_SSA: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_images"
+  BraTS2024_PED: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_images"
+  UCSF: "${datasets_path}/UCSF/UCSF_images"
+  LUMIERE: "${datasets_path}/LUMIERE/LUMIERE_images"
 
 # Paths for feature extraction CSV files
 features:
-  dataset_1: "${features_path}/extracted_information_dataset_1.csv"
-  dataset_N: "${features_path}/extracted_information_dataset_N.csv"
+  BraTS2020: "${features_path}/extracted_information_BraTS2020.csv"
+  BraTS2024_SSA: "${features_path}/extracted_information_BraTS2024_SSA.csv"
+  BraTS2024_PED: "${features_path}/extracted_information_BraTS2024_PED.csv"
+  UCSF: "${features_path}/extracted_information_UCSF.csv"
+  LUMIERE: "${features_path}/extracted_information_LUMIERE.csv"
 
 # Paths for metric extraction CSV files
 metrics:
-  dataset_1: "${metrics_path}/extracted_information_dataset_1.csv"
-  dataset_N: "${metrics_path}/extracted_information_dataset_N.csv"
+  BraTS2024_SSA: "${metrics_path}/extracted_information_BraTS2024_SSA.csv"
+  BraTS2024_PED: "${metrics_path}/extracted_information_BraTS2024_PED.csv"
+  UCSF: "${metrics_path}/extracted_information_UCSF.csv"
+  LUMIERE: "${metrics_path}/extracted_information_LUMIERE.csv"
 
 # Paths for models predictions
 predictions:
-  dataset_1:
-    model_1: "${datasets_path}/dataset_1/dataset_1_seg/model_1"
-    model_M: "${datasets_path}/dataset_1/dataset_1_seg/model_M"
-  dataset_N:
-    model_1: "${datasets_path}/dataset_N/dataset_N_seg/model_1"
-    model_M: "${datasets_path}/dataset_N/dataset_N_seg/model_M"
+  BraTS2024_SSA:
+    nnUnet: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS2024_SSA/BraTS2024_SSA_seg/SegResNet"
+  BraTS2024_PED:
+    nnUnet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/nnUnet"
+    SegResNet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/SegResNet"
 ```
 </details>
 
-
 ### 3. Run AUDIT backend
 
-Use the following commands to run the *Feature extraction* and *Metric extraction* scripts:
+Use the following commands to run the *Feature extraction* and *Metric extraction* scripts from your terminal:
 
 ```bash
 python src/audit/feature_extraction.py
@@ -231,29 +251,28 @@ python src/audit/metric_extraction.py
 ```
 
 A _logs_ folder will be created after running each of the scripts to keep track of the execution. All the output files 
-will be stored in the folder defined in the corresponding config file (by default in the _output_ folder).
+will be stored in the folder defined in the corresponding config file (by default in the _outputs_ folder).
 
 ### 4. Run AUDIT app
 
-Use the following streamlit command to run the APP and start the data exploration:
+AUDIT app is build on top of Streamlit library. Use the following command to run the APP and start the data exploration:
 
 ```bash
-python python src/audit/app/launcher.py
+python src/audit/app/launcher.py
 ```
 
 ### 5. Additional configurations
 
 #### 5.1. ITK-Snap
 
-AUDIT is prepared for opening cases with ITK-Snap while exploring the data in the different dashboards. However, the 
+AUDIT can be adjusted for opening cases with ITK-Snap while exploring the data in the different dashboards. The 
 ITK-Snap tool must have been installed and preconfigured before. Here we provide a simple necessary configuration to 
 use it in each operative system:
 
 <details>
   <summary><strong>5.1.1. On Mac OS</strong></summary>
 
-```bash
-```
+
 </details>
 
 
@@ -263,7 +282,6 @@ use it in each operative system:
 ```bash
 ```
 </details>
-
 
 
 ## Authors
@@ -282,7 +300,6 @@ Please feel free to contact us with any issues, comments, or questions.
 
 ## License
 Apache License 2.0
-
 
 
 

@@ -1,3 +1,3 @@
-# Multivariate Analysis
+# Multivariate feature analysis
 
 

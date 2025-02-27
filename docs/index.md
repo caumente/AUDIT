@@ -7,7 +7,7 @@
 
 
 <p align="center">
-    <em>AUDIT: An open-source Python library for comprehensive evaluation of brain tumor segmentation models and MRI analysis</em>
+    <em>AUDIT: An open-source Python library for comprehensive evaluation of medical image segmentation models and MRI datasets analysis</em>
 </p>
 
 
@@ -19,35 +19,39 @@
 
 ---
 
+Welcome to the official documentation for **AUDIT** (Analysis & evalUation Dashboard of artIficial inTelligence), a
+a tool designed to provide researchers and developers an interactive way to better analyze and explore MRI datasets and 
+segmentation models. Given its functionalities to extract the most relevant features and metrics from your several data 
+sources, it allows for uncovering biases both intra and inter-dataset as well as within the model predictions.
 
-Welcome to the official documentation for **AUDIT** (Analysis & evalUation Dashboard of artIficial inTelligence), a comprehensive Python library for the evaluation of brain tumor segmentation models and MRI dataset analysis. 
 
 ## 🚀 Key Features
 
-- **Robust Evaluation**: Extracts region-specific features and calculates a wide range of performance metrics.
-- **Interactive Visualizations**: Includes a dynamic Streamlit-based web app for intuitive data exploration.
-- **Customizable Analysis**: Easily extendable for additional features and metrics tailored to your needs.
-- **Integration-Friendly**: Supports plugins and external libraries for advanced analysis (e.g., ITK-SNAP, pymia).
+- **Robust evaluation**: Extracts region-specific features and calculates a wide range of performance metrics.
+- **Interactive visualizations**: Includes a dynamic Streamlit-based web app for intuitive data exploration.
+- **Highly customizable**: Easily extendable for additional features and metrics tailored to your needs.
+- **Friendly integration**: Supports plugins and external libraries for advanced analysis (e.g., ITK-SNAP, pymia).
 - **Open Source**: Fully available on GitHub with comprehensive tutorials and examples.
 
 ## 📚 What You'll Find Here
 
 This documentation is structured to help you get the most out of AUDIT:
 
-- **[Getting Started](Getting_started/getting_started.md)**: Learn how to install AUDIT and set up your first project.
+- **[Getting Started](getting_started/getting_started.md)**: Learn how to install AUDIT and set up your first project.
 - **[API Reference](API_reference/features/feature_extraction.md)**: Detailed reference for all library classes and methods.
-- **[Dashboard](app/APP.md)**: Explore the dashboard included in the web app.
-- **[Tutorials](tutorials/postprocessing_segmentations)**: Hands-on examples demonstrating common use cases.
-- **[About](about/release-notes.md)**: Check latest AUDIT release and license terms.
+- **[Analysis modes](app/home_page.md)**: Explore the dashboard included in the web app.
+- **[Tutorials](tutorials/preprocessing.md)**: Hands-on examples demonstrating common use cases.
+- **[About](about/LICENSE.md)**: Check latest AUDIT release and license terms.
 
 
 # 🌟 Quick Start
 
 The best way to get familiar with AUDIT and explore all its capabilities is through our interactive DEMO. You can find
-it at: <a href="https://auditapp.streamlit.app/" target="_blank">https://auditapp.streamlit.app/</a>
+it at: <a href="https://auditapp.streamlit.app/" target="_blank">https://auditapp.streamlit.app/</a>. 
 
+Users will find an online wep app with pre-configured data to explore features and compare the accuracy of a set of 
+medical image segmentation models. However, you could use AUDIT easily in your own computer by following a few little steps. 
 
-However, you could use AUDIT easily in your own computer by following a few little steps.
 
 **Install AUDIT** 
 
@@ -82,16 +86,12 @@ python src/audit/app/launcher.py
 ```
 
 That's it! You're ready to explore our default data and evaluate AI segmentations models with AUDIT. Go to 
-[Getting Started](Getting_started/getting_started.md) to learn more about how to use AUDIT with your own datasets and 
+[Getting Started](getting_started/getting_started.md) to learn more about how to use AUDIT with your own datasets and 
 configurations.
 
 
 # 🤝 Contributing
-Contributions are welcome! Please check the contributing guide for details on how to report issues, suggest new features, or contribute code.
+Contributions are welcome! Please check the contributing guide for details on how to report issues, suggest new features, 
+or contribute code.
 
-
-# 🔗 Links
-
-AUDIT is designed to address the unique challenges of evaluating AI in medical imaging, empowering researchers to 
-develop robust, clinically reliable solutions.
-License: Apache 2.0
+Feel free to reach out at [Contact Us](mailto:UO297103@uniovi.es).

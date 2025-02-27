@@ -1,10 +1,10 @@
-# Getting Started
+# Getting started
 
 Before installing AUDIT on your local computer, we recommend checking out the publicly deployed app on the Streamlit 
 Cloud server at https://auditapp.streamlit.app/.
 
-Users can familiarize themselves with AUDIT through this tool without needing to install anything. However, to make 
-extensive use of it and analyze your own datasets, you will need to follow the steps outlined below.
+Users can familiarize themselves with AUDIT through this tool without needing to install anything. When users are ready
+to make extensive use of it and analyze their own datasets, they will need to follow the steps outlined below.
 
 ---
 
@@ -15,28 +15,28 @@ regularly in their projects, we recommend the "For Developers" option, as it all
 with new functionalities. For users who do not want to have all the code on their local machine, there is the 
 "For Standard Users" option.
 
-The "For Developers" option is not necessarily more complex and, in fact, is the one recommended by the developers.
+The "For Developers" option is not necessarily more complex and, in fact, is the one recommended by the authors.
 
 ### 1.1 For standard users - Using PIP
-Install AUDIT directly from PyPI (when available): 
+
+Install the latest available AUDIT version directly from PyPI (when available) through the following command: 
 
 ```bash
-pip install AUDIT
+pip install auditapp
 ```
 
-This is the simplest method if you just want to use the library without modifying the source code.
+This is the simplest method if you just want to use the library without modifying the source code. However, 
+configuration files and project structure still need to be set up.
 
 ---
 
 ### 1.2. For developers - Using AUDIT repository
 
-For development or if you need access to the latest updates, install AUDIT from the repository. 
-If you do not have the Poetry library for dependency management, you should choose option 1.2.1. However, if you are 
+For development or if you need access to the latest updates, install AUDIT from our repository. 
+If you do not use Poetry for dependency management, you should choose option 1.2.1. However, if you are 
 familiar with Poetry, select option 1.2.2.
 
 #### 1.2.1. Without using Poetry for dependency management
-
-For development or if you need access to the latest updates, install AUDIT from the repository:
 
 1. **Create an isolated environment** (recommended for avoiding dependency conflicts):  
     
@@ -57,7 +57,6 @@ For development or if you need access to the latest updates, install AUDIT from 
     ```bash
     pip install -r requirements.txt
     ```
-
 ---
 
 #### 1.2.2. Using Poetry for dependency management
@@ -66,7 +65,7 @@ Poetry is a dependency manager that simplifies library management and environmen
 
 1. **Ensure Poetry is installed** in your environment.
 
-2. **Clone the repository**:  
+2. **Clone AUDIT's repository**:  
 
 ```bash
 git clone git@github.com:caumente/AUDIT.git
@@ -89,13 +88,12 @@ poetry shell
 ### 1.3. Conclusion
 
 The authors recommend following the developer option, as it provides greater flexibility for users once they are 
-familiar with the use of AUDIT. Additionally, our repository includes example cases, the required project structure, 
+familiar with the use of AUDIT. Additionally, our repository includes example cases, a specific project structure, 
 and certain outputs. This simplifies interaction with the AUDIT app right from the start of its use.
-
 
 ---
 
-## 2. Project Structure and Guidelines
+## 2. Project structure and guidelines
 
 AUDIT supports various project structures, but it is highly recommended to adhere to the default structure for clarity, 
 ease of use, and ensuring correct functionality. This structure is intuitive, modular, and designed to facilitate
@@ -106,7 +104,7 @@ AUDIT Python library.
 
 ---
 
-### 2.1.Datasets Directory (`/datasets`)
+### 2.1.Datasets directory (`/datasets`)
 
 The `datasets` directory is the cornerstone of the project, containing all datasets used for both training and testing 
 models. Each dataset is organized into subdirectories, making it straightforward to store images, ground truth 
@@ -123,6 +121,7 @@ your_project/
 │   │   │   │   ├── dataset_1_case_1_t2.nii.gz
 │   │   │   │   ├── dataset_1_case_1_flair.nii.gz
 │   │   │   │   ├── dataset_1_case_1_seg.nii.gz
+│   │   │   ├── dataset_1_case_2/
 │   │   │   ......
 │   │   ├── dataset_1_seg/
 │   │   │   ├── model_1/
@@ -139,20 +138,25 @@ your_project/
 
 **Explanation of Components**
 
-- **`dataset_1/`:** Each dataset is stored in its own subdirectory (e.g., `dataset_1`, `dataset_2`, etc.).
-- **`dataset_1_images/`:** This folder contains all image data for the dataset. Subfolders represent individual cases (e.g., `dataset_1_case_1`), and each case includes its respective sequences, such as T1, T1ce, T2, FLAIR, and segmentation (ground truth).
-- **`dataset_1_seg/`:** This directory stores predictions made on the dataset by different models. Each model has its own subdirectory (e.g., `model_1`, `model_2`), and within each, predictions for every case are organized similarly to the ground truth images.
+- **`dataset_1/`:** Each dataset is stored in its own directory (e.g., `dataset_1`, `dataset_2`, etc.).
+- **`dataset_1_images/`:** This folder contains all image data for the dataset. Subfolders represent individual cases 
+                           (e.g., `dataset_1_case_1`), and each case includes its respective sequences, such as T1, 
+                           T1ce, T2, FLAIR, and segmentation (ground truth).
+- **`dataset_1_seg/`:** This directory stores predictions made on the dataset by different models. Each model has its 
+                        own subdirectory (e.g., `model_1`, `model_2`), and within each, predictions for every case are 
+                        organized similarly to the ground truth images. The **extension __pred_ is a reserved word** in 
+                        AUDIT library for model predictions.
 
-This design supports multi-center and multi-model comparisons by storing predictions from various models alongside the 
+This design supports multi-center and multi-model comparisons by storing predictions from several models alongside the 
 original data. Please, find an example of this folder in the following link: 
 [dummy dataset folder](https://github.com/caumente/AUDIT/tree/main/datasets).
 
 ---
 
-### 2.2. Configuration Directory (`config/`)
+### 2.2. Configuration directory (`config/`)
 
-The `config` directory houses all configuration files required to run and evaluate models in AUDIT. Configurations are 
-categorized into features and metrics, ensuring modularity and ease of customization. 
+The `config` directory houses all configuration files required to run feature and metric extraction as well as the web
+app. 
 
 ```
 your_project/
@@ -162,12 +166,12 @@ your_project/
 │   ├── app.yaml
 ```
 
-Each of the config files are carefully described in section 3. Please, find an example of each of the 
+Each of the config files are carefully described in section 3. Configuration. Please, find an example of each of the 
 config files in the following link: [dummy config files](https://github.com/caumente/AUDIT/tree/main/src/audit/configs).
 
 ---
 
-### 2.3. Outputs Directory (`outputs/`)
+### 2.3. Outputs directory (`outputs/`)
 
 The `outputs` directory is where all results generated by the project are stored. This includes extracted features and 
 metrics calculated during model evaluation.

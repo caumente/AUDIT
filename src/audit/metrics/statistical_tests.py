@@ -1,11 +1,9 @@
-from itertools import combinations
-
 import numpy as np
-from scipy.stats import kruskal
 from scipy.stats import mannwhitneyu
 from scipy.stats import shapiro
 from scipy.stats import ttest_rel
 from scipy.stats import wilcoxon
+from scipy.stats import levene
 from statsmodels.stats.diagnostic import lilliefors
 
 
@@ -199,6 +197,41 @@ def lilliefors_test(sample, alpha=0.05):
     }
 
 
+def levene_variance_test(groups, alpha=0.05):
+    """
+    Perform Levene's test to assess the equality of variances (homoscedasticity) across groups.
+
+    Parameters:
+    - groups (list of array-like): List of groups (each a sequence of numeric values).
+    - alpha (float): Significance level for the test.
+
+    Returns:
+    - dict: A dictionary with test statistic, p-value, and interpretation.
+    """
+    if len(groups) < 2:
+        raise ValueError("At least two groups are required for Levene's test.")
+
+    stat, p_value = levene(*groups)
+
+    # Format output
+    stat_sci = f"{stat:.3e}"
+    p_value_sci = f"{p_value:.3e}"
+
+    if p_value <= alpha:
+        interpretation = "Null hypothesis rejected: variances are not equal (heteroscedasticity)."
+        homoscedastic = False
+    else:
+        interpretation = "Fail to reject null hypothesis: variances are equal (homoscedasticity)."
+        homoscedastic = True
+
+    return {
+        "Statistic": stat_sci,
+        "P-value": p_value_sci,
+        "Homoscedastic": homoscedastic,
+        "Null hypothesis interpretation": interpretation
+    }
+
+
 def normality_test(data, alpha=0.05, threshold_observations=50):
     """
     Check the normality of data using Shapiro-Wilk or Lilliefors test based on the sample size.
@@ -228,3 +261,18 @@ def normality_test(data, alpha=0.05, threshold_observations=50):
     output.update(result)
 
     return output
+
+
+def homoscedasticity_test(*groups, alpha=0.05):
+    """
+    Wrapper for checking homoscedasticity across input groups using Levene's test.
+
+    Parameters:
+    - groups: Multiple groups of data as positional arguments.
+    - alpha (float): Significance level.
+
+    Returns:
+    - dict: Result dictionary from Levene's test, including interpretation.
+    """
+    return levene_variance_test(groups=list(groups), alpha=alpha)
+

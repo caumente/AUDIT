@@ -19,6 +19,7 @@ from audit.app.util.constants.descriptions import PairwiseModelPerformanceCompar
 from audit.app.util.constants.metrics import Metrics
 from audit.metrics.commons import calculate_improvements
 from audit.metrics.statistical_tests import normality_test
+from audit.metrics.statistical_tests import homoscedasticity_test
 from audit.metrics.statistical_tests import paired_ttest
 from audit.metrics.statistical_tests import wilcoxon_test
 from audit.utils.commons.file_manager import read_datasets_from_dict
@@ -90,11 +91,10 @@ class PairwiseModelPerformance(BasePage):
 
                 # Perform statistical test
                 if setup_statistical_test():
-                    sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model = self.perform_normality_test(
-                        df_stats, selected_set, selected_metric, ba_model, be_model
+                    sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
+                        self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
                     )
-
-                    self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, sample_bm, sample_nm)
+                    self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
 
                     setup_button_data_download(df_stats)
 
@@ -173,7 +173,7 @@ class PairwiseModelPerformance(BasePage):
 
         return fig
 
-    def perform_normality_test(self, data, selected_set, selected_metric, baseline_model, benchmark_model):
+    def perform_parametric_assumptions_test(self, data, selected_set, selected_metric, baseline_model, benchmark_model):
         st.markdown("""**Performing normality test:**""")
         col1, col2 = st.columns(2)
         df_wide = data[data.set == selected_set][["ID", "model", self.metrics.get_metrics().get(selected_metric, None)]]
@@ -194,25 +194,36 @@ class PairwiseModelPerformance(BasePage):
             st.table(pd.DataFrame(normality_test_ben_model.items(), columns=["Metric", "Benchmark model"]).set_index("Metric"))
             st.plotly_chart(self.visualize_histogram(df_wide, benchmark_model), theme="streamlit", use_container_width=True, scrolling=True)
 
-        return sample_baseline_model, sample_benchmark_model, normality_test_bas_model, normality_test_ben_model
+        homoscedasticity = homoscedasticity_test(sample_baseline_model, sample_benchmark_model)
+
+        return sample_baseline_model, sample_benchmark_model, normality_test_bas_model, normality_test_ben_model, homoscedasticity
 
     @staticmethod
     def perform_statistical_test(
-        normality_test_baseline_model, normality_test_benchmark_model, sample_baseline_model, sample_benchmark_model
+            normality_test_baseline_model,
+            normality_test_benchmark_model,
+            homoscedasticity,
+            sample_baseline_model,
+            sample_benchmark_model
     ):
         st.markdown("""**Performing statistical test:**""")
-        if normality_test_baseline_model["Normally distributed"] and normality_test_benchmark_model["Normally distributed"]:
-            st.markdown("""
-            Both the baseline model sample and the benchmark model sample follow a normal distribution.
-            Therefore, the **Paired Student t-test** will be performed. This is a parametric test that compares two
-            **paired samples** normally distributed.""")
 
+        normal_baseline = normality_test_baseline_model["Normally distributed"]
+        normal_benchmark = normality_test_benchmark_model["Normally distributed"]
+        homoscedastic = homoscedasticity["Homoscedastic"]
+
+        if normal_baseline and normal_benchmark and homoscedastic:
+            st.markdown("""
+            Both the baseline and benchmark samples are normally distributed and have equal variances.
+            Therefore, the **Paired Student's t-test** will be performed. This parametric test compares two
+            **paired samples** under the assumptions of normality and homoscedasticity.
+            """)
             statistical_diff = paired_ttest(sample_a=sample_baseline_model, sample_b=sample_benchmark_model)
         else:
             st.markdown("""
-            Either the baseline model sample or the benchmark model sample does not follow a normal distribution.
-            Therefore, the **Wilcoxon signed-rank test** will be used. This is a non-parametric test that compares two
-            **paired samples** when normality cannot be assumed.
+            Either the samples do not follow a normal distribution or they do not have equal variances.
+            Therefore, the **Wilcoxon signed-rank test** will be used. This is a non-parametric test appropriate
+            when the assumptions of the t-test are not met.
             """)
 
             statistical_diff = wilcoxon_test(sample_a=sample_baseline_model, sample_b=sample_benchmark_model)

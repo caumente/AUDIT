@@ -12,8 +12,7 @@ You can access it here: [https://auditapp.streamlit.app](https://auditapp.stream
 
 Below is a short video that walks you through the homepage interface:
 
-<iframe width="720" height="405" src="https://youtu.be/ZSiwRmx6vxA" title="AUDIT Home Page Walkthrough" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+[![Watch the video](https://img.youtube.com/vi/ZSiwRmx6vxA/0.jpg)](https://www.youtube.com/watch?v=ZSiwRmx6vxA)
 
 ---
 

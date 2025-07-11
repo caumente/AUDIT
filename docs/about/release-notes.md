@@ -1,44 +1,31 @@
-# Release Notes - Version 0.1.0
-
-## Release Date: [Insert Date]
-
----
-
-## Introduction
-
-Welcome to the first release of our segmentation model evaluation and MRI data analysis library! In this initial 
-version, we have focused on providing an intuitive and efficient experience through interactive visualizations and 
-preprocessing tools.
+# 🧾 Release Notes – AUDIT v0.1.0  
+📅 **Release date**: July 10, 2025
 
 ---
 
-## Key Features
-
-
----
-
-## Technical Enhancements
-
+We’re excited to announce the first public release of **AUDIT**, a lightweight and interactive Python tool for 
+evaluating **medical image segmentation models**, especially on **MRI datasets**.  
+This version focuses on enabling fast exploration and quality control with minimal setup, bridging model developers 
+and researchers.
 
 ---
 
-## External Contributions
+## 📬 Get Involved
 
-We are grateful to the following libraries and tools that make this application possible:
-- **Streamlit**: For rapid development of interactive web interfaces.
-- **Plotly**: For advanced and interactive visualizations.
-- **ITK-SNAP**: For exploring medical data cases seamlessly.
+- Try it: [auditapp.streamlit.app](https://auditapp.streamlit.app)  
+- Read the docs: [caumente.github.io](https://caumente.github.io)  
+- Contribute or report bugs: [github.com/caumente/audit](https://github.com/caumente/audit)
 
----
-
-## Future Roadmap
-
-For upcoming versions, we plan to:
-- Introduce advanced customization options for plots.
-- 
+Thank you for trying AUDIT — let’s improve medical segmentation evaluation together!
 
 ---
 
-Thank you for using our tool! Please share your feedback and suggestions to help us improve.
+## 🙌 Acknowledgements
 
----
+Built on top of an amazing open-source ecosystem:
+
+- [Streamlit](https://streamlit.io) – rapid UIs  
+- [Plotly](https://plotly.com) – interactive graphs  
+- [NiBabel](https://nipy.org/nibabel) – neuroimaging I/O  
+- [ITK-SNAP](http://www.itksnap.org) – image inspection
+

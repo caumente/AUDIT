@@ -38,8 +38,8 @@ sources, it allows for uncovering biases both intra and inter-dataset as well as
 This documentation is structured to help you get the most out of AUDIT:
 
 - **[Getting Started](getting_started/getting_started.md)**: Learn how to install AUDIT and set up your first project.
-- **[API Reference](API_reference/features/feature_extraction.md)**: Detailed reference for all library classes and methods.
-- **[Analysis modes](app/home_page.md)**: Explore the dashboard included in the web app.
+- **[API Reference](API_reference/features/index.md)**: Detailed reference for all library classes and methods.
+- **[Analysis modes](analysis_modes/home_page.md)**: Explore the dashboard included in the web app.
 - **[Tutorials](tutorials/preprocessing.md)**: Hands-on examples demonstrating common use cases.
 - **[About](about/LICENSE.md)**: Check latest AUDIT release and license terms.
 

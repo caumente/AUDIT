@@ -1,14 +1,22 @@
 site_name: AUDIT - Analysis & Evaluation Dashboard of Artificial Intelligence
 site_url: https://caumente.github.io/AUDIT/
+site_description: "Documentation for AUDIT — an open-source tool to evaluate medical image segmentation models."
+#repo_name: caumente/AUDIT
+#repo_url: https://github.com/caumente/AUDIT
+
 theme:
   name: material
   logo: assets/lupa2.png
   favicon: assets/favicon.ico
   features:
+    - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
 #    - navigation.sections
-    - toc.integrate
+    - navigation.indexes
+    - navigation.footer
+    - toc.follow
+#    - toc.integrate
     - navigation.top
     - search.suggest
     - search.highlight
@@ -35,7 +43,7 @@ nav:
   - Getting started: getting_started/getting_started.md
   - API reference:
     - Feature extraction:
-      - Feature extraction: API_reference/features/feature_extraction.md
+      - API_reference/features/index.md
       - Statistical features: API_reference/features/statistical.md
       - Texture features: API_reference/features/texture.md
       - Tumor features: API_reference/features/tumor.md
@@ -47,15 +55,15 @@ nav:
       - Sequences: API_reference/utils/sequences.md
       - File manager: API_reference/utils/file_manager.md
   - Analysis modes:
-    - Home page: app/home_page.md
-    - Univariate: app/univariate.md
-    - Multivariate: app/multivariate.md
-    - Segmentation error matrix: app/segmentation_error.md
-    - Single model performance: app/single_model.md
-    - Pairwise model performance: app/pairwise_model.md
-    - Multi-model performance: app/multi_model.md
-    - Longitudinal: app/longitudinal.md
-    - Subjects' exploration: app/subjects_exploration.md
+    - Home page: analysis_modes/home_page.md
+    - Univariate: analysis_modes/univariate.md
+    - Multivariate: analysis_modes/multivariate.md
+    - Segmentation error matrix: analysis_modes/segmentation_error.md
+    - Single model performance: analysis_modes/single_model.md
+    - Pairwise model performance: analysis_modes/pairwise_model.md
+    - Multi-model performance: analysis_modes/multi_model.md
+    - Longitudinal: analysis_modes/longitudinal.md
+    - Subjects' exploration: analysis_modes/subjects_exploration.md
 
   - Tutorials:
       - Preprocessing dataset: tutorials/preprocessing.md
@@ -72,16 +80,63 @@ extra:
   social:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/caumente/AUDIT
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/@AUDITapp
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to improve your user experience and help us enhance the AUDIT documentation and tools. By 
+      consenting, you support us in making AUDIT better for everyone.
+  analytics:
+    provider: google
+    property: G-9LHEEH0JK9
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: Very helpful
+          data: 5
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-happy
+          name: Helpful
+          data: 4
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-neutral-outline
+          name: Neutral
+          data: 3
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-sad
+          name: Not very helpful
+          data: 2
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-sad-outline
+          name: Not helpful at all
+          data: 1
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+  generator: true
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
 
 markdown_extensions:
+  - toc
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - admonition
+  - pymdownx.details
+  - pymdownx.superfences
   - pymdownx.arithmatex:
       generic: true
   - footnotes
@@ -97,5 +152,7 @@ markdown_extensions:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
+
 copyright: |
-  &copy; 2024 <a href="https://github.com/caumente"  target="_blank" rel="noopener">Carlos Aumente Maestro</a>
+  &copy; Copyright 2025, Carlos Aumente-Maestro <br>
+  <a href="#__consent">Change cookie settings</a>

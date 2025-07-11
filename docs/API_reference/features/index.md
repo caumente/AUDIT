@@ -1,5 +1,6 @@
 [//]: # (::: src.feature_extraction)
 
+# Feature extraction
 
 This `feature extraction` pipeline is designed to process medical imaging datasets, specifically MRI scans, to extract a 
 wide range of features including spatial, tumor-related, statistical, and texture-based characteristics. The pipeline 

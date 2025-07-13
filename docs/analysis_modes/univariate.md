@@ -121,7 +121,7 @@ individual data points.
 Displays the median, interquartile range, and potential outliers for each group.  
 Useful for comparing central tendency and variability between datasets.
 
-> ![Box plot comparing feature distributions across datasets.](../assets/dashboards_examples/box.svg)
+> ![Box plot comparing feature distributions across datasets.](../assets/dashboards_examples/univariate/box.svg)
 > *Figure 1:* This box plot summarizes the subject-level distribution of a selected feature across multiple datasets, showing median, quartiles, and outliers.
 
 
@@ -131,7 +131,7 @@ Extends the boxplot with a mirrored kernel density estimation, offering insight 
 (e.g., multimodality or skewness).  
 Great for identifying subtle differences between groups.
 
-> ![Violin plot displaying feature distribution density across datasets.](../assets/dashboards_examples/violin.svg)
+> ![Violin plot displaying feature distribution density across datasets.](../assets/dashboards_examples/univariate/violin.svg)
 > *Figure 2:* Violin plots illustrate the full shape of feature distributions across datasets, useful for spotting multimodal or skewed distributions.
 
 
@@ -139,7 +139,7 @@ Great for identifying subtle differences between groups.
 ##### **Box + Points**
 Combines a boxplot with individual data points overlaid.  
 
-> ![Box plot with overlaid individual data points.](../assets/dashboards_examples/box_points.svg)
+> ![Box plot with overlaid individual data points.](../assets/dashboards_examples/univariate/box_points.svg)
 > *Figure 3:* Box + Points visualization combines summary statistics with subject-level markers, making it easier to spot trends or anomalies within groups.
 
 
@@ -152,14 +152,14 @@ This view focuses on the overall shape and structure of the feature distribution
 ##### **Probability Density (Smoothed Distribution)**
 Displays a smoothed estimate of the probability density function (PDF) for each dataset, often using kernel density estimation.
 
-> ![Smoothed probability density plots for each dataset.](../assets/dashboards_examples/probability_distribution.svg)
+> ![Smoothed probability density plots for each dataset.](../assets/dashboards_examples/univariate/probability_distribution.svg)
 > *Figure 4:* Probability density functions estimate the underlying shape of feature distributions, revealing subtle differences in central tendency and spread.
 
 
 ##### **Histogram**
 Shows the frequency of observations grouped into bins.
 
-> ![Histogram showing the binned frequency of feature values per dataset.](../assets/dashboards_examples/histogram.svg)
+> ![Histogram showing the binned frequency of feature values per dataset.](../assets/dashboards_examples/univariate/histogram.svg)
 > *Figure 5:* Histograms display the frequency distribution of a selected feature across datasets, allowing users to tune bin width for detailed or coarse analysis.
 
 
@@ -177,6 +177,7 @@ obscure relevant patterns.
 ---
 
 All plots are interactive, powered by _Plotly_, allowing users to:
+
 - Toggle datasets on and off
 - Zoom and pan within plots
 - Export high-resolution images

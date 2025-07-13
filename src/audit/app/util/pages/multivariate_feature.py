@@ -81,7 +81,7 @@ class MultivariateFeature(BasePage):
             color=color_axis,
             x_label=self.features.get_pretty_feature_name(x_axis),
             y_label=self.features.get_pretty_feature_name(y_axis),
-            legend_title=self.features.get_pretty_feature_name(y_axis) if color_axis != "Dataset" else None,
+            legend_title=self.features.get_pretty_feature_name(color_axis) if color_axis != "Dataset" else None,
             highlight_point=highlight_subject,
             template=self.template
         )
@@ -106,7 +106,7 @@ class MultivariateFeature(BasePage):
                 color=color_axis,
                 x_label=self.features.get_pretty_feature_name(x_axis),
                 y_label=self.features.get_pretty_feature_name(y_axis),
-                legend_title=self.features.get_pretty_feature_name(y_axis) if color_axis != "Dataset" else None,
+                legend_title=self.features.get_pretty_feature_name(color_axis) if color_axis != "Dataset" else None,
                 highlight_point=highlight_subject,
                 template=self.template
             )

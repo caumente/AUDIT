@@ -93,21 +93,9 @@ extra:
     feedback:
       title: Was this page helpful?
       ratings:
-        - icon: material/emoticon-happy-outline
-          name: Very helpful
-          data: 5
-          note: >-
-            Thanks for your feedback! Please help us improve by
-            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
-        - icon: material/emoticon-happy
-          name: Helpful
-          data: 4
-          note: >-
-            Thanks for your feedback! Please help us improve by
-            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
-        - icon: material/emoticon-neutral-outline
-          name: Neutral
-          data: 3
+        - icon: material/emoticon-sad-outline
+          name: Not helpful at all
+          data: 1
           note: >-
             Thanks for your feedback! Please help us improve by
             filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
@@ -117,9 +105,21 @@ extra:
           note: >-
             Thanks for your feedback! Please help us improve by
             filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
-        - icon: material/emoticon-sad-outline
-          name: Not helpful at all
-          data: 1
+        - icon: material/emoticon-neutral-outline
+          name: Neutral
+          data: 3
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-happy
+          name: Helpful
+          data: 4
+          note: >-
+            Thanks for your feedback! Please help us improve by
+            filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.
+        - icon: material/emoticon-happy-outline
+          name: Very helpful
+          data: 5
           note: >-
             Thanks for your feedback! Please help us improve by
             filling out <a href="https://forms.gle/WDezrbJiaJkpGDLMA" target="_blank" rel="noopener">this feedback form</a>.

@@ -119,7 +119,7 @@ class SingleModelPerformance(BasePage):
             fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
         selected_points = plotly_events(fig, click_event=True, override_height=None)
-        download_plot(fig, label="Univariate Analysis", filename="univariate_analysis")
+        download_plot(fig, label="Single model performance", filename="single_model_performance")
 
         return selected_points
 

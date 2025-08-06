@@ -75,17 +75,19 @@ class SegmentationErrorMatrixPage(ConstantsAPP):
         super().__init__()
 
         self.header = """Segmentation Error Matrix"""
-        self.sub_header = """**Description**: The figure below is a confusion matrix that visualizes the performance
-        of an AI segmentation model in labeling MRI image pixels. Each row represents the actual pixel class as labeled
-        by a neuro-radiologist, while each column represents the predicted pixel class by the AI model. The numbers in
-        the cells indicate the count/percentage of pixels for each actual-predicted class pair. A darker cell color
-        signifies a higher number of errors, highlighting the model's misclassifications."""
+        self.sub_header = """**Description**: The figure below shows a pseudo-confusion matrix that visualizes the 
+        performance of a segmentation model at the pixel level. It summarizes how frequently each ground truth label is 
+        misclassified as another class, helping identify common errors across anatomical structures or lesion subregions.
+        Unlike a standard confusion matrix, this visualization focuses specifically on misclassifications, correctly 
+        segmented pixels (true positives) are not shown. Each row corresponds to a true label, and each column to a 
+        predicted label. The matrix is row-normalized, so each row sums to 100%, making it easier to interpret
+         class-wise prediction errors. Darker cell colors indicate higher misclassification rates."""
 
         self.description = """
-        - **True Label**: Indicated along the rows, representing the actual pixel classifications.
-        - **Predicted Label**: Indicated along the columns, representing the AI model's pixel classifications.
-        - **Diagonal Cells**: Correct classifications where the predicted label matches the true label.
-        - **Off-Diagonal Cells**: Misclassifications where the predicted label differs from the true label.
+            - True Label (rows): Actual pixel class from the ground truth segmentation.
+            - Predicted Label (columns): Pixel class predicted by the model.
+            - Diagonal cells: Not shown. The matrix highlights only errors.
+            - Off-diagonal cells: Indicate how often a true label was wrongly predicted as another class.
         """
 
 
@@ -178,25 +180,30 @@ class LongitudinalAnalysisPage(ConstantsAPP):
 
         self.header = """Longitudinal analysis"""
         self.sub_header = """
-            **Description**: The following figures allow visualization of longitudinal data depicting the variation in
-            lesion size over time. Both lineplots are designed to provide insights into how well predicted lesion
-            sizes align with actual values over the course of multiple time points. Users can interact with the plot by
-            zooming, panning, and selecting specific data points to obtain more detailed information. This interactivity
-            enhances the analytical capabilities, allowing for a more thorough investigation of the data.
+        **Description**: This plot allows users to assess the evolution of lesion size over time and to evaluate 
+        how well predictions align with ground truth data. The graph presents lesion size (in mm³) along the 
+        vertical axis and six distinct timepoints along the horizontal axis. Two primary curves are displayed:
 
+        - Observed Lesion Size: Represents the actual measured lesion size for a given subject at each timepoint.
+        - Predicted Lesion Size: Represents the lesion size estimated by an AI model or predictive algorithm at the same timepoints.
 
-        ##### Relative Error in Lesion Size Estimation
-        This plot shows two lines representing actual lesion size and predicted lesion size over different time points.
-        Dashed lines between data points indicate the relative error in the lesion size estimation, displayed as a
-        percentage above each segment. Additionally, annotations highlight the percentage difference between actual
-        and predicted lesion sizes.
+        Between each pair of consecutive timepoints, percentage values are displayed above the 
+        solid lines. These values represent the relative growth or shrinkage in lesion size between two timepoints:
 
-            """
-        self.description = """
-        ##### Absolute Difference in Lesion Size Variation
-        This plot displays the absolute difference in variation between actual and predicted lesion sizes over different
-        time points. Slopes between consecutive points indicate the absolute difference in variation, annotated with
-        numerical values. Each line is color-coded to differentiate between observed and predicted lesion sizes.
+        - A positive percentage indicates an increase in lesion size (tumor progression).
+        - A negative percentage indicates a decrease in lesion size (tumor regression).
+
+        In addition to analyzing temporal changes, the plot highlights the discrepancy between observed and predicted 
+        lesion sizes using dotted vertical blue lines. Each of these dotted lines connects the predicted and observed 
+        values at a single timepoint and is annotated with a blue percentage, which quantifies the relative error in 
+        lesion size estimation at that time.
+        """
+
+        self.description = """       
+        Together, these visual elements offer a comprehensive overview of how lesion size changes over time and how 
+        well those changes are captured by predictive models. The plot is especially useful for identifying timepoints
+        where model predictions deviate significantly from actual measurements, enabling a more nuanced understanding 
+        of model performance in a longitudinal context.
         """
 
 

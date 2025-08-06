@@ -37,23 +37,22 @@ class SegmentationErrorMatrix(BasePage):
         # Setup sidebar
         selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,raw_datasets)
 
-        # Main visualization logic
-        normalized = st.checkbox(
-            "Normalized per ground truth label",
-            value=True,
-            help="It normalizes the errors per class, if enabled."
-        )
-
-        if selected_id == "All":
-            averaged = st.checkbox(
-                "Averaged per number of subjects",
-                value=True,
-                help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
-            )
 
         col1, col2 = st.columns([2, 2], gap="small")
         with col1:
-                st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
+            # Main visualization logic
+            normalized = st.checkbox(
+                "Normalized per ground truth label",
+                value=True,
+                help="It normalizes the errors per class, if enabled."
+            )
+
+            if selected_id == "All":
+                averaged = st.checkbox(
+                    "Averaged per number of subjects",
+                    value=True,
+                    help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
+                )
         with col2:
             customization_matrix = st.selectbox(label="Customize visualization",
                                                  options=["Standard visualization", "Custom visualization"],
@@ -84,7 +83,10 @@ class SegmentationErrorMatrix(BasePage):
             # run itk-snap
             visualize_itk = st.button("Visualize it in ITK-SNAP")
             if visualize_itk:
-                run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
+                try:
+                    run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
+                except:
+                    st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
 
     @staticmethod
     def setup_sidebar(predictions, raw_datasets):

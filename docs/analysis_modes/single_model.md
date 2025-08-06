@@ -22,6 +22,15 @@ The purpose of single model performance analysis is to:
 
 ---
 
+## 🎥 Demo video
+
+
+Below is a short video that walks you through the segmentation error matrix mode interface:
+
+[![Watch the video](https://img.youtube.com/vi/usqE4YibdfA/0.jpg)](https://youtu.be/usqE4YibdfA)
+
+---
+
 ## ⚙️ User Configuration
 
 ### 1. **Dataset selection**

@@ -20,8 +20,7 @@ The goals of segmentation error matrix analysis are to:
 
 Below is a short video that walks you through the segmentation error matrix mode interface:
 
-[//]: # ([![Watch the video]&#40;https://img.youtube.com/vi/tkXZVlTHgxE/0.jpg&#41;]&#40;https://www.youtube.com/watch?v=tkXZVlTHgxE&#41;)
-_Video soon_
+[![Watch the video](https://img.youtube.com/vi/KW24py449bo/0.jpg)](https://youtu.be/KW24py449bo)
 
 ---
 
@@ -35,7 +34,7 @@ same view. Instead, its purpose is to provide a focused and detailed evaluation 
 a specific dataset by analyzing which tumor subregions are well segmented and which are commonly misclassified.
 
 It is important that the segmentation labels and the ground truth labels must be aligned properly; otherwise, the 
-analysis mode will not work correctly. You can follow this [tutorial](tutorial) where it is explain how to modify the 
+analysis mode will not work correctly. You can follow this [tutorial](tutorial) where it is explained how to modify the 
 dataset labels to ensure proper alignment.
 
 !!! warning
@@ -82,7 +81,7 @@ The pseudo-confusion matrix shown in this mode is structured as follows:
 
 - **Rows** represent the ground truth (true) labels, indicating the actual pixel classifications.  
 - **Columns** represent the predicted labels output by the segmentation model, indicating the model’s pixel-wise classification.   
-- **Diagonal cells** correspond to correctly classified pixels, where the predicted label matches the true label.  
+- **Diagonal cells** correspond to correctly classified pixels, where the predicted label matches the true label. Not shown, the matrix highlights only errors.
 - **Off-diagonal cells** highlight misclassifications, where the predicted label differs from the true label.  
 
 !!! info

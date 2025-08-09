@@ -28,8 +28,7 @@ capabilities of AUDIT are presented below:
 - **Longitudinal analysis**: Track the model performance over different time points.
 - **High compatibility**: Provides connection with tools like ITK-SNAP and other external tools.
 
-Details of our work are provided in [*our paper*](...........), **AUDIT**. We hope that 
-users will use *AUDIT* to gain novel insights into brain tumor segmentation field.
+Details of our work are provided in our paper [*AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation*](https://doi.org/10.1016/j.cmpb.2025.108991), **AUDIT**. We hope that users will use *AUDIT* to gain novel insights into medical image segmentation field.
 
 ## Usage
 

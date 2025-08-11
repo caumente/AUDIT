@@ -4,9 +4,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "auditapp"
-version = "0.0.12"
+version = "0.1.0"
 description = "AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence"
-authors = ["Carlos Aumente <carlosaumente@gmail.com>"]
+authors = ["Carlos Aumente Maestro <carlosaumente@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/caumente/AUDIT"

@@ -1,15 +1,39 @@
 
-![alt text](https://github.com/caumente/AUDIT/blob/main/src/audit/app/util/images/AUDIT_medium.jpeg)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/caumente/AUDIT/main/src/audit/app/util/images/AUDIT_medium.jpeg" width="600">
+</p>
 
 
-<a href="https://github.com/caumente/AUDIT" title="Go to GitHub repo"><img src="https://img.shields.io/static/v1?label=caumente&message=AUDIT&color=e78ac3&logo=github" alt="caumente - AUDIT"></a>
-<a href="https://github.com/caumente/AUDIT"><img src="https://img.shields.io/github/stars/caumente/AUDIT?style=social" alt="stars - AUDIT"></a>
-<a href="https://github.com/caumente/AUDIT"><img src="https://img.shields.io/github/forks/caumente/AUDIT?style=social" alt="forks - AUDIT"></a>
+[![AUDIT](https://img.shields.io/static/v1?style=for-the-badge&label=caumente&message=AUDIT&color=099268&logo=github)](https://github.com/caumente/AUDIT)
+[![Release](https://img.shields.io/github/release/caumente/audit?style=for-the-badge&include_prereleases=&sort=semver&color=2ecc71)](https://github.com/caumente/audit/releases/)
+[![Docs](https://img.shields.io/badge/docs-User%20Guide-blue?style=for-the-badge&color=f4a261)](https://caumente.github.io/AUDIT/)
+[![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 
+[![Stars](https://img.shields.io/github/stars/caumente/AUDIT?style=for-the-badge&color=f1c40f)](https://github.com/caumente/AUDIT/stargazers)
+[![Forks](https://img.shields.io/github/forks/caumente/AUDIT?style=for-the-badge&color=3498db&logo=git&logoColor=white)](https://github.com/caumente/AUDIT/network/members)
+[![Contributors](https://img.shields.io/github/contributors/caumente/AUDIT?&style=for-the-badge&color=9b59b6)](https://github.com/caumente/AUDIT/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/caumente/audit?style=for-the-badge&color=e74c3c)](https://github.com/caumente/audit/issues)
+[![License](https://img.shields.io/badge/License-Apache_2.0-e78ac3?style=for-the-badge)](#license)
 
-<a href="https://github.com/caumente/audit/releases/"><img src="https://img.shields.io/github/release/caumente/audit?include_prereleases=&sort=semver&color=e78ac3" alt="GitHub release"></a>
-<a href="#license"><img src="https://img.shields.io/badge/License-Apache_2.0-e78ac3" alt="License"></a>
-<a href="https://github.com/caumente/audit/issues"><img src="https://img.shields.io/github/issues/caumente/audit" alt="issues - AUDIT"></a>
+## Table of Contents
+- [Summary](#summary)
+- [AUDIT workflow](#audit-workflow)
+- [AUDIT analysis modes](#audit-analysis-modes)
+- [Online Web application](#online-web-application)
+- [Getting Started](#getting-started)
+  - [1 Installation](#1-installation)
+  - [2 Configuration](#2-configuration)
+    - [2.1 Feature extraction config file](#21-feature-extraction-config-file)
+    - [2.2 Metric extraction config file](#22-metric-extraction-config-file)
+    - [2.3 APP config file](#23-app-config-file)
+  - [3 Run AUDIT backend](#3-run-audit-backend)
+  - [4 Run AUDIT app](#4-run-audit-app)
+  - [5 Additional configurations](#5-additional-configurations)
+    - [5.1 ITK-Snap](#51-itk-snap)
+      - [5.1.1 On Mac OS](#511-on-mac-os)
+      - [5.1.2 On Linux OS](#512-on-linux-os)
+- [Authors](#authors)
+- [License](#license)
 
 
 ## Summary
@@ -21,11 +45,21 @@ allows for uncovering biases both intra and inter-dataset as well as in the mode
 
 Details of our work are provided in our paper [*AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation*](https://doi.org/10.1016/j.cmpb.2025.108991). We hope that users will leverage AUDIT to gain novel insights into the field of medical image segmentation.
 
+<p align="center">
+  <a href="https://auditapp.streamlitapp.com">
+    <img src="https://img.shields.io/badge/Try%20it%20Online-AUDIT-099268?style=for-the-badge&logo=streamlit">
+  </a>
+</p>
+
+
 ## AUDIT workflow
 
 The diagram below illustrates the overall workflow of AUDIT, from input data to data visualization on the APP.
 
-![alt text](https://github.com/caumente/AUDIT/blob/main/src/audit/app/util/images/audit_workflow_compressed.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/caumente/AUDIT/main/src/audit/app/util/images/audit_workflow_compressed.png" width="1000">
+</p>
+
 
 For more details, please refer to the AUDIT paper.
 
@@ -75,8 +109,12 @@ Install the required packages:
 Edit the config files in `./src/audit/configs/` directory to set up the paths for data loading and other configurations:
 
 
+### 2.1 Feature extraction config file
+
+This configuration file is used to set paths, labels, features, and longitudinal study parameters for feature extraction in AUDIT.
+
 <details>
-  <summary><strong>2.1. Feature extraction config file</strong></summary>
+  <summary><strong>Show configuration</strong></summary>
 
 ```yaml
 # Paths to all the datasets
@@ -129,8 +167,12 @@ cpu_cores: 8
 </details>
 
 
+### 2.2 Metric extraction config file
+
+This configuration file defines the paths to datasets and model predictions, the labels, metrics to compute, and output paths for metric extraction in AUDIT.
+
 <details>
-  <summary><strong>2.2. Metric extraction config file</strong></summary>
+  <summary><strong>Show configuration</strong></summary>
 
 ```yaml
 # Path to the raw dataset
@@ -173,8 +215,12 @@ cpu_cores: 8
 </details>
 
 
+### 2.3 APP config file
+
+This configuration file sets up paths for datasets, extracted features, metrics, and model predictions. It also defines available sequences and label mappings used by the AUDIT application.
+
 <details>
-  <summary><strong>2.3. APP config file</strong></summary>
+  <summary><strong>Show configuration</strong></summary>
 
 ```yaml
 # Sequences available. First of them will be used to compute properties like spacing
@@ -227,6 +273,7 @@ predictions:
   BraTS2024_PED:
     nnUnet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/nnUnet"
     SegResNet: "${datasets_path}/BraTS2024_PED/BraTS2024_PED_seg/SegResNet"
+
 ```
 </details>
 
@@ -257,20 +304,28 @@ python src/audit/app/launcher.py
 #### 5.1. ITK-Snap
 
 AUDIT can be adjusted for opening cases with ITK-Snap while exploring the data in the different dashboards. The 
-ITK-Snap tool must have been installed and preconfigured before. Here we provide a simple necessary configuration to 
-use it in each operative system:
+ITK-Snap tool must have been installed and preconfigured before. Below are placeholders for the necessary configuration 
+for each operating system. **Information will be added soon.**
+
+#### 5.1.1. On Mac OS
 
 <details>
-  <summary><strong>5.1.1. On Mac OS</strong></summary>
+  <summary>show configuration</summary>
 
+⚠️ Configuration instructions for Mac OS are not available yet. Please check back later.
 
 </details>
 
+#### 5.1.2. On Linux OS
 
 <details>
-  <summary><strong>5.1.2. On Linux OS</strong></summary>
+  <summary>Show configuration</summary>
+
+⚠️ Configuration instructions for Linux OS are not available yet. Please check back later.
+
 
 ```bash
+# Placeholder for future configuration commands
 ```
 </details>
 

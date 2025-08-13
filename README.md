@@ -48,6 +48,15 @@ users will use *AUDIT* to gain novel insights into brain tumor segmentation fiel
                                  accuracy.
 - **Subjects Exploration**: Detailed examination of individual subjects within the dataset.
 
+
+## AUDIT workflow
+
+The diagram below illustrates the overall workflow of AUDIT, from input data to data visualization on the APP.
+
+![alt text](https://github.com/caumente/AUDIT/blob/main/src/audit/app/util/images/audit_workflow_compressed.png)
+
+For more details, please refer to the AUDIT paper.
+
 ## Web app
 
 Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.

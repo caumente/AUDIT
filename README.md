@@ -15,51 +15,36 @@
 ## Summary
 
 AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence, is a tool designed to provide
-researchers and developers an interactive way to better analyze and explore MRI datasets and segmentation models.
-Given its functionalities to extract the most relevant features and metrics from your several data sources, it
-allows for uncovering biases both intra and inter-dataset as well as within the model predictions. Some of the main
-capabilities of AUDIT are presented below:
+researchers and developers with an interactive way to better analyze and explore MRI datasets and segmentation models.
+Given its functionalities to extract the most relevant features and metrics from your multiple data sources, it
+allows for uncovering biases both intra and inter-dataset as well as in the model predictions.
 
-- **Data management**: Easily work and preprocess MRIs from various sources.
-- **Feature extraction**: Extract relevant features from the images and their segmentations for analysis.
-- **Model robustness**: Assess model generalization by evaluating its performance across several experiments
-                        and conditions.
-- **Bias detection**: Identify potential biases either in model predictions and performance or on your data.
-- **Longitudinal analysis**: Track the model performance over different time points.
-- **High compatibility**: Provides connection with tools like ITK-SNAP and other external tools.
+Details of our work are provided in our paper [*AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation*](https://doi.org/10.1016/j.cmpb.2025.108991). We hope that users will leverage AUDIT to gain novel insights into the field of medical image segmentation.
 
-Details of our work are provided in our paper [*AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation*](https://doi.org/10.1016/j.cmpb.2025.108991), **AUDIT**. We hope that users will use *AUDIT* to gain novel insights into medical image segmentation field.
-
-## Usage
+## AUDIT analysis modes:
 
 - **Home Page**: The main landing page of the tool.
-- **Univariate Analysis**: Exploration of individual variables to understand their distributions and discover
-                           outliers in it.
-- **Multivariate Analysis**: Examination of multiple variables simultaneously to explore relationships and
-                             hidden patterns.
-- **Segmentation Error Matrix**: A pseudo-confusion matrix displaying the errors associated with the
-                                 segmentation tasks.
-- **Model Performance Analysis**: Evaluation of the effectiveness and accuracy of a single model.
-- **Pairwise Model Performance Comparison**: Perform pair-wise comparisons between models to find statistical
-                                             significant differences.
-- **Multi-model Performance Comparison**: Comparative analysis of performance metrics across multiple models.
-- **Longitudinal Measurements**: Analysis of data collected over time to observe trends and changes on model
-                                 accuracy.
-- **Subjects Exploration**: Detailed examination of individual subjects within the dataset.
+- **Univariate**: Exploration of individual features to understand how they are distributed.
+- **Multivariate**: Analysis of multiple features simultaneously to explore relationships and hidden patterns.
+- **Segmentation error matrix**: Overview of disagreements between ground truth and predicted segmentation through a class-wise error matrix.
+- **Single model performance**: Evaluation of the performance of a single model based on extracted features.
+- **Pairwise model performance**: Perform pairwise comparisons between models to find statistically significant differences.
+- **Multi-model performance**: Comparative analysis of performance metrics across multiple models.
+- **Longitudinal measurements**: Analysis of data collected over time to observe trends and changes in model performance.
+- **Subjects' exploration**: Detailed examination of individual subjects within the dataset.
 
-## Web app
+## Online Web application
 
-Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
+The latest released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
 
 ## Getting Started
 
-AUDIT library can be installed either from our repository or PYPI repository through the command _pip install auditapp_. 
-Here we will show how to do it following the first approach. For a more detailed exploration of AUDIT, please check our 
-[*official documentation*](https://github.com/caumente/AUDIT).
+AUDIT can be installed either from our GitHub repository or from PyPI using the command _pip install auditapp_. In this guide, we will show how to install it from the GitHub repository.
+For a more detailed exploration of AUDIT, please check our [*official documentation*](https://caumente.github.io/AUDIT/getting_started/getting_started/).
 
 ### 1 Installation 
 
-Create an isolated Anaconda environment:
+Create an isolated Anaconda environment (recommended to avoid dependency conflicts):
 
 ```bash
 conda create -n audit_env python=3.10
@@ -239,7 +224,7 @@ predictions:
 
 ### 3. Run AUDIT backend
 
-Use the following commands to run the *Feature extraction* and *Metric extraction* scripts from your terminal:
+Use the following commands in your terminal to run the *Feature extraction* and *Metric extraction* scripts:
 
 ```bash
 python src/audit/feature_extraction.py
@@ -249,12 +234,11 @@ python src/audit/feature_extraction.py
 python src/audit/metric_extraction.py
 ```
 
-A _logs_ folder will be created after running each of the scripts to keep track of the execution. All the output files 
-will be stored in the folder defined in the corresponding config file (by default in the _outputs_ folder).
+After running either script, a _logs_ folder will be created to keep track of the execution. All output files will be stored in the folder defined in the corresponding config file (by default, in the _outputs_ folder).
 
 ### 4. Run AUDIT app
 
-AUDIT app is build on top of Streamlit library. Use the following command to run the APP and start the data exploration:
+AUDIT app is built on top of the Streamlit library. Use the following command to run the app and start exploring your data:
 
 ```bash
 python src/audit/app/launcher.py
@@ -287,15 +271,11 @@ use it in each operative system:
 
 Please feel free to contact us with any issues, comments, or questions.
 
-#### Carlos Aumente 
-
-- Email: <UO297103@uniovi.es>
-- GitHub: https://github.com/caumente
-
-#### Mauricio Reyes 
-#### Michael Muller 
-#### Jorge Díez 
-#### Beatriz Remeseiro 
+- Carlos Aumente  (<UO297103@uniovi.es>)
+- Mauricio Reyes 
+- Michael Muller 
+- Jorge Díez 
+- Beatriz Remeseiro 
 
 ## License
 Apache License 2.0

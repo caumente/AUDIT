@@ -21,6 +21,14 @@ allows for uncovering biases both intra and inter-dataset as well as in the mode
 
 Details of our work are provided in our paper [*AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation*](https://doi.org/10.1016/j.cmpb.2025.108991). We hope that users will leverage AUDIT to gain novel insights into the field of medical image segmentation.
 
+## AUDIT workflow
+
+The diagram below illustrates the overall workflow of AUDIT, from input data to data visualization on the APP.
+
+![alt text](https://github.com/caumente/AUDIT/blob/main/src/audit/app/util/images/audit_workflow_compressed.png)
+
+For more details, please refer to the AUDIT paper.
+
 ## AUDIT analysis modes:
 
 - **Home Page**: The main landing page of the tool.
@@ -35,7 +43,7 @@ Details of our work are provided in our paper [*AUDIT: An open-source Python lib
 
 ## Online Web application
 
-The latest released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
+Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.com for an online overview of its functionalities.
 
 ## Getting Started
 

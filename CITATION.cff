@@ -24,10 +24,10 @@ preferred-citation:
   - family-names: "Reyes"
     given-names: "Mauricio"
     orcid: https://orcid.org/0000-0002-2434-9990
-  doi: "......."
-  issn: "......."
-  journal: "......."
-  pages: "......"
-  title: "AUDIT: An open-source Python library for Analysis & evalUation Dashboard of artIficial inTelligence models."
-  url: "https://www.sciencedirect.com/......"
+  doi: "https://doi.org/10.1016/j.cmpb.2025.108991"
+  issn: "0169-2607"
+  journal: "Computer Methods and Programs in Biomedicine"
+  pages: "108991"
+  title: "AUDIT: An open-source Python library for AI model evaluation with use cases in MRI brain tumor segmentation"
+  url: "https://www.sciencedirect.com/science/article/pii/S0169260725004080"
   year: 2025

@@ -40,7 +40,13 @@ theme:
 
 nav:
   - AUDIT library: index.md
-  - Getting started: getting_started/getting_started.md
+  - Getting started: 
+    - Installation: getting_started/installation.md
+    - Project structure: getting_started/project_structure.md
+    - Configuration file: getting_started/configuration.md
+    - Run backend: getting_started/run_backend.md
+    - Run APP: getting_started/run_app.md
+    - Additional notes: getting_started/additional_notes.md
   - API reference:
     - Feature extraction:
       - API_reference/features/index.md
@@ -149,8 +155,8 @@ markdown_extensions:
   - pymdownx.mark
   - attr_list
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 
 copyright: |

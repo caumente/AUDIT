@@ -60,6 +60,66 @@ def calculate_confusion_matrix_elements(gt, seg):
     return tp, tn, fp, fn
 
 
+def f_beta_score(tp: float, fp: float, fn: float, beta: float = 1.0) -> float:
+    """
+    Computes the F_beta score.
+
+    Parameters:
+    - tp (float): True positives.
+    - fp (float): False positives.
+    - fn (float): False negatives.
+    - beta (float): Weight of recall in the combined score (default=1.0).
+
+    Returns:
+    - f_beta (float): F_beta score.
+    """
+    if tp == 0:
+        return np.nan
+    beta_sq = beta ** 2
+    return (1 + beta_sq) * tp / ((1 + beta_sq) * tp + beta_sq * fn + fp)
+
+
+def surface_distances(mask1: np.ndarray, mask2: np.ndarray, spacing: np.array = np.array([1, 1, 1])) -> np.ndarray:
+    """
+    Computes the distances from the surface of mask1 to mask2.
+    """
+    from scipy.ndimage import binary_erosion, distance_transform_edt
+    mask1 = mask1.astype(bool)
+    mask2 = mask2.astype(bool)
+    # Find surface voxels
+    surface1 = mask1 ^ binary_erosion(mask1)
+    surface2 = mask2 ^ binary_erosion(mask2)
+    # Distance transform
+    dt = distance_transform_edt(~surface2, sampling=spacing)
+    return dt[surface1]
+
+
+def assd(gt: np.ndarray, seg: np.ndarray, spacing: np.array = np.array([1, 1, 1])) -> float:
+    """
+    Computes the Average Symmetric Surface Distance (ASSD).
+    """
+    if np.sum(gt) == 0 and np.sum(seg) == 0:
+        return 0.0
+    if np.sum(gt) == 0 or np.sum(seg) == 0:
+        return np.nan
+    d1 = surface_distances(gt, seg, spacing)
+    d2 = surface_distances(seg, gt, spacing)
+    return (d1.mean() + d2.mean()) / 2
+
+
+def masd(gt: np.ndarray, seg: np.ndarray, spacing: np.array = np.array([1, 1, 1])) -> float:
+    """
+    Computes the Mean Average Surface Distance (MASD).
+    """
+    if np.sum(gt) == 0 and np.sum(seg) == 0:
+        return 0.0
+    if np.sum(gt) == 0 or np.sum(seg) == 0:
+        return np.nan
+    d1 = surface_distances(gt, seg, spacing)
+    d2 = surface_distances(seg, gt, spacing)
+    return np.concatenate([d1, d2]).mean()
+
+
 def calculate_metrics(
     ground_truth: np.ndarray,
     segmentation: np.ndarray,
@@ -108,7 +168,10 @@ def calculate_metrics(
             'accu': lambda: accuracy(tp, tn, fp, fn),
             'jacc': lambda: jaccard_index(tp, fp, fn, gt, seg),
             'prec': lambda: precision(tp, fp),
-            'size': lambda: Counter(seg.flatten()).get(1, np.nan) * spacing.prod()
+            'size': lambda: Counter(seg.flatten()).get(1, np.nan) * spacing.prod(),
+            'fbeta': lambda: f_beta_score(tp, fp, fn, beta=1.0),
+            'assd': lambda: assd(gt, seg, spacing),
+            'masd': lambda: masd(gt, seg, spacing)
         }
         for metric in metrics:
             if metric in available_metrics:

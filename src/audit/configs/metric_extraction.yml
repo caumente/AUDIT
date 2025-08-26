@@ -1,10 +1,10 @@
 # Path to the raw dataset
-data_path: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
+data_path: '/home/c062o/Documents/projects/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
 
 # Paths to model predictions
 model_predictions_paths:
-  nnUnet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
-  SegResNet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/SegResNet'
+  nnUnet: '/home/c062o/Documents/projects/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
+  SegResNet: '/home/c062o/Documents/projects/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/SegResNet'
 
 # Mapping of labels to their numeric values
 labels:
@@ -22,15 +22,18 @@ metrics:
   sens: true
   spec: true
   haus: true
+  fbeta: true
+  assd: true
+  masd: true
   size: true
 
 # Library used for computing all the metrics
 package: audit
 
 # Path where output metrics will be saved
-output_path: '/home/usr/AUDIT/outputs/metrics'
+output_path: '/home/c062o/Documents/projects/AUDIT/outputs/metrics'
 filename: 'BraTS2024_PED'
-logs_path: '/home/usr/AUDIT/logs/metric'
+logs_path: '/home/c062o/Documents/projects/AUDIT/logs/metric'
 
 # others
 cpu_cores: 12

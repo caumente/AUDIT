@@ -73,8 +73,11 @@ def f_beta_score(tp: float, fp: float, fn: float, beta: float = 1.0) -> float:
     Returns:
     - f_beta (float): F_beta score.
     """
-    if tp == 0:
+    if tp + fp + fn == 0:
         return np.nan
+    if tp == 0:
+        return 0.0
+
     beta_sq = beta ** 2
     return (1 + beta_sq) * tp / ((1 + beta_sq) * tp + beta_sq * fn + fp)
 

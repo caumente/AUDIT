@@ -1,48 +1,144 @@
 import os
 import re
 import shutil
-from typing import Any
 from pathlib import Path
+import importlib.resources as pkg_resources
 
 import pandas as pd
 import yaml
 
 
-def list_dirs(path: str) -> list:
+def create_project_structure(base_path: str = "./"):
     """
-    Lists all directories within a given root_dir and returns their names in sorted order.
+    Creates the project directory structure and copies default config files
+    from the installed `audit` package into the project's configs folder.
+
+    Structure:
+        your_project/
+        ├── datasets/
+        ├── configs/
+        ├── outputs/
+        ├── logs/
 
     Args:
-        path: The path root_dir where to look for subdirectories.
+        base_path (str): Root directory name. Default is './'.
+    """
+    subfolders = ["datasets", "configs", "outputs", "logs"]
+
+    base_path = Path(base_path)
+    target_configs_path = base_path / "configs"
+
+    try:
+        # Create project folders
+        for folder in subfolders:
+            os.makedirs(base_path / folder, exist_ok=True)
+
+        # Locate configs inside installed audit package
+        configs_dir = pkg_resources.files("audit") / "configs"
+
+        if not configs_dir.exists():
+            raise FileNotFoundError("Could not find 'configs' directory inside audit package")
+
+        # Copy *.yml files into project configs folder
+        for file in configs_dir.iterdir():
+            if file.suffix == ".yml":
+                dest_file = target_configs_path / file.name
+                if not dest_file.exists():  # don't overwrite existing configs
+                    shutil.copy(file, dest_file)
+
+        print(f"Project structure created under '{base_path}' with default config templates.")
+
+    except Exception as e:
+        print(
+            f"Error while creating project structure: {e}\n"
+            "Check the official documentation to replicate the needed project structure:\n"
+            "https://caumente.github.io/AUDIT/getting_started/project_structure/"
+        )
+
+
+def list_dirs(path: str, recursive: bool = False, full_path: bool = False, pattern: str = None) -> list:
+    """
+    Lists directories within a given root directory.
+
+    Args:
+        path (str): The root directory where to look for subdirectories.
+        recursive (bool): If True, search subdirectories recursively. Default is False.
+        full_path (bool): If True, return absolute paths instead of just directory names.
+        pattern (str): Optional regex pattern to filter directory names.
 
     Returns:
-        list: A sorted list of path names found within the specified root_dir.
+        List[str]: A sorted list of directory names or paths.
     """
     try:
-        return sorted([f.path.split("/")[-1] for f in os.scandir(path) if f.is_dir()])
-    except FileNotFoundError:
-        print(f"Error: The root_dir '{path}' does not exist.")
-        return []
+        root = Path(path)
+        if not root.exists():
+            print(f"Error: The root_dir '{path}' does not exist.")
+            return []
+
+        # Choose iterator based on recursion
+        dirs = root.rglob("*") if recursive else root.iterdir()
+        dirs = [d for d in dirs if d.is_dir()]
+
+        # Apply pattern filter if provided
+        if pattern:
+            regex = re.compile(pattern)
+            dirs = [d for d in dirs if regex.search(d.name)]
+
+        # Format output
+        result = [str(d.resolve()) if full_path else d.name for d in dirs]
+
+        return sorted(result)
+
     except PermissionError:
         print(f"Error: Permission denied to access '{path}'.")
         return []
 
 
-def list_files(path: str) -> list:
+def list_files(
+        path: str,
+        recursive: bool = False,
+        full_path: bool = False,
+        pattern: str = None,
+        extensions: list[str] | None = None
+) -> list:
     """
-    Lists all files within a given root_dir and returns their names in sorted order.
+    Lists files within a given root directory.
 
     Args:
-        path: The path root_dir where to look for files.
+        path (str): The root directory where to look for files.
+        recursive (bool): If True, search subdirectories recursively. Default is False.
+        full_path (bool): If True, return absolute paths instead of just file names.
+        pattern (str): Optional regex pattern to filter file names.
+        extensions (list[str] | None): Optional list of file extensions (e.g., ['.yml', '.csv']).
 
     Returns:
-        list: A sorted list of files names found within the specified root_dir.
+        list[str]: A sorted list of file names or paths.
     """
     try:
-        return sorted([f.path.split("/")[-1] for f in os.scandir(path) if f.is_file()])
-    except FileNotFoundError:
-        print(f"Error: The root_dir '{path}' does not exist.")
-        return []
+        root = Path(path)
+        if not root.exists():
+            print(f"Error: The root_dir '{path}' does not exist.")
+            return []
+
+        # Choose iterator
+        files = root.rglob("*") if recursive else root.iterdir()
+        files = [f for f in files if f.is_file()]
+
+        # Filter by regex pattern
+        if pattern:
+            regex = re.compile(pattern)
+            files = [f for f in files if regex.search(f.name)]
+
+        # Filter by extension
+        if extensions:
+            extensions = [ext.lower() for ext in extensions]
+            files = [f for f in files if f.suffix.lower() in extensions]
+
+        # Format output
+        result = [str(f.resolve()) if full_path else f.name for f in files]
+
+        return sorted(result)
+
     except PermissionError:
         print(f"Error: Permission denied to access '{path}'.")
         return []
@@ -88,7 +184,7 @@ def load_config_file(path: str) -> dict:
     return config
 
 
-def rename_directories(root_dir: str, old_name: str, new_name: str, verbose: bool = False, safe_mode: bool = True):
+def rename_dirs(root_dir: str, old_name: str, new_name: str, verbose: bool = False, safe_mode: bool = True):
     """
     Renames all directories and subdirectories within a path,
     replacing string_1 with string_2 in their names.
@@ -159,7 +255,13 @@ def add_string_directories(root_dir: str, prefix: str = "", suffix: str = "", ve
         print(f"Set safe_mode parameter to False to rename the directories")
 
 
-def rename_files(root_dir: str, old_name: str = "_t1ce", new_name: str = "_t1c", verbose: bool = False, safe_mode: bool = True):
+def rename_files(
+        root_dir: str,
+        old_name: str = "_t1ce",
+        new_name: str = "_t1c",
+        verbose: bool = False,
+        safe_mode: bool = True
+):
     """
     Renames files in a path and its subdirectories by replacing a specific substring in the filenames.
 
@@ -307,46 +409,68 @@ def delete_files_by_extension(root_dir: str, ext: str, verbose=False, safe_mode:
         print(f"Total files deleted: {deleted_files}")
 
 
-def delete_folders_by_pattern(root_dir: str, pattern: str, verbose=False, safe_mode: bool = True):
+def delete_folders_by_pattern(
+        root_dir: str,
+        pattern: str,
+        match_type: str = 'contains',
+        verbose=False,
+        safe_mode: bool = True
+):
     """
-    Deletes all folders that match a given pattern in a path and its subdirectories.
+    Deletes folders matching a pattern in a path and its subdirectories.
 
     Args:
-        root_dir (str): The root_dir path where the search will start.
-        pattern (str): The pattern to match folder names (supports regular expressions).
-        safe_mode (bool): If True, simulates the deletion without actually removing the folders.
+        root_dir (str): Path where the search will start.
+        pattern (str): Pattern to match folder names.
+        match_type (str): Type of matching: 'contains', 'starts', 'ends', or 'exact'.
+        safe_mode (bool): If True, simulates deletion without actually removing folders.
         verbose (bool): If True, prints detailed logs for each folder deletion operation.
     """
+    # Validate match_type
+    allowed_match_types = ['contains', 'starts', 'ends', 'exact']
+    if match_type not in allowed_match_types:
+        raise ValueError(f"match_type must be one of {allowed_match_types}, but got '{match_type}'")
+
     if not os.path.exists(root_dir):
         raise ValueError(f"Root path '{root_dir}' does not exist.")
 
-    deleted_folders = 0  # To keep track of how many folders have been deleted
-    regex_pattern = re.compile(pattern)  # Compile the provided pattern for use in matching folder names
+    deleted_folders = 0
+    found_folders = []
 
-    # Walk through the path tree
-    for subdir, dirs, _ in os.walk(root_dir, topdown=False):  # topdown=False ensures subdirectories are checked first
-
+    # Walk through the directory tree
+    for subdir, dirs, _ in os.walk(root_dir, topdown=False):
         for dir_name in dirs:
-            if regex_pattern.match(dir_name):  # Match folder name with the regex pattern
+            match = False
+            if match_type == 'contains' and pattern in dir_name:
+                match = True
+            elif match_type == 'starts' and dir_name.startswith(pattern):
+                match = True
+            elif match_type == 'ends' and dir_name.endswith(pattern):
+                match = True
+            elif match_type == 'exact' and dir_name == pattern:
+                match = True
+
+            if match:
                 folder_path = os.path.join(subdir, dir_name)
+                found_folders.append(folder_path)
 
-                if safe_mode:
-                    # In safe mode, only print what would happen
+                if safe_mode and verbose:
                     print(f"[SAFE MODE] Would delete: {folder_path}")
-                else:
+                elif not safe_mode:
                     try:
-                        shutil.rmtree(folder_path)  # Delete the folder and its contents
+                        shutil.rmtree(folder_path)
                         deleted_folders += 1
-
                         if verbose:
                             print(f"Deleted folder: {folder_path}")
                     except Exception as e:
                         print(f"Error deleting {folder_path}: {e}")
 
-    # After all operations, report how many folders were deleted
-    if deleted_folders == 0 and verbose:
+    # Final summary
+    if safe_mode and verbose:
+        print(f"[SAFE MODE] {len(found_folders)} folders would be deleted.")
+    elif not safe_mode and deleted_folders == 0 and verbose:
         print(f"No folders matching the pattern '{pattern}' were found to delete.")
-    elif verbose:
+    elif not safe_mode and verbose:
         print(f"Total folders deleted: {deleted_folders}")
 
 

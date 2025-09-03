@@ -222,7 +222,7 @@ def rename_dirs(root_dir: str, old_name: str, new_name: str, verbose: bool = Fal
         print(f"Set safe_mode parameter to False to rename the directories")
 
 
-def add_string_directories(root_dir: str, prefix: str = "", suffix: str = "", verbose: bool = False, safe_mode: bool = True):
+def add_string_dirs(root_dir: str, prefix: str = "", suffix: str = "", verbose: bool = False, safe_mode: bool = True):
     """
     Adds a prefix and/or suffix to all directories and subdirectories within a path.
 
@@ -409,7 +409,7 @@ def delete_files_by_extension(root_dir: str, ext: str, verbose=False, safe_mode:
         print(f"Total files deleted: {deleted_files}")
 
 
-def delete_folders_by_pattern(
+def delete_dirs_by_pattern(
         root_dir: str,
         pattern: str,
         match_type: str = 'contains',
@@ -534,7 +534,7 @@ def move_files_to_parent(root_dir: str, levels_up: int = 1, ext: str = None, ver
         print(f"Total files moved: {moved_files}")
 
 
-def organize_files_into_folders(root_dir, extension='.nii.gz', verbose=False, safe_mode: bool = True):
+def organize_files_into_dirs(root_dir, extension='.nii.gz', verbose=False, safe_mode: bool = True):
     """
     Organizes files into folders based on their filenames. Each file will be moved into a folder named
     after the file (excluding the extension).
@@ -591,7 +591,7 @@ def organize_files_into_folders(root_dir, extension='.nii.gz', verbose=False, sa
         print(f"Total files organized: {organized_files}")
 
 
-def organize_subfolders_into_named_folders(root_dir, join_char="-", verbose=False, safe_mode: bool = True):
+def organize_subdirs_into_named_dirs(root_dir, join_char="-", verbose=False, safe_mode: bool = True):
     """
     Organizes subfolders into combined named folders.
     Dynamically combines parent folder names and their subfolder names into a single folder per subfolder.

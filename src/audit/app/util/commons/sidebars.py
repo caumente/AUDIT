@@ -3,7 +3,7 @@ import streamlit as st
 from audit.app.util.constants.features import Features
 from audit.app.util.constants.metrics import Metrics
 from audit.utils.commons.strings import pretty_string
-from audit.utils.commons.file_manager import load_config_file
+from audit.utils.internal._config_helpers import load_config_file
 
 # Load constants
 const_metrics = Metrics()

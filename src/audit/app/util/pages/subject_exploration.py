@@ -10,7 +10,7 @@ from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
 from audit.app.util.commons.sidebars import setup_sidebar_single_subjects
 from audit.app.util.constants.descriptions import SubjectsExplorationPage
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
 
 

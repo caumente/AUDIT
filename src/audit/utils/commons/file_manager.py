@@ -7,9 +7,6 @@ from typing import Dict
 from typing import Optional
 from typing import Union, List
 
-import pandas as pd
-import yaml
-
 
 def create_project_structure(
     base_path: Union[str, Path] = "./",
@@ -898,81 +895,3 @@ def delete_dirs_by_pattern(
         elif verbose:
             print(f"Total folders deleted: {deleted_count}")
 
-
-
-def concatenate_csv_files(path: str, output_file: str):
-    """
-    Concatenates all CSV files in a specified directory into a single CSV file.
-
-    Args:
-        path: The directory containing the CSV files to concatenate.
-        output_file: The root_dir where the concatenated CSV file will be saved.
-    """
-    csv_files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".csv")]
-    df_list = [pd.read_csv(csv_file) for csv_file in csv_files]
-    concatenated_df = pd.concat(df_list, ignore_index=True)
-    concatenated_df.to_csv(output_file, index=False)
-    print(f"Concatenated CSV files saved to: {output_file}")
-
-
-def read_datasets_from_dict(name_path_dict: dict, col_name: str = "set") -> pd.DataFrame:
-    """
-    Reads multiple datasets from a dictionary of name-root_dir pairs and concatenates them into a single DataFrame.
-
-    Args:
-        name_path_dict: A dictionary where keys are dataset names and values are file paths to CSV files.
-        col_name: The name of the column to add that will contain the dataset name. Defaults to "set".
-
-    Returns:
-        pd.DataFrame: A concatenated DataFrame containing all the datasets, with an additional column specifying
-                      the dataset name.
-    """
-
-    out = []
-    for name, path in name_path_dict.items():
-        data = pd.read_csv(path)
-        data[col_name] = name
-        out.append(data)
-    out = pd.concat(out)
-
-    return out
-
-
-def load_config_file(path: str) -> dict:
-    """
-    Loads a configuration file in YAML format and returns its contents as a dictionary.
-
-    Args:
-        path: The relative file root_dir to the YAML configuration file.
-
-    Returns:
-        dict: The contents of the YAML file as a dictionary.
-    """
-
-    def replace_variables(config, variables):
-        def replace(match):
-            return variables.get(match.group(1), match.group(0))
-
-        for key, value in config.items():
-            if isinstance(value, str):
-                config[key] = re.sub(r"\$\{(\w+)\}", replace, value)
-            elif isinstance(value, dict):
-                replace_variables(value, variables)
-
-    # Resolve the absolute root_dir based on the current file's path
-    base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust the depth according to your project
-    absolute_path = base_dir / path
-
-    # Validate if the file exists
-    if not absolute_path.exists():
-        raise FileNotFoundError(f"Config file not found: {absolute_path}")
-
-    # Load the YAML file
-    with open(absolute_path, "r") as file:
-        config = yaml.safe_load(file)
-
-    # Replace variables in the YAML configuration
-    variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
-    replace_variables(config, variables)
-
-    return config

@@ -8,7 +8,7 @@ import streamlit as st
 from PIL import Image
 from streamlit_theme import st_theme
 
-from audit.utils.commons.file_manager import load_config_file
+from audit.utils.internal._config_helpers import load_config_file
 from audit.app.util.pages.home_page import HomePage
 from audit.app.util.pages.longitudinal import Longitudinal
 from audit.app.util.pages.single_model_performance import SingleModelPerformance

@@ -12,8 +12,7 @@ from loguru import logger
 
 from audit.metrics.main import extract_audit_metrics
 from audit.metrics.main import extract_pymia_metrics
-from audit.utils.internal._config_helpers import load_config_file, check_metric_extraction_config
-from audit.utils.commons.strings import configure_logging
+from audit.utils.internal._config_helpers import load_config_file, check_metric_extraction_config, configure_logging
 
 
 def run_metric_extraction(config_path):

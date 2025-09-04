@@ -198,3 +198,7 @@ def check_app_config(config: dict) -> None:
     if not config.get("sequences"):
         logger.error("Missing sequences key in the feature_extraction.yml file")
         sys.exit(1)
+
+
+def configure_logging(log_filename: str):
+    logger.add(log_filename, retention="90 days", level="INFO")

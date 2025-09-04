@@ -11,8 +11,7 @@ from colorama import Fore
 from loguru import logger
 
 from audit.features.main import extract_features
-from audit.utils.internal._config_helpers import load_config_file, check_feature_extraction_config
-from audit.utils.commons.strings import configure_logging
+from audit.utils.internal._config_helpers import load_config_file, check_feature_extraction_config, configure_logging
 from audit.utils.commons.strings import fancy_print
 
 

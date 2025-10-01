@@ -11,7 +11,7 @@ from typing import Union, List
 def create_project_structure(
     base_path: Union[str, Path] = "./",
     copy_configs: bool = True
-) -> List[Path]:
+):
     """
     Create a standard project folder structure with optional default configs.
 
@@ -302,8 +302,10 @@ def rename_files(
     >>> rename_files("./data", old_name="_t1ce", new_name="_t1c", safe_mode=True)
     [SAFE MODE] Would rename: data/patient1_t1ce.nii -> data/patient1_t1c.nii
     """
-    root_dir = Path(root_dir)
+    if not old_name or not new_name:
+        raise ValueError("Both 'old_name' and 'new_name' must be non-empty strings")
 
+    root_dir = Path(root_dir)
     if not root_dir.exists():
         raise FileNotFoundError(f"The specified root_dir does not exist: '{root_dir}'")
     if not root_dir.is_dir():
@@ -481,14 +483,14 @@ def add_string_files(
                 if safe_mode:
                     print(f"[SAFE MODE] Would rename: {old_file_path} -> {new_file_path}")
                 else:
+                    if new_file_path.exists():
+                        raise FileExistsError(f"Target already exists: '{new_file_path}'")
                     try:
                         old_file_path.rename(new_file_path)
                         if verbose:
                             print(f"Renamed: {old_file_path} -> {new_file_path}")
                     except PermissionError as e:
                         raise PermissionError(f"Permission denied: cannot rename '{old_file_path}'") from e
-                    except FileExistsError as e:
-                        raise FileExistsError(f"Target already exists: '{new_file_path}'") from e
                     except OSError as e:
                         raise OSError(f"Failed to rename '{old_file_path}' to '{new_file_path}': {e}") from e
 

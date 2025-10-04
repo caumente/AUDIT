@@ -25,7 +25,7 @@ This tutorial uses some utility functions from the `audit.utils.commons.file_man
 modules to manipulate files and sequences.
 
 ```python
-from audit.utils.sequences.sequences import(
+from audit.utils.sequences.sequences import (
     load_nii_by_subject_id,
     iterative_labels_replacement,
     count_labels
@@ -34,7 +34,7 @@ from audit.utils.sequences.sequences import(
 from audit.utils.commons.file_manager import (
     list_dirs,
     list_files,
-    organize_files_into_folders,
+    organize_files_into_dirs,
     add_suffix_to_files
 )
 ```

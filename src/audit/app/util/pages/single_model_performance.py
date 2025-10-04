@@ -15,7 +15,7 @@ from audit.app.util.commons.sidebars import setup_sidebar_single_model
 from audit.app.util.constants.descriptions import ModelPerformanceAnalysisPage
 from audit.app.util.constants.metrics import Metrics
 from audit.app.util.commons.utils import download_plot
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
 from audit.visualization.scatter_plots import multivariate_metric_feature
 from audit.visualization.commons import update_plot_customization

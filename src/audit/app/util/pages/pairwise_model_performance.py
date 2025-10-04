@@ -22,7 +22,7 @@ from audit.metrics.statistical_tests import normality_test
 from audit.metrics.statistical_tests import homoscedasticity_test
 from audit.metrics.statistical_tests import paired_ttest
 from audit.metrics.statistical_tests import wilcoxon_test
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.barplots import aggregated_pairwise_model_performance
 from audit.visualization.barplots import individual_pairwise_model_performance
 from audit.visualization.histograms import plot_histogram

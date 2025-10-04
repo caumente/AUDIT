@@ -13,7 +13,7 @@ from audit.app.util.commons.sidebars import setup_sidebar_features
 from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import UnivariatePage
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.boxplot import boxplot_highlighter
 from audit.visualization.histograms import custom_distplot

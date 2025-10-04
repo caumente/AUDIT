@@ -22,12 +22,12 @@ from audit.utils.commons.file_manager import (
     list_dirs,
     list_files,
     delete_files_by_extension,
-    delete_folders_by_pattern,
+    delete_dirs_by_pattern,
     move_files_to_parent,
     organize_subfolders_into_named_folders,
     rename_files,
     add_string_filenames,
-    rename_directories
+    rename_dirs
 )
 ```
 
@@ -59,7 +59,7 @@ from audit.utils.commons.file_manager import (
 
 [//]: # (    add_string_filenames,)
 
-[//]: # (    rename_directories)
+[//]: # (    rename_dirs)
 
 [//]: # (&#41;)
 
@@ -441,7 +441,7 @@ so that the segmentations from each model are contained in the `DATASET_seg` dir
 rename the LUMIERE directory to `LUMIERE_images`.
 
 ```python
-rename_directories(
+rename_dirs(
     root_dir="./datasets/",
     old_name="LUMIERE",
     new_name="LUMIERE_images",

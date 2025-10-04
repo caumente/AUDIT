@@ -82,7 +82,7 @@ Last released version of **AUDIT** is hosted at https://auditapp.streamlitapp.co
 ## Getting Started
 
 AUDIT can be installed either from our GitHub repository or from PyPI using the command _pip install auditapp_. In this guide, we will show how to install it from the GitHub repository.
-For a more detailed exploration of AUDIT, please check our [*official documentation*](https://caumente.github.io/AUDIT/getting_started/getting_started/).
+For a more detailed exploration of AUDIT, please check our [*official documentation*](https://caumente.github.io/AUDIT/).
 
 ### 1 Installation 
 

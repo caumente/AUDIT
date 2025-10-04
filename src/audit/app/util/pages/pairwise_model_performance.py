@@ -27,6 +27,7 @@ from audit.visualization.barplots import aggregated_pairwise_model_performance
 from audit.visualization.barplots import individual_pairwise_model_performance
 from audit.visualization.histograms import plot_histogram
 from streamlit_theme import st_theme
+from audit.app.util.commons.checks import none_check
 
 
 class PairwiseModelPerformance(BasePage):
@@ -58,45 +59,49 @@ class PairwiseModelPerformance(BasePage):
         improvement_type = setup_improvement_button()
         agg = setup_aggregation_button()
 
-        # Load datasets
-        raw_metrics = read_datasets_from_dict(metrics_paths)
-        raw_features = read_datasets_from_dict(features_paths)
-        df_stats = raw_metrics.drop(columns="region").groupby(["ID", "model", "set"]).mean().reset_index()
+        proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
+        if proceed[0]:
+            # Load datasets
+            raw_metrics = read_datasets_from_dict(metrics_paths)
+            raw_features = read_datasets_from_dict(features_paths)
+            df_stats = raw_metrics.drop(columns="region").groupby(["ID", "model", "set"]).mean().reset_index()
 
-        # Setup sidebar
-        selected_set, ba_model, be_model, selected_metric, num_subjects, selected_sorted, selected_order = self.setup_sidebar(
-            raw_metrics, agg)
+            # Setup sidebar
+            selected_set, ba_model, be_model, selected_metric, num_subjects, selected_sorted, selected_order = self.setup_sidebar(
+                raw_metrics, agg)
 
-        if not models_sanity_check(ba_model, be_model):
-            st.error("Models selected must be different to make a performance comparison", icon="🚨")
-        else:
-            df = processing_data(raw_metrics, selected_set,
-                                 features=['ID', 'region', self.metrics.get_metrics().get(selected_metric, None), 'model', 'set'])
-            df = self.process_metrics(
-                data=df.drop(columns='set'),
-                selected_metric=self.metrics.get_metrics().get(selected_metric, None),
-                baseline_model=ba_model,
-                benchmark_model=be_model,
-                aggregate=agg,
-                improvement_type=improvement_type
-            )
-
-            # Merge with features and average performance if not aggregated
-            if not agg:
-                df = df.merge(raw_features, on=["ID"])
-                self.run_individualized(df, ba_model, be_model, improvement_type, selected_sorted, selected_order,
-                                        num_subjects)
+            if not models_sanity_check(ba_model, be_model):
+                st.error("Models selected must be different to make a performance comparison", icon="🚨")
             else:
-                self.run_aggregated(df, improvement_type, selected_metric, selected_set)
+                df = processing_data(raw_metrics, selected_set,
+                                     features=['ID', 'region', self.metrics.get_metrics().get(selected_metric, None), 'model', 'set'])
+                df = self.process_metrics(
+                    data=df.drop(columns='set'),
+                    selected_metric=self.metrics.get_metrics().get(selected_metric, None),
+                    baseline_model=ba_model,
+                    benchmark_model=be_model,
+                    aggregate=agg,
+                    improvement_type=improvement_type
+                )
 
-                # Perform statistical test
-                if setup_statistical_test():
-                    sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
-                        self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
-                    )
-                    self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
+                # Merge with features and average performance if not aggregated
+                if not agg:
+                    df = df.merge(raw_features, on=["ID"])
+                    self.run_individualized(df, ba_model, be_model, improvement_type, selected_sorted, selected_order,
+                                            num_subjects)
+                else:
+                    self.run_aggregated(df, improvement_type, selected_metric, selected_set)
 
-                    setup_button_data_download(df_stats)
+                    # Perform statistical test
+                    if setup_statistical_test():
+                        sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
+                            self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
+                        )
+                        self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
+
+                        setup_button_data_download(df_stats)
+        else:
+            st.error(proceed[-1], icon='🚨')
 
     @staticmethod
     def setup_sidebar(data, aggregated=True):

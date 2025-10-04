@@ -27,9 +27,12 @@ python src/audit/metric_extraction.py --config path/to/your/metric_extraction.ya
 If installed via PyPI, use the command-line interface:
 
 ```bash
-auditapp feature-extraction --config path/to/your/feature_extraction.yaml
-auditapp metric-extraction --config path/to/your/metric_extraction.yaml
+auditapp feature-extraction --config full/path/to/your/feature_extraction.yaml
+auditapp metric-extraction --config full/path/to/your/metric_extraction.yaml
 ```
+
+Full path to your config files is mandatory. Otherwise, AUDIT might look for internal config files contained in the
+library by default.
 
 ---
 

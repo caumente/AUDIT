@@ -70,8 +70,9 @@ nav:
     - Multi-model performance: analysis_modes/multi_model.md
     - Longitudinal: analysis_modes/longitudinal.md
     - Subjects' exploration: analysis_modes/subjects_exploration.md
-
   - Tutorials:
+      - BraTS 2025: tutorials/BraTS_2025.md
+      - BraTS 2024 - Site analysis: tutorials/BraTS_2024.md
       - Preprocessing dataset: tutorials/preprocessing.md
       - Postprocessing segmentations: tutorials/postprocessing_segmentations.md
   - About:

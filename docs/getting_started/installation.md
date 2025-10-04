@@ -69,7 +69,13 @@ Poetry is a modern dependency manager that simplifies library management and env
 
 ## 📦 Installation via PyPI
 
-If you want a quick way to use AUDIT for data analysis and evaluation, you can install the latest stable version from PyPI:
+If you want a quick way to use AUDIT for data analysis and evaluation, you can install the latest stable version from PyPI. AUDIT (`auditapp`) requires **Python 3.10 or higher**.  
+If you try to install it with an older Python version, you will see an error like:
+
+!!! failure
+    ERROR: Could not find a version that satisfies the requirement auditapp (from versions: none)
+    ERROR: No matching distribution found for auditapp
+
 
 ```bash
 pip install auditapp
@@ -79,6 +85,7 @@ This method is ideal for users who do not need to modify the source code. You wi
 
 !!! tip
     If you encounter issues with permissions, try running `pip install --user auditapp`.
+
 
 ---
 

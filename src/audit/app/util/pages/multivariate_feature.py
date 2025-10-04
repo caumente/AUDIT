@@ -36,18 +36,16 @@ class MultivariateFeature(BasePage):
 
         df = read_datasets_from_dict(features_information)
 
-        sidebar_info = self.setup_sidebar(df, features_information)
-        proceed = health_checks(sidebar_info.values())
+        selected_sets, selected_feature = self.setup_sidebar(df, features_information)
+        proceed = health_checks(selected_sets, selected_feature)
+
         if proceed[0]:
-            df = processing_data(df, sets=sidebar_info["selected_sets"])
+            df = processing_data(df, sets=selected_sets)
             df.reset_index(drop=True, inplace=True)
 
             self.handle_selection(
-                df, datasets_root_path,
-                sidebar_info["x_axis"], sidebar_info["y_axis"],
-                sidebar_info["color_axis"], labels
+                df, datasets_root_path, selected_feature[0], selected_feature[1], selected_feature[2], labels
             )
-
             st.markdown(self.descriptions.description)
         else:
             st.error(proceed[-1], icon='🚨')
@@ -56,12 +54,12 @@ class MultivariateFeature(BasePage):
     def setup_sidebar(data, data_paths):
         with st.sidebar:
             st.header("Configuration")
-            return {
-                "selected_sets": setup_sidebar_multi_datasets(data_paths),
-                "x_axis": setup_sidebar_features(data, name="Features (X axis)", key="feat_x"),
-                "y_axis": setup_sidebar_features(data, name="Features (Y axis)", key="feat_y", f_index=1),
-                "color_axis": setup_sidebar_color(data, name="Color feature", key="feat_col"),
-            }
+            selected_sets = setup_sidebar_multi_datasets(data_paths)
+            x_axis = setup_sidebar_features(data, name="Features (X axis)", key="feat_x")
+            y_axis = setup_sidebar_features(data, name="Features (Y axis)", key="feat_y", f_index=1)
+            color_axis= setup_sidebar_color(data, name="Color feature", key="feat_col")
+
+        return selected_sets, [x_axis, y_axis, color_axis]
 
     def scatter_plot_logic(self, data, x_axis, y_axis, color_axis, customization):
         if customization == 'Standard visualization':

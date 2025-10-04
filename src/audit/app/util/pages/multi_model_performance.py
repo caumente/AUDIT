@@ -15,6 +15,7 @@ from audit.app.util.constants.metrics import Metrics
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.visualization.boxplot import models_performance_boxplot
 from audit.visualization.commons import update_multimodel_plot
+from audit.app.util.commons.checks import none_check
 
 
 class MultiModelPerformance(BasePage):
@@ -36,36 +37,40 @@ class MultiModelPerformance(BasePage):
         st.subheader(self.descriptions.header)
         st.markdown(self.descriptions.sub_header)
 
-        # Load the data
-        raw_metrics = read_datasets_from_dict(metrics_paths)
-        agg = setup_aggregation_button()
+        proceed = none_check(metrics_paths=metrics_paths, labels_dict=labels_dict)
+        if proceed[0]:
+            # Load the data
+            raw_metrics = read_datasets_from_dict(metrics_paths)
+            agg = setup_aggregation_button()
 
-        # calling main function
-        selected_set, selected_models, selected_regions, selected_metrics = self.setup_sidebar(raw_metrics)
+            # calling main function
+            selected_set, selected_models, selected_regions, selected_metrics = self.setup_sidebar(raw_metrics)
 
-        df = processing_data(
-            data=raw_metrics,
-            models=selected_models,
-            sets=selected_set,
-            regions=selected_regions,
-            features=["ID", 'region', 'model', 'set'] + selected_metrics
-        )
+            df = processing_data(
+                data=raw_metrics,
+                models=selected_models,
+                sets=selected_set,
+                regions=selected_regions,
+                features=["ID", 'region', 'model', 'set'] + selected_metrics
+            )
 
-        data_melted = self.main_table(df, agg)
+            data_melted = self.main_table(df, agg)
 
-        # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([1, 1], gap="small")
-        with col1:
-            st.markdown(self.descriptions.description)
-        with col2:
-            customization_boxplot = st.selectbox(label="Customize visualization",
-                                                 options=["Standard visualization", "Custom visualization"], index=0,
-                                                 key="multimodel")
+            # Create a layout with two columns: one for the plot and another for the customization panel
+            col1, col2 = st.columns([1, 1], gap="small")
+            with col1:
+                st.markdown(self.descriptions.description)
+            with col2:
+                customization_boxplot = st.selectbox(label="Customize visualization",
+                                                     options=["Standard visualization", "Custom visualization"], index=0,
+                                                     key="multimodel")
 
-        if customization_boxplot == "Standard visualization":
-            self.visualize_data(data_melted, agg)
+            if customization_boxplot == "Standard visualization":
+                self.visualize_data(data_melted, agg)
+            else:
+                self.visualize_data_with_customization(data_melted, labels_dict, agg)
         else:
-            self.visualize_data_with_customization(data_melted, labels_dict, agg)
+            st.error(proceed[-1], icon='🚨')
 
     def setup_sidebar(self, data):
         with st.sidebar:

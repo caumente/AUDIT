@@ -12,7 +12,7 @@ from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_
 from audit.utils.sequences.sequences import load_nii_by_subject_id
 from audit.visualization.confusion_matrices import plt_confusion_matrix
 from audit.visualization.commons import update_segmentation_matrix_plot
-
+from audit.app.util.commons.checks import none_check
 
 class SegmentationErrorMatrix(BasePage):
     def __init__(self, config):
@@ -34,59 +34,61 @@ class SegmentationErrorMatrix(BasePage):
         st.markdown(self.descriptions.sub_header)
         st.markdown(self.descriptions.description)
 
-        # Setup sidebar
-        selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,raw_datasets)
+        proceed = none_check(labels=labels_dict, predictions=predictions, raw_datasets=raw_datasets)
+        if proceed[0]:
+            # Setup sidebar
+            selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,raw_datasets)
 
 
-        col1, col2 = st.columns([2, 2], gap="small")
-        with col1:
-            # Main visualization logic
-            normalized = st.checkbox(
-                "Normalized per ground truth label",
-                value=True,
-                help="It normalizes the errors per class, if enabled."
-            )
-
-            if selected_id == "All":
-                averaged = st.checkbox(
-                    "Averaged per number of subjects",
-                    value=True,
-                    help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
-                )
-        with col2:
-            customization_matrix = st.selectbox(label="Customize visualization",
-                                                 options=["Standard visualization", "Custom visualization"],
-                                                 index=0,
-                                                 key="matrix")
-
-        if customization_matrix == "Custom visualization":
-            col1, col2 = st.columns([4, 1], gap="small")
+            col1, col2 = st.columns([2, 2], gap="small")
             with col1:
+                # Main visualization logic
+                normalized = st.checkbox(
+                    "Normalized per ground truth label",
+                    value=True,
+                    help="It normalizes the errors per class, if enabled."
+                )
+
                 if selected_id == "All":
-                    fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged,
-                                              normalized)
+                    averaged = st.checkbox(
+                        "Averaged per number of subjects",
+                        value=True,
+                        help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
+                    )
+            with col2:
+                customization_matrix = st.selectbox(label="Customize visualization",
+                                                     options=["Standard visualization", "Custom visualization"],
+                                                     index=0,
+                                                     key="matrix")
+
+            if customization_matrix == "Custom visualization":
+                col1, col2 = st.columns([4, 1], gap="small")
+                with col1:
+                    if selected_id == "All":
+                        fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged,
+                                                  normalized)
+                    else:
+                        fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+                with col2:
+                    update_segmentation_matrix_plot(fig, list(labels_dict.keys()), key="matrix")
+                with col1:
+                    st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+            else:
+                if selected_id == "All":
+                    fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
                 else:
                     fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
-            with col2:
-                update_segmentation_matrix_plot(fig, list(labels_dict.keys()), key="matrix")
-            with col1:
+
                 st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-        else:
-            if selected_id == "All":
-                fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
-            else:
-                fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
 
-            st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-
-        if selected_id != "All":
-            # run itk-snap
-            visualize_itk = st.button("Visualize it in ITK-SNAP")
-            if visualize_itk:
-                try:
-                    run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
-                except:
-                    st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
+            if selected_id != "All":
+                # run itk-snap
+                visualize_itk = st.button("Visualize it in ITK-SNAP")
+                if visualize_itk:
+                    try:
+                        run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
+                    except:
+                        st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
 
     @staticmethod
     def setup_sidebar(predictions, raw_datasets):

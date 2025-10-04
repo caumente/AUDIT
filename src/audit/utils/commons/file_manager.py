@@ -2,7 +2,9 @@ import os
 import re
 import shutil
 from pathlib import Path
-import importlib.resources as pkg_resources
+from audit.utils.commons.config_checks import init_app_yaml
+from audit.utils.commons.config_checks import init_feature_extraction_yaml
+from audit.utils.commons.config_checks import init_metric_extraction_yaml
 
 import pandas as pd
 import yaml
@@ -24,27 +26,36 @@ def create_project_structure(base_path: str = "./"):
         base_path (str): Root directory name. Default is './'.
     """
     subfolders = ["datasets", "configs", "outputs", "logs"]
-
     base_path = Path(base_path)
-    target_configs_path = base_path / "configs"
 
+    # Create project folders
+    for folder in subfolders:
+        path = base_path / folder
+        try:
+            os.makedirs(path, exist_ok=True)
+        except PermissionError:
+            print(f"Permission denied: cannot create folder {path}")
+        except FileExistsError:
+            print(f"A file with the same name already exists: {path}")
+        except OSError as e:
+            print(f"OS error while creating {path}: {e}")
+        else:
+            print(f"Folder created or already exists: {path}")
+
+    configs_path = base_path / "configs"
     try:
-        # Create project folders
-        for folder in subfolders:
-            os.makedirs(base_path / folder, exist_ok=True)
+        # Initialize YAML config files from scratch
+        app_file = configs_path / "app.yaml"
+        feature_file = configs_path / "feature_extraction.yaml"
+        metric_file = configs_path / "metric_extraction.yaml"
 
-        # Locate configs inside installed audit package
-        configs_dir = pkg_resources.files("audit") / "configs"
-
-        if not configs_dir.exists():
-            raise FileNotFoundError("Could not find 'configs' directory inside audit package")
-
-        # Copy *.yml files into project configs folder
-        for file in configs_dir.iterdir():
-            if file.suffix == ".yml":
-                dest_file = target_configs_path / file.name
-                if not dest_file.exists():  # don't overwrite existing configs
-                    shutil.copy(file, dest_file)
+        # Only create files if they don't exist (don't overwrite)
+        if not app_file.exists():
+            init_app_yaml(app_file)
+        if not feature_file.exists():
+            init_feature_extraction_yaml(feature_file)
+        if not metric_file.exists():
+            init_metric_extraction_yaml(metric_file)
 
         print(f"Project structure created under '{base_path}' with default config templates.")
 

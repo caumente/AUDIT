@@ -1,4 +1,4 @@
-# BraTS 2025 Feature Extraction Tutorial
+# BraTS 2025 Tutorial
 
 This tutorial will guide you step by step to prepare the **BraTS 2025 dataset**, organize it, configure the feature 
 extraction, and finally launch the web app to explore the data. The workflow is based on the **AUDIT framework**.
@@ -9,7 +9,7 @@ extraction, and finally launch the web app to explore the data. The workflow is 
 
 Before working with the dataset, we need to set up a clean environment.
 
-### 1.1 Create a New Environment
+### 1.1 Create a new environment
 
 We recommend creating a new conda environment to avoid conflicts with other packages:
 
@@ -18,7 +18,7 @@ conda create -n audit_env python=3.10
 conda activate audit_env
 ```
 
-### 1.2 Install Required Packages
+### 1.2 Install required packages
 
 Install the core AUDIT package and Jupyter-related dependencies:
 
@@ -27,7 +27,7 @@ pip install auditapp
 pip install ipykernel jupyter
 ```
 
-### 1.3 Register Kernel for Jupyter
+### 1.3 Register kernel for Jupyter
 
 Register the environment so it appears as an option in Jupyter Notebook:
 
@@ -49,19 +49,19 @@ When opening a notebook, select the kernel **Python (brats2025\_env)**.
 
 ---
 
-## 2. Download the BraTS 2025 Data
+## 2. Download the BraTS 2025 data
 
-The BraTS 2025 dataset is hosted on **Synapse** and requires prior registration. Please follow the official 
-instructions from the [BraTS 2025 Challenge](https://www.synapse.org/Synapse:syn64377310) to download the data.
+The BraTS 2025 dataset is hosted on Synapse and **requires prior registration**. Please follow the [official 
+instructions](https://www.synapse.org/Synapse:syn64153130/wiki/) from the challenge and to BraTS 2025
+[Data Access](https://www.synapse.org/Synapse:syn64377310) section to download the data. For this tutorial we will take
+advantage of both datasets training and validation. 
 
-After downloading, you will have training and validation datasets. For consistency, rename them to BraTS2025_train and
-BraTS2025_val.
-
-This ensures that the following steps work without additional modifications.
+For consistency, rename them to BraTS2025_train and BraTS2025_val. This ensures that the following steps work without 
+additional modifications.
 
 ---
 
-## 3. Project Structure
+## 3. Project structure
 
 Open your terminal and create a new folder for your project. 
 
@@ -92,14 +92,14 @@ create_project_structure(base_path="./")
 After that, you should see in your project something like that:
 
 ```
-your_project/
+brats2025_project/
 ├── datasets/
 ├── config/
 ├── outputs/
 ├── logs/
 ```
 
-Move both datasets, training and validation, into your project’s `./datasets/` folder.
+Unzip the folders and move both datasets, training and validation, into your project’s `./datasets/` folder.
 
 ```bash
 ./datasets/BraTS2025_train/
@@ -125,11 +125,11 @@ print(list_dirs(train_data_path)[:10])
 
 ---
 
-## 4. Standardize Folder and File Naming
+## 4. Standardize folder and file naming
 
 To ensure compatibility with AUDIT, we will rename folders and files.
 
-### 4.1 Rename Folders
+### 4.1 Rename folders
 
 We will replace the prefix `BraTS-GLI-` with dataset-specific names. Set the parameter *safe_mode* to True to avoid
 
@@ -149,7 +149,7 @@ rename_dirs(
 )
 ```
 
-### 4.2 Rename Files
+### 4.2 Rename files
 
 The same applies to files:
 
@@ -169,7 +169,7 @@ rename_files(
 )
 ```
 
-### 4.3 Standardize Sequences
+### 4.3 Standardize sequences
 
 To make the sequence names clearer and consistent, we will replace suffixes:
 
@@ -199,16 +199,21 @@ for root_path in [train_data_path, val_data_path]:
 
 ---
 
-## 5. Configure Feature Extraction
+## 5. Run feature extraction
 
-Now that the dataset is ready, let’s configure feature extraction. AUDIT requires a YAML configuration file with 
-absolute paths. Create a file named `feature_extraction.yml` inside `configs/`:
+Now that the datasets are ready, let’s configure the feature extraction. AUDIT takes advantage of YAML configuration 
+files for extracting features and metrics and running the app. All of them have been created automatically inside 
+the `configs/` at the time of generating the project structure. The one we need to edit to run the feature extraction 
+is named `feature_extraction.yaml`. 
+
+Here we provide the config file needed for this project. In it, paths to datasets, sequences names, labels mapping, 
+features to extract, and output paths need to be defined.:
 
 ```yaml
 # Paths to all the datasets
 data_paths:
-  BraTS2025_train: '/home/usr/project/datasets/BraTS2025_train/'
-  BraTS2025_val: '/home/usr/project/datasets/BraTS2025_val/'
+  BraTS2025_train: '/home/usr/brats2025_project/datasets/BraTS2025_train/'
+  BraTS2025_val: '/home/usr/brats2025_project/datasets/BraTS2025_val/'
 
 # Sequences available
 sequences:
@@ -232,29 +237,30 @@ features:
   tumor: true
 
 # Output paths
-output_path: '/home/usr/project/outputs/features'
-logs_path: '/home/usr/project/logs/features'
+output_path: '/home/usr/brats2025_project/outputs/features'
+logs_path: '/home/usr/brats2025_project/logs/features'
 
 # Resources
 cpu_cores: 8
 ```
 
-Run feature extraction with:
+Run feature extraction by using the following command:
 
 ```bash
-auditapp feature-extraction --config /home/usr/projects/configs/feature_extraction.yml
+auditapp feature-extraction --config /home/usr/projects/configs/feature_extraction.yaml
 ```
 
-After execution, `/home/usr/project/outputs/features` will contain the extracted features for both training and 
+After execution, `/home/usr/brats2025_project/outputs/features` will contain the extracted features for both training and 
 validation datasets.
 
 ⚠️ **Important:** All paths must be absolute. Otherwise, AUDIT may fallback to its internal default config files.
 
 ---
 
-## 6. Launch the Web App
+## 6. Launch the dashboard
 
-Once features are extracted, we can explore them using the web app. Create a config file named `app.yml`:
+Once features are extracted, we can explore them using the web app. We should edit the config file named `app.yaml` and 
+adapt it as follows:
 
 ```yaml
 # Sequences available
@@ -272,9 +278,9 @@ labels:
   NEC: 2
 
 # Root paths
-datasets_path: '/home/usr/project/datasets'
-features_path: '/home/usr/project/outputs/features'
-metrics_path: '/home/usr/project/outputs/metrics'
+datasets_path: '/home/usr/brats2025_project/datasets'
+features_path: '/home/usr/brats2025_project/outputs/features'
+metrics_path: '/home/usr/brats2025_project/outputs/metrics'
 
 # Raw datasets
 raw_datasets:
@@ -296,17 +302,21 @@ predictions:
 Launch the app with:
 
 ```bash
-auditapp run-app --config /home/usr/projects/configs/app.yml
+auditapp run-app --config /home/usr/projects/configs/app.yaml
 ```
+
+Now it’s time to explore the datasets!
+
+Keep in mind that some feature types may influence generalization across cohorts more than others. For example, while 
+the statistical features appear quite similar between the datasets, we encourage you to dive deeper into the data, 
+experiment with different feature sets, and challenge your models to reach the next level of performance.
+
+> ![Univariate feature analysis](../assets/tutorials/brats2025_flair_median_intensity_l.png#only-light)
+> ![Univariate feature analysis](../assets/tutorials/brats2025_flair_median_intensity_d.png#only-dark)
+> *Figure 1:* Univariate feature analysis mode. Median pixel intensity distribution for FLAIR sequence.
+
+
 
 ---
 
 
-### Best Practices
-
-* Always use **absolute paths** in configs.
-* Verify sequence naming before running extraction.
-* Start with a clean environment to avoid dependency conflicts.
-
-By following this guided workflow, you will be able to prepare BraTS 2025 datasets for feature extraction and 
-visualization consistently.

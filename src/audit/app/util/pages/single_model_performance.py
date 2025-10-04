@@ -19,6 +19,7 @@ from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
 from audit.visualization.scatter_plots import multivariate_metric_feature
 from audit.visualization.commons import update_plot_customization
+from audit.app.util.commons.checks import none_check
 
 
 class SingleModelPerformance(BasePage):
@@ -40,38 +41,42 @@ class SingleModelPerformance(BasePage):
         st.subheader(self.descriptions.header)
         st.markdown(self.descriptions.sub_header)
 
-        # Load the data
-        features_df = read_datasets_from_dict(features_paths)
-        metrics_df = read_datasets_from_dict(metrics_paths)
+        proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
+        if proceed[0]:
+            # Load the data
+            features_df = read_datasets_from_dict(features_paths)
+            metrics_df = read_datasets_from_dict(metrics_paths)
 
-        col1, col2 = st.columns([2, 2], gap="small")
-        with col1:
-            agg = setup_aggregation_button()
-            st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
-        with col2:
-            customization_scatter = st.selectbox(label="Customize visualization",
-                                                 options=["Standard visualization", "Custom visualization"], index=0,
-                                                 key="single_model")
-        merged_data = self.merge_features_and_metrics(features=features_df, metrics=metrics_df, aggregate=agg)
+            col1, col2 = st.columns([2, 2], gap="small")
+            with col1:
+                agg = setup_aggregation_button()
+                st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
+            with col2:
+                customization_scatter = st.selectbox(label="Customize visualization",
+                                                     options=["Standard visualization", "Custom visualization"], index=0,
+                                                     key="single_model")
+            merged_data = self.merge_features_and_metrics(features=features_df, metrics=metrics_df, aggregate=agg)
 
-        # Setup sidebar
-        selected_sets, selected_model, feature, metric, selected_regions = self.setup_sidebar(data=merged_data,
-                                                                                         data_paths=metrics_paths,
-                                                                                         aggregated=agg)
-        if not dataset_sanity_check(selected_sets):
-            st.error("Please, select a dataset from the left sidebar", icon="🚨")
+            # Setup sidebar
+            selected_sets, selected_model, feature, metric, selected_regions = self.setup_sidebar(data=merged_data,
+                                                                                             data_paths=metrics_paths,
+                                                                                             aggregated=agg)
+            if not dataset_sanity_check(selected_sets):
+                st.error("Please, select a dataset from the left sidebar", icon="🚨")
+            else:
+                df = processing_data(merged_data, sets=selected_sets, models=selected_model, regions=selected_regions,
+                                     features=['ID', 'model', feature, self.metrics.get(metric, None), 'set', 'region'])
+                self.scatter_plot_logic(
+                    data=df,
+                    x_axis=feature,
+                    y_axis=metric,
+                    aggregated=agg,
+                    customization=customization_scatter
+                )
+
+                st.markdown(self.descriptions.description)
         else:
-            df = processing_data(merged_data, sets=selected_sets, models=selected_model, regions=selected_regions,
-                                 features=['ID', 'model', feature, self.metrics.get(metric, None), 'set', 'region'])
-            self.scatter_plot_logic(
-                data=df,
-                x_axis=feature,
-                y_axis=metric,
-                aggregated=agg,
-                customization=customization_scatter
-            )
-
-            st.markdown(self.descriptions.description)
+            st.error(proceed[-1], icon='🚨')
 
     @staticmethod
     def setup_sidebar(data, data_paths, aggregated):

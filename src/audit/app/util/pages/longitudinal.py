@@ -12,7 +12,7 @@ from audit.app.util.constants.descriptions import LongitudinalAnalysisPage
 from audit.utils.commons.file_manager import read_datasets_from_dict
 from audit.visualization.time_series import plot_longitudinal_lesions
 from audit.visualization.commons import update_longitudinal_plot
-
+from audit.app.util.commons.checks import none_check
 
 class Longitudinal(BasePage):
     def __init__(self, config):
@@ -31,30 +31,34 @@ class Longitudinal(BasePage):
         st.header(self.descriptions.header)
         st.markdown(self.descriptions.sub_header)
 
-        # Reading feature data
-        features_df = read_datasets_from_dict(features_paths)
-        metrics_df = read_datasets_from_dict(metrics_paths)
-        merged = self.merge_features_metrics(features_df, metrics_df)
+        proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
+        if proceed[0]:
+            # Reading feature data
+            features_df = read_datasets_from_dict(features_paths)
+            metrics_df = read_datasets_from_dict(metrics_paths)
+            merged = self.merge_features_metrics(features_df, metrics_df)
 
-        if not merged.empty:
-            # Sidebar setup
-            selected_set, selected_model = self.setup_sidebar(merged)
-            df = processing_data(
-                data=merged,
-                sets=selected_set,
-                models=selected_model,
-                features=["ID", "set", "longitudinal_id", "time_point", "lesion_size_whole", "lesion_size_pred"]
-            )
+            if not merged.empty:
+                # Sidebar setup
+                selected_set, selected_model = self.setup_sidebar(merged)
+                df = processing_data(
+                    data=merged,
+                    sets=selected_set,
+                    models=selected_model,
+                    features=["ID", "set", "longitudinal_id", "time_point", "lesion_size_whole", "lesion_size_pred"]
+                )
 
-            # filter subject
-            df['longitudinal_id'] = df['longitudinal_id'].apply(self.clean_longitudinal_id)
-            selected_subject = setup_sidebar_longitudinal_subject(df)
-            df = df[df.longitudinal_id == selected_subject]
+                # filter subject
+                df['longitudinal_id'] = df['longitudinal_id'].apply(self.clean_longitudinal_id)
+                selected_subject = setup_sidebar_longitudinal_subject(df)
+                df = df[df.longitudinal_id == selected_subject]
 
-            # Main functionality
-            self.plot_visualization(df)
+                # Main functionality
+                self.plot_visualization(df)
+            else:
+                st.error("Metric datasets must contain tumor size variable", icon="🚨")
         else:
-            st.error("Metric datasets must contain tumor size variable", icon="🚨")
+            st.error(proceed[-1], icon='🚨')
 
     @staticmethod
     def setup_sidebar(data):

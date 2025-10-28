@@ -331,6 +331,17 @@ Launch the app with:
 auditapp run-app --config /home/usr/projects/configs/app.yaml
 ```
 
+Now it’s time to explore the datasets!
+
+Keep in mind that some feature types may influence generalization across cohorts more than others. For example, while 
+the statistical features appear quite similar between the datasets, we encourage you to dive deeper into the data, 
+experiment with different feature sets, and challenge your models to reach the next level of performance.
+
+> ![Univariate feature analysis](../assets/tutorials/brats2024_t1_max_intensity_l.png#only-light)
+> ![Univariate feature analysis](../assets/tutorials/brats2024_t1_max_intensity_d.png#only-dark)
+> *Figure 1:* Univariate feature analysis mode. Maximum pixel intensity distribution for T1 sequence.
+
+
 
 
 

@@ -2,9 +2,9 @@ import os
 import re
 import shutil
 from pathlib import Path
-from audit.utils.commons.config_checks import init_app_yaml
-from audit.utils.commons.config_checks import init_feature_extraction_yaml
-from audit.utils.commons.config_checks import init_metric_extraction_yaml
+from audit.utils.internal._config_helpers import init_app_yaml
+from audit.utils.internal._config_helpers import init_feature_extraction_yaml
+from audit.utils.internal._config_helpers import init_metric_extraction_yaml
 
 from typing import Dict
 from typing import Optional

@@ -1,33 +1,34 @@
 # BraTS 2024 Tutorial
 
-This tutorial will guide you step by step to prepare the BraTS 2024 dataset, organize it, configure feature extraction, 
-and finally launch the web app to explore the data.
 
-The BraTS 2024 dataset is special because it includes a mapping file containing demographic information.
-For example, for each patient, it specifies the glioma type, the magnetic field strength used during MRI acquisition, sex, and other variables.
-The goal of this tutorial is not only to analyze the cohort at a high level (as done in the BraTS 2025 tutorial) but 
-also to dive deeper and identify potential biases or peculiarities that may go unnoticed when no specific analysis is performed.
+This tutorial guides you step by step through preparing the BraTS 2024 dataset, organizing it, configuring feature 
+extraction, and launching the interactive dashboard to explore your data using the AUDIT framework.
 
-AUDIT provides a broader perspective, helping understand differences within a dataset, analyze model performance 
-based on demographic variables, and more.
+Unlike BraTS 2025, this dataset includes a demographic mapping file containing valuable metadata such as glioma type, 
+MRI scanner specifications, magnetic field strength, and patient demographics. This enables a deeper analysis—not only 
+exploring dataset structure and image-derived features but also uncovering potential biases or acquisition-related 
+differences that may affect model performance.
+
+AUDIT provides a unified environment to analyze, compare, and visualize these variations across patient cohorts, 
+acquisition sites, and demographic groups.
 
 ---
 
 ## 1. Prerequisites
 
-Before starting this tutorial, you should have reviewed the BraTS 2025 tutorial, as concepts and functionalities 
-explained there are assumed here.
+Before starting, make sure you are familiar with the BraTS 2025 tutorial, as this guide assumes you already understand 
+the fundamentals of AUDIT, such as environment setup, project structure, and configuration files.
 
-As in the previous tutorial, we recommend using an Anaconda environment with Jupyter Notebook, creating the project 
-structure, and understanding how AUDIT configuration files work.
+We recommend using an isolated Anaconda environment with Jupyter Notebook and following the same project organization 
+used in the previous tutorial.
 
-The BraTS 2025 dataset is hosted on Synapse and **requires prior registration**. Please follow the [official 
-instructions](https://www.synapse.org/Synapse:syn64153130/wiki/) from the challenge and to BraTS 2025
-[Data Access](https://www.synapse.org/Synapse:syn64377310) section to download the data. For this tutorial we will take
-advantage of both datasets training and validation. 
+The BraTS 2024 dataset is hosted on Synapse and **requires prior registration**. Please follow the [official 
+instructions](https://www.synapse.org/Synapse:syn64153130/wiki/) from the challenge and to BraTS 2024
+[Data Access](https://www.synapse.org/Synapse:syn64377310) section to download the data. 
 
-Once downloaded and unzipped, store the training and additional training sets in a directory called `.datasets/BraTS_2024`.
-The metadata file must be stored in the project root. The project structure should look like this before starting:
+Once downloaded and unzipped, store the training and additional training sets in a directory called 
+`.datasets/BraTS_2024`. The metadata file must be stored in the project root. The project structure should look like 
+this before starting:
 
 ```
 brats2024_project/
@@ -47,12 +48,11 @@ brats2024_project/
 
 ## 2. Exploring the metadata
 
-Before working with the images, we need to understand what information we have about the patients. The BraTS 2024 
-dataset comes with a spreadsheet that contains demographics, glioma types, MRI scanner info, and more.
-By looking at this data first, we can plan our analyses and later see if our model behaves differently across sites 
-or patient characteristics.
+Before working with the imaging data, it is useful to explore the metadata. The BraTS 2024 demographic spreadsheet 
+includes variables such as acquisition site, magnetic field strength, scanner manufacturer, patient age, sex, and 
+glioma type - all of which can later be used to stratify analyses and investigate dataset heterogeneity.
 
-Let's load this spreadsheet into a pandas DataFrame and take a first look:
+Let’s begin by loading the file in a pandas DataFrame and take a first look:
 
 ```python
 import pandas as pd
@@ -70,22 +70,27 @@ This will give you a table like this:
 | BraTS-GLI-00006-101  | UCSF | 1001752         | BKKF        | JDR        | Train                 | 3.0                     | GE           | 39.0          | F             | Glioblastoma      |
 
 
-Notice how each patient has a site, age, sex, and glioma type. Later, we can use this information to organize the 
-dataset and check for potential biases.
+Each patient record is linked to a specific site and scanner configuration. Later, you can use this information to 
+partition the dataset and perform site-wise or scanner-wise analyses.
 
-
-For now, we will focus on analyzing the differences between cases from different acquisition sites. However, we 
-encourage users to perform their own analyses, exploring stratifications by glioma type, magnetic field strength, manufacturer, and other variables.
-The goal is to show how AUDIT can help you better understand your dataset and perform a more accurate evaluation of segmentation models and MRI cohorts.
-
-For this tutorial, we will work only with the training and additional training cohorts, excluding the validation set.
-
+For this tutorial, we will focus on the training and additional training subsets, excluding validation data.
 
 ```python
 df = mapping[mapping["Train/Test/Validation "].isin(["Train", "Train-additional"])]
 ```
 
-Let's create a function to move each patient into their corresponding folder, instead of keeping all of them grouped in a single directory.
+## 3. Organizing the dataset by site
+
+To facilitate comparisons between different acquisition centers, we will reorganize the dataset into site-specific 
+folders.  The function below automates the process by reading the metadata and copying each subject folder into the 
+appropriate subdirectory. However, we  encourage users to perform their own analyses, exploring splitting by glioma 
+type, magnetic field strength, manufacturer, and other variables.
+
+The goal is to show how AUDIT can help you better understand your dataset and perform a more accurate evaluation of
+segmentation models and MRI cohorts.
+
+Let's create a function to move each patient into their corresponding folder, instead of keeping all of them grouped 
+in a single directory.
 
 ```python
 import os
@@ -132,7 +137,8 @@ def organize_patients(df, column, input_dir, output_dir):
     print(f"Organization completed in {output_dir}")
 ```
 
-This function allows you to organize patients into separate directories and can be reused for any other analysis you want to perform with the BraTS 2024 dataset.
+This function allows you to organize patients into separate directories and can be reused for any other analysis you 
+want to perform with the BraTS 2024 dataset. Run the following code to organize your data by acquisition site:
 
 ```python
 input_dir = "./datasets/BraTS_2024"
@@ -141,7 +147,7 @@ output_dir = "./datasets/BraTS_2024_by_site"
 organize_patients(df, column="Site", input_dir=input_dir, output_dir=output_dir)
 ```
 
-Ready! After running this, your project should have the following structure:
+Ready! After running this, your project structure will look like:
 
 ```
 brats2024_project/
@@ -163,22 +169,26 @@ brats2024_project/
 ```
 
 
-## 3. Standardize folder and file naming
+## 4. Standardize folder and file naming
 
-To ensure compatibility with AUDIT, we will rename folders and files. Check XXXX out for more details.
+As in the BraTS 2025 tutorial, we need to standardize the folder and file names to ensure AUDIT compatibility. This 
+includes replacing prefixes, updating sequence identifiers, and ensuring consistent use of underscores. Check
+[BraTS 2025 tutorial](BraTS_2025.md) for more details.
 
+### 4.1 Rename folders and files
 
-We will replace the prefix `BraTS-GLI-` with dataset-specific names. Set the parameter *safe_mode* to True to avoid
+We’ll first replace the `BraTS-GLI-` prefix with the site name for clarity.
 
 ```python
 sites = ["Duke", "Indiana", "Missouri", "UCSD", "UCSF"]
 for s in sites:
     rename_dirs(
-    root_dir=os.path.join(output_dir, s),
-    old_name="BraTS-GLI",
-    new_name=s,
-    safe_mode=False
+        root_dir=os.path.join(output_dir, s),
+        old_name="BraTS-GLI",
+        new_name=s,
+        safe_mode=False
     )
+    
     rename_files(
         root_dir=os.path.join(output_dir, s),
         old_name="BraTS-GLI",
@@ -186,6 +196,8 @@ for s in sites:
         safe_mode=False
     )
 ```
+
+### 4.2 Standardize sequence
 
 Additionally, to make the sequence names clearer and consistent, we will replace suffixes:
 
@@ -204,8 +216,9 @@ for s in sites:
         )
 ```
 
+### 4.3 Replace dashes with underscores (optional)
 
-Finally, for consistency, we replace all `-` characters with `_`:
+Finally, to ensure consistent naming conventions, we replace all `-` characters with `_`:
 
 ```python
 for s in sites:
@@ -271,7 +284,8 @@ auditapp feature-extraction --config /home/usr/projects/configs/feature_extracti
 
 After execution, `/home/usr/brats2024_project/outputs/features` will contain the extracted features for all the datasets.
 
-⚠️ **Important:** All paths must be absolute. Otherwise, AUDIT may fallback to its internal default config files.
+!!! warning "Important"
+    All paths must be absolute. Otherwise, AUDIT may fall back to its internal default config files.
 
 ---
 
@@ -340,8 +354,6 @@ experiment with different feature sets, and challenge your models to reach the n
 > ![Univariate feature analysis](../assets/tutorials/brats2024_t1_max_intensity_l.png#only-light)
 > ![Univariate feature analysis](../assets/tutorials/brats2024_t1_max_intensity_d.png#only-dark)
 > *Figure 1:* Univariate feature analysis mode. Maximum pixel intensity distribution for T1 sequence.
-
-
 
 
 

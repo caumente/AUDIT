@@ -42,7 +42,7 @@ same view. Instead, its purpose is to provide a focused and detailed evaluation 
 a specific dataset, ensuring a consistent and fair comparison, as all models are evaluated on the exact same subjects.
 
 It is important that the segmentation labels and the ground truth labels must be aligned properly; otherwise, the 
-analysis mode will not work correctly. You can follow this [tutorial](tutorial) where it is explained how to modify the 
+analysis mode will not work correctly. You can follow this [tutorial](../tutorials/postprocessing_segmentations.md) where it is explained how to modify the 
 dataset labels to ensure proper alignment.
 
 
@@ -145,7 +145,7 @@ This compact overview enables users to quickly identify which models perform bes
 higher variability.
 
 > ![Summary table — aggregated view](../assets/dashboards_examples/multi_model_performance/summary_table_agg_l.png#only-light)
-> ![Summary table — aggregated view](../assets/dashboards_examples/multi_model_perfomance/summary_table_agg_d.png#only-dark)
+> ![Summary table — aggregated view](../assets/dashboards_examples/multi_model_performance/summary_table_agg_d.png#only-dark)
 > *Figure 1:* Summary table showing model performance aggregated over all tumor regions.
 
 The "Aggregated" checkbox above the table allows switching between showing average scores across all 

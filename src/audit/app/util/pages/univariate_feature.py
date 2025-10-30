@@ -62,8 +62,11 @@ class UnivariateFeature(BasePage):
                 clip_up=c_up,
                 num_std_devs=num_std_devs
             )
-
-            self.main(df, datasets_paths, selected_feature, labels)
+            try:
+                self.main(df, datasets_paths, selected_feature, labels)
+            except TypeError:
+                st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
+                    "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
         else:
             st.error(proceed[-1], icon='🚨')
 

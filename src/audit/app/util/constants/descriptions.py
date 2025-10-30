@@ -1,6 +1,3 @@
-from audit.app.util.constants.features import Features
-
-
 class ConstantsAPP:
     def __init__(self):
         self.mia_url = "https://www.artorg.unibe.ch/research/mia/index_eng.html"
@@ -9,8 +6,6 @@ class ConstantsAPP:
         self.sub_header = ""
         self.description = ""
         self.contact = "[Contact us - MIA group](%s)" % self.mia_url
-        # self.features = Features()
-
 
 class UnivariatePage(ConstantsAPP):
     def __init__(self):

@@ -41,7 +41,11 @@ class SubjectsExploration(BasePage):
         self.show_subject_information(subject_data)
 
         # check whether the subject is an outlier or not
-        self.show_outlier_information(subject_data, rest_data)
+        try:
+            self.show_outlier_information(subject_data, rest_data)
+        except TypeError:
+            st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
+                     "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
 
     @staticmethod
     def setup_sidebar(data):

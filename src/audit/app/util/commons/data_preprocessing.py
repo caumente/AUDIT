@@ -60,7 +60,11 @@ def filter_outliers(
         num_std_devs: int = None
 ):
     if filtering_method:
-        mean, std_dev = data[filtering_feature].mean(), data[filtering_feature].std()
+        try:
+            mean, std_dev = data[filtering_feature].mean(), data[filtering_feature].std()
+        except TypeError:
+            return data
+
         if filtering_method == "Removing outliers":
             data = data[data[filtering_feature].between(remove_low, remove_up)]
         elif filtering_method == "Clipping outliers":

@@ -1,20 +1,22 @@
 # Configuration Guide
 
-AUDIT uses configuration files to define paths, settings, and parameters for feature extraction, metric evaluation, and app customization. We recommend starting from the example files included in the repository and adapting them to your needs.
+AUDIT uses configuration files to define paths, settings, and parameters for feature extraction, metric evaluation, and 
+app customization. We recommend starting from the example files included in the repository and adapting them to your 
+needs.
 
 ---
 
-## ⚙️ Configuration File Types
+## Configuration files
 
-- **Feature extraction**: `feature_extraction.yaml`
-- **Metric evaluation**: `metric_extraction.yaml`
-- **App settings**: `app.yaml`
+- **Feature extraction**: _feature_extraction.yaml_
+- **Metric evaluation**: _metric_extraction.yaml_
+- **App settings**: _app.yaml_
 
-All configuration files are stored in the `config/` directory.
+All configuration files are stored in the _config/_ directory.
 
 ---
 
-## 📝 Example: Feature Extraction Config
+## Example: Feature Extraction Config
 
 Defines dataset paths, label mappings, features to extract, and longitudinal study settings.
 
@@ -51,7 +53,7 @@ output_path: '/home/user/AUDIT/outputs/features'
 
 ---
 
-## 📝 Example: Metric Extraction Config
+## Example: Metric Extraction Config
 
 Defines dataset and prediction paths, label mappings, metrics to compute, and output settings.
 
@@ -90,7 +92,7 @@ filename: 'BraTS'
 
 ---
 
-## 📝 Example: App Config
+## Example: App Config
 
 Defines dataset, feature, and metric paths for the web app.
 
@@ -123,7 +125,7 @@ predictions:
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 - Start from the example configuration files in the repository.
 - Adjust paths and settings to match your environment and project needs.

@@ -1,228 +1,247 @@
-# File Manager API Reference
-
-The `file_manager` module provides a comprehensive set of utilities for **file and directory management**.  
-It supports listing, renaming, moving, copying, deleting, and organizing files/folders, as well as reading/writing datasets and configuration files.
+The `file_manager` module provides a comprehensive set of utilities for managing files and directories. It supports operations for listing, renaming, copying, moving, deleting, and organizing files, with pattern matching, recursion, and safe simulation modes.
 
 ---
 
-## Module Overview
-- **Listing**: Enumerate files and directories.
-- **Configuration**: Load YAML config files with variable substitution.
-- **File & Directory Operations**: Rename, add prefixes/suffixes, delete, copy, move.
-- **Organizing**: Restructure files/folders for dataset preparation.
-- **CSV Handling**: Concatenate multiple CSVs, load datasets into DataFrames.
+## __Project Initialization__
 
-Most modification functions support:
-- **`safe_mode`** → simulate changes without executing them.
-- **`verbose`** → detailed logs of operations.
+### `create_project_structure`
 
----
+Creates the project directory structure and copies default config files
+from the installed __AUDIT__ package into the project's configs folder.
 
-## Functions
 
-### 🔍 Listing
+```text
+your_project/
+├── datasets/
+├── configs/
+│   ├── app.yaml
+│   ├── feature_extraction.yaml
+│   └── metric_extraction.yaml
+├── outputs/
+└── logs/
+```
 
-#### `list_dirs(path: str) -> list`
-List all **subdirectories** inside a given path.
+**Parameters**  
 
-- **Parameters**
-  - `path` *(str)*: Path to search for subdirectories.
-- **Returns**
-  - *(list)*: Sorted list of directory names.
-- **Raises**
-  - Prints errors if the path does not exist or permission is denied.
+- **base_path** (`str`, default: `"./"`): Root directory name where the project structure will be created.
+
 
 ---
 
-#### `list_files(path: str) -> list`
-List all **files** inside a given path.
+## __Listing Operations__
 
-- **Parameters**
-  - `path` *(str)*: Path to search for files.
-- **Returns**
-  - *(list)*: Sorted list of filenames.
-- **Raises**
-  - Prints errors if the path does not exist or permission is denied.
+### `list_dirs`
 
----
+List directories in a given path.
 
-### ⚙️ Configuration
+**Parameters**  
 
-#### `load_config_file(path: str) -> dict`
-Load a YAML configuration file and substitute variables of the form `${VAR}`.
+- **path** (`str` or `Path`): The root directory where to look for subdirectories.  
+- **recursive** (`bool`, default: `False`): If True, search subdirectories recursively.  
+- **full_path** (`bool`, default: `False`): If True, return absolute paths instead of just directory names.  
+- **pattern** (`str`, optional): Optional regex pattern to filter directory names.
 
-- **Parameters**
-  - `path` *(str)*: Relative path to the YAML configuration file.
-- **Returns**
-  - *(dict)*: Parsed YAML content with variables resolved.
-- **Raises**
-  - `FileNotFoundError`: If the file does not exist.
+**Returns**  
+
+- `list[str]`: A sorted list of directory names or paths.
+
 
 ---
 
-### 📝 Directory Operations
+### `list_files`
 
-#### `rename_directories(root_dir: str, old_name: str, new_name: str, verbose=False, safe_mode=True)`
-Rename all directories and subdirectories by replacing a substring in their names.
+List files in a given directory.
 
-- **Parameters**
-  - `root_dir` *(str)*: Root path where renaming starts.
-  - `old_name` *(str)*: Substring to replace.
-  - `new_name` *(str)*: Replacement string.
-  - `verbose` *(bool)*: Print details if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+**Parameters**  
 
----
+- **path** (`str` or `Path`): Root directory to search.  
+- **recursive** (`bool`, default: `False`): If True, search subdirectories recursively.  
+- **full_path** (`bool`, default: `False`): If True, return absolute paths instead of just filenames.  
+- **pattern** (`str`, optional): Regex pattern to filter file names.  
+- **extensions** (`list[str]` or `None`, optional): List of file extensions to filter by (e.g., `['.csv', '.yml']`).
 
-#### `add_string_directories(root_dir: str, prefix="", suffix="", verbose=False, safe_mode=True)`
-Add prefix/suffix to all directories recursively.
+**Returns**  
 
-- **Parameters**
-  - `root_dir` *(str)*: Path where renaming starts.
-  - `prefix` *(str)*: String to prepend.
-  - `suffix` *(str)*: String to append.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+- `list[str]`: A sorted list of file names or paths.
+
 
 ---
 
-### 📝 File Operations
+## __Directory Operations__
 
-#### `rename_files(root_dir: str, old_name="_t1ce", new_name="_t1c", verbose=False, safe_mode=True)`
-Rename files by replacing a substring.
+### `rename_dirs`
 
-- **Parameters**
-  - `root_dir` *(str)*: Path where renaming starts.
-  - `old_name` *(str)*: Substring to replace.
-  - `new_name` *(str)*: Replacement string.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+Rename directories recursively by replacing a substring in their names.
 
----
+**Parameters**  
 
-#### `add_suffix_to_files(root_dir: str, suffix="_pred", ext=".nii.gz", verbose=False, safe_mode=True)`
-Append a suffix to filenames before the extension.
+- **root_dir** (`str` or `Path`): Path to the directory where renaming will be performed.  
+- **old_name** (`str`): The string to be replaced in the directory names.  
+- **new_name** (`str`): The new string that will replace old_name.  
+- **verbose** (`bool`, default: `False`): If True, print information about each rename operation.  
+- **safe_mode** (`bool`, default: `True`): If True, only simulate renaming without making changes.
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `suffix` *(str)*: Suffix to add.
-  - `ext` *(str)*: Target extension.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
 
 ---
 
-#### `add_string_filenames(root_dir: str, prefix="", suffix="", ext=None, verbose=False, safe_mode=True)`
-Add prefix/suffix to filenames.
+### `add_string_dirs`
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `prefix` *(str)*: String to prepend.
-  - `suffix` *(str)*: String to append.
-  - `ext` *(str or None)*: If set, only process files with this extension.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+Add a prefix and/or suffix to all directories and subdirectories.
 
----
+**Parameters**  
 
-### 📤 Copying & Moving
+- **root_dir** (`str` or `Path`): Root directory to start renaming.  
+- **prefix** (`str`, default: `""`): Prefix to add to directory names.  
+- **suffix** (`str`, default: `""`): Suffix to add to directory names.  
+- **verbose** (`bool`, default: `False`): If True, print information about renamed directories (only when safe_mode=False).  
+- **safe_mode** (`bool`, default: `True`): If True, simulate renaming without changing directories.
 
-#### `copy_files_by_extension(src_dir: str, dst_dir: str, ext: str, safe_mode=True, overwrite=False, verbose=False)`
-Copy all files of a given extension.
-
-- **Parameters**
-  - `src_dir` *(str)*: Source path.
-  - `dst_dir` *(str)*: Destination path.
-  - `ext` *(str)*: File extension (e.g. `.txt`).
-  - `safe_mode` *(bool)*: Simulate only if `True`.
-  - `overwrite` *(bool)*: Allow overwriting if `True`.
-  - `verbose` *(bool)*: Print logs if `True`.
 
 ---
 
-#### `move_files_to_parent(root_dir: str, levels_up=1, ext=None, verbose=False, safe_mode=True)`
-Move files up to a parent folder.
+## __File Operations__
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to start.
-  - `levels_up` *(int)*: Number of parent levels to move up.
-  - `ext` *(str or None)*: File extension filter.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+### `rename_files`
 
----
+Recursively rename files by replacing a substring in their filenames.
 
-### ❌ Deleting
+**Parameters**  
 
-#### `delete_files_by_extension(root_dir: str, ext: str, verbose=False, safe_mode=True)`
-Delete all files of a given extension.
+- **root_dir** (`str` or `Path`): Root directory to start renaming files.  
+- **old_name** (`str`, default: `""`): Substring in filenames to replace.  
+- **new_name** (`str`, default: `""`): Substring to replace old_name with.  
+- **verbose** (`bool`, default: `False`): If True, print information about renamed files (only when safe_mode=False).  
+- **safe_mode** (`bool`, default: `True`): If True, simulate renaming without changing files.
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `ext` *(str)*: Extension filter.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
 
 ---
 
-#### `delete_folders_by_pattern(root_dir: str, pattern: str, verbose=False, safe_mode=True)`
-Delete folders matching a regex pattern.
+### `add_suffix_to_files`
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `pattern` *(str)*: Regex for folder names.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+Adds a suffix to all files with a specific extension in a folder and its subdirectories.
 
----
+**Parameters**  
 
-### 📦 Organizing
+- **root_dir** (`str`): The folder where the files are located.  
+- **suffix** (`str`, default: `"_pred"`): The suffix to add to the filenames before the extension.  
+- **ext** (`str`, default: `".nii.gz"`): The file extension to search for and rename.  
+- **verbose** (`bool`, default: `False`): If True, print detailed information about each file being renamed.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the renaming operation without changing any files.
 
-#### `organize_files_into_folders(root_dir: str, extension=".nii.gz", verbose=False, safe_mode=True)`
-Move each file into its own folder named after the filename.
-
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `extension` *(str)*: File extension filter.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
 
 ---
 
-#### `organize_subfolders_into_named_folders(root_dir: str, join_char="-", verbose=False, safe_mode=True)`
-Flatten nested folder structures into combined names.
+### `add_string_files`
 
-- **Parameters**
-  - `root_dir` *(str)*: Path to scan.
-  - `join_char` *(str)*: Separator between parent/subfolder names.
-  - `verbose` *(bool)*: Print logs if `True`.
-  - `safe_mode` *(bool)*: Simulate only if `True`.
+Add a prefix and/or suffix to all files in a folder and its subfolders.
 
----
+**Parameters**  
 
-### 📊 CSV & Dataset Handling
+- **root_dir** (`str` or `Path`): Directory containing files to rename.  
+- **prefix** (`str`, default: `""`): Prefix to add to the file name (before the stem).  
+- **suffix** (`str`, default: `""`): Suffix to add to the file name (after the stem, before extension).  
+- **ext** (`str` or `None`, optional): If provided, treat this exact string as the file extension (supports multi-part extensions like `'.nii.gz'`).  
+- **verbose** (`bool`, default: `False`): If True, print information about actual renames (only when safe_mode=False).  
+- **safe_mode** (`bool`, default: `True`): If True, simulate renames and print planned operations (no filesystem changes).
 
-#### `concatenate_csv_files(path: str, output_file: str)`
-Concatenate all CSV files in a directory into one.
-
-- **Parameters**
-  - `path` *(str)*: Directory with CSV files.
-  - `output_file` *(str)*: Path of the output CSV file.
 
 ---
 
-#### `read_datasets_from_dict(name_path_dict: dict, col_name="set") -> pd.DataFrame`
-Load multiple CSV datasets into a single DataFrame.
+## __Copying and Moving Operations__
 
-- **Parameters**
-  - `name_path_dict` *(dict)*: Keys = dataset names, values = CSV file paths.
-  - `col_name` *(str)*: Column to hold dataset name. Default `"set"`.
-- **Returns**
-  - *(pd.DataFrame)*: Concatenated DataFrame with dataset labels.
+### `copy_files_by_extension`
+
+Copy all files with a specific extension from one directory to another.
+
+**Parameters**  
+
+- **src_dir** (`str`): The source directory from which to copy files.  
+- **dst_dir** (`str`): The destination directory where files will be copied.  
+- **ext** (`str`): The file extension to search for and copy (e.g., `".txt"`, `".yaml"`).  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the operation without making changes.  
+- **overwrite** (`bool`, default: `False`): If True, allow overwriting existing files in the destination directory.  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs for each file operation.
+
 
 ---
 
-## 🔎 Notes
-- **Safe Mode**: Enabled by default to avoid unintended modifications.  
-- **Verbose**: Useful for debugging file operations.  
-- **Regex Support**: Available for folder deletion via `delete_folders_by_pattern`.
+### `move_files_to_parent`
+
+Move files (optionally filtered by extension) from subdirectories
+to a specified parent level above their current location.
+
+**Parameters**  
+
+- **root_dir** (`str`): Root directory where the search will start.  
+- **levels_up** (`int`, default: `1`): Number of parent levels up to move the files.  
+- **ext** (`str` or `None`, optional): File extension to filter by (e.g., `".txt"`).  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs for each file move operation.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the move without actually moving the files.
+
+
+---
+
+## __Deletion Operations__
+
+### `delete_files_by_extension`
+
+Deletes all files with a specific extension in a path and its subdirectories.
+
+**Parameters**  
+
+- **root_dir** (`str`): The root directory where the search will start.  
+- **ext** (`str`): The file extension of the files to be deleted (e.g., `'.nii.gz'`).  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs for each file deletion operation.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the deletion without actually removing the files.
+
+
+---
+
+### `delete_dirs_by_pattern`
+
+Deletes folders matching a pattern in a path and its subdirectories.
+
+**Parameters**  
+
+- **root_dir** (`str`): Directory where the search will start.  
+- **pattern** (`str`): Pattern to match folder names.  
+- **match_type** (`str`, default: `'contains'`): Type of matching: `'contains'`, `'starts'`, `'ends'`, or `'exact'`.  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs for each folder deletion operation.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate deletion without actually removing folders.
+
+
+---
+
+## __Organization Operations__
+
+### `organize_files_into_dirs`
+
+Organizes files into folders based on their filenames. Each file will be moved into a folder named
+after the file (excluding the extension).
+
+**Parameters**  
+
+- **root_dir** (`str`): Directory containing the files to organize.  
+- **extension** (`str`, default: `'.nii.gz'`): The file extension to look for.  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs about each file being organized.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the file organization without moving the files.
+
+
+---
+
+### `organize_subdirs_into_named_dirs`
+
+Organizes subfolders into combined named folders.
+Combines parent folder names and their subfolder names into a single folder per subfolder.
+
+**Parameters**  
+
+- **root_dir** (`str`): Directory containing the parent folders.  
+- **join_char** (`str`, default: `"-"`): Character to join parent and subfolder names.  
+- **verbose** (`bool`, default: `False`): If True, print detailed logs about each operation.  
+- **safe_mode** (`bool`, default: `True`): If True, simulate the folder organization without making changes.
+
+**Returns**  
+
+- `dict[str, list[str]]`: Summary of operations performed or simulated.  
+  Keys: `"created_folders"`, `"moved_items"`, `"removed_folders"`.

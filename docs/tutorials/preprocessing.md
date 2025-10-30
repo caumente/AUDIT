@@ -5,10 +5,14 @@ library. Our goal is to demonstrate how to clean, organize, and standardize the 
 analysis. We'll cover key operations such as file and folder cleaning, reorganization, and renaming, all while 
 explaining each step in detail.
 
+References:
+
+- [The LUMIERE dataset: Longitudinal Glioblastoma MRI with expert RANO evaluation](https://www.nature.com/articles/s41597-022-01881-7)
+
 Let's get started!
 
 
-## 0. Import Library's Functions
+## 1. Prerequisites
 
 Before we dive into the dataset preprocessing, we first need to import the necessary functions from the **AUDIT** 
 library. These utility functions will help us clean and reorganize the dataset. Importing these functions at the 
@@ -31,41 +35,8 @@ from audit.utils.commons.file_manager import (
 )
 ```
 
-[//]: # ()
-[//]: # (Otherwise, if you're using **AUDIT** as a developer, then import them from the source code.)
 
-[//]: # ()
-[//]: # (```python)
-
-[//]: # (import os)
-
-[//]: # (os.chdir&#40;'./..'&#41;)
-
-[//]: # (from src.audit.utils.commons.file_manager import &#40;)
-
-[//]: # (    list_dirs,)
-
-[//]: # (    list_files,)
-
-[//]: # (    delete_files_by_extension,)
-
-[//]: # (    delete_folders_by_pattern,)
-
-[//]: # (    move_files_to_parent,)
-
-[//]: # (    organize_subfolders_into_named_folders,)
-
-[//]: # (    rename_files,)
-
-[//]: # (    add_string_filenames,)
-
-[//]: # (    rename_dirs)
-
-[//]: # (&#41;)
-
-[//]: # (```)
-
-## 1. Data understanding
+## 2. Data understanding
 
 Before diving into the preprocessing tasks, it is essential to gain an understanding of the dataset's structure. This 
 helps us identify the key elements we will be working with, such as the available sequences and segmentation data. 
@@ -143,7 +114,7 @@ print(list_files(f"{root_data_path}Patient-091/week-000/DeepBraTumIA-segmentatio
 ['measured_volumes_in_mm3.json', 'seg_mask.nii.gz']
 ```
 
-## 2. Files cleaning
+## 3. Files cleaning
 
 Now that we understand the structure, the next step is to clean the dataset by removing unnecessary files. This 
 involves eliminating sequences and files that we won’t use in our analysis. The files we want to remove are mainly 
@@ -202,7 +173,7 @@ for file in files_to_delete:
     )
 ```
     
-## 3. Folders cleaning
+## 4. Folders cleaning
 
 In this step, we remove unnecessary folders that contain irrelevant data, such as "HD-GLIO-AUTO-segmentation" and 
 "DeepBraTumIA-segmentation/atlas/". This helps us further simplify the structure, keeping only the essential files 
@@ -260,7 +231,7 @@ print(list_dirs(f"{root_data_path}Patient-091/week-000/DeepBraTumIA-segmentation
 ['segmentation', 'skull_strip']
 ```
 
-## 4. Files organization
+## 5. Files organization
 
 Now that we have cleaned up the unnecessary files and folders, it’s time to organize the remaining files. Currently, 
 they are nested in deep directory structures, and we need to move them to the parent folders for easier access.
@@ -314,7 +285,7 @@ delete_folders_by_pattern(
 ```
 
 
-## 5. Folders organization
+## 6. Folders organization
 
 At this point, we need to organize the folders further. To align with the expected structure for **AUDIT**, we will 
 move the timepoint folders to the root level. This way, each subject and their respective timepoints will be placed 
@@ -376,7 +347,7 @@ print(list_dirs(root_data_path)[:6])
 ['Patient-001-week-044', 'Patient-001-week-056', 'Patient-002-week-000', 'Patient-002-week-003', 'Patient-002-week-021', 'Patient-002-week-037']
 ```
 
-## 6. Sequences name standardization
+## 7. Sequences name standardization
 
 Finally, to follow a more standardized naming convention, such as the one used in the BraTS dataset, we will rename 
 the sequences and the segmentation to follow a similar pattern. Typically, MRI sequences are named `t1`, `t2`, `t1ce`, 
@@ -436,9 +407,9 @@ for subject in list_dirs(root_data_path):
 ```
 
 With this, we would have organized the project as required to work with AUDIT. Additionally, we recommend that the 
-images (sequences and segmentations provided by the medical experts) be placed in a directory called `DATASET_images`, 
-so that the segmentations from each model are contained in the `DATASET_seg` directory. Therefore, to conclude, we'll 
-rename the LUMIERE directory to `LUMIERE_images`.
+images (sequences and segmentations provided by the medical experts) be placed in a directory called _DATASET_images_, 
+so that the segmentations from each model are contained in the _DATASET_seg_ directory. Therefore, to conclude, we'll 
+rename the LUMIERE directory to _LUMIERE_images_.
 
 ```python
 rename_dirs(

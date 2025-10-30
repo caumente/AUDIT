@@ -2,6 +2,7 @@ import os
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 import numpy as np
 import SimpleITK
@@ -12,68 +13,102 @@ from SimpleITK import ReadImage
 from SimpleITK import WriteImage
 
 
-def load_nii(path_folder: str, as_array: bool = False) -> SimpleITK.Image:
-    """  This function loads a NIfTI."""
+def load_nii(path_folder: str, as_array: bool = False) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
+    """
+    Load a NIfTI image from disk.
 
-    # Check if the file path exists
+    This function reads a NIfTI file using SimpleITK. If ``as_array`` is True, the
+    image is returned as a NumPy array; otherwise a ``SimpleITK.Image`` is returned.
+    If an error occurs while reading, ``None`` is returned and a warning is logged.
+
+    Parameters
+    ----------
+    path_folder : str
+        Path to the NIfTI file on disk (e.g., ``/path/to/scan.nii.gz``).
+    as_array : bool, default False
+        If True, return the image as a NumPy array; otherwise return a SimpleITK image.
+
+    Returns
+    -------
+    Optional[Union[SimpleITK.Image, np.ndarray]]
+        The loaded image (``SimpleITK.Image`` or ``np.ndarray``) if successful; otherwise ``None``.
+    """
     if path_folder is None or not os.path.isfile(path_folder):
         raise ValueError(f"The file at {path_folder} does not exist or is not a valid file.")
 
     try:
-        # Read the NIfTI file using SimpleITK
         image = ReadImage(str(path_folder))
-
-        # Return as a numpy array if requested
         if as_array:
             return GetArrayFromImage(image)
-
         return image
-
     except RuntimeError as e:
-        # Log specific errors related to SimpleITK
         logger.warning(f"Error loading NIfTI file {path_folder}: {e}")
         return None
-
     except Exception as e:
-        # Catch other potential errors and raise a general error message
         logger.warning(f"Unexpected error while loading NIfTI file {path_folder}: {e}")
         return None
 
 
-def load_nii_by_subject_id(root_dir: str, subject_id: str, seq: str = "_seg", as_array: bool = False) -> SimpleITK.Image:
-    """  This function loads a specific sequence from a NIfTI file by subject ID."""
+def load_nii_by_subject_id(root_dir: str, subject_id: str, seq: str = "_seg", as_array: bool = False
+                           ) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
+    """
+    Load a specific NIfTI sequence for a subject ID from a dataset tree.
 
-    # Check if root_dir or subject_id is None or empty
+    This helper builds the expected path ``{root_dir}/{subject_id}/{subject_id}{seq}.nii.gz``,
+    verifies its existence, and loads it via :func:`load_nii` optionally as a NumPy array.
+
+    Parameters
+    ----------
+    root_dir : str
+        Root folder containing all subject subfolders.
+    subject_id : str
+        Identifier of the subject (e.g., ``Patient-001``).
+    seq : str, default "_seg"
+        Sequence suffix to append to the subject id (e.g., "_t1", "_flair").
+    as_array : bool, default False
+        If True, return the image as a NumPy array; otherwise return a SimpleITK image.
+
+    Returns
+    -------
+    Optional[Union[SimpleITK.Image, np.ndarray]]
+        The loaded image if found and readable; otherwise ``None``.
+    """
     if not root_dir or not subject_id:
         raise ValueError("Invalid path or subject ID provided. Both must be non-empty strings.")
 
     nii_path = os.path.join(root_dir, subject_id, f"{subject_id}{seq}.nii.gz")
-
     if not os.path.exists(nii_path):
         logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
         return None
-
     return load_nii(nii_path, as_array=as_array)
 
 
-def read_sequences_dict(root_dir: str, subject_id: str, sequences: Optional[List[str]] = None) -> dict:
+def read_sequences_dict(root_dir: str, subject_id: str, sequences: Optional[List[str]] = None) -> Dict[str, Optional[np.ndarray]]:
     """
-    Reads a dictionary of NIfTI sequences for a given subject from the specified root_dir directory.
+    Read multiple NIfTI sequences for a subject and return them as a dictionary.
 
-    Parameters:
-        root_dir (str): The root_dir directory where subject data is stored.
-        subject_id (str): The subject's ID used to locate the NIfTI files.
-        sequences (List[str], optional): A list of sequences to load. Defaults to ["_t1", "_t1ce", "_t2", "_flair"].
+    For each sequence in ``sequences`` (defaults to ``["_t1", "_t1ce", "_t2", "_flair"]``),
+    attempts to load ``{subject_id}{seq}.nii.gz`` and returns a map from the sequence
+    name without underscore (e.g., ``"t1"``) to a NumPy array. Missing or unreadable
+    sequences are returned as ``None``.
 
-    Returns:
-        dict: A dictionary with sequence names (e.g., 't1', 't1ce', 't2', 'flair') as keys
-              and Numpy arrays of the corresponding loaded NIfTI files or None if the sequence doesn't exist.
+    Parameters
+    ----------
+    root_dir : str
+        Root directory where subject data is stored.
+    subject_id : str
+        Subject identifier used to locate the NIfTI files.
+    sequences : list of str, optional
+        Sequence suffixes to load. Defaults to ``["_t1", "_t1ce", "_t2", "_flair"]``.
+
+    Returns
+    -------
+    dict[str, Optional[np.ndarray]]
+        Mapping from sequence key (without leading underscore) to the loaded array,
+        or ``None`` if the sequence file is missing/unreadable.
     """
-    # Default sequences if none are provided
     if sequences is None:
         sequences = ["_t1", "_t1ce", "_t2", "_flair"]
-
-    # Ensure root_dir and subject_id are valid
     if not root_dir or not subject_id:
         raise ValueError("Both 'root_dir path' and 'subject id' must be non-empty strings.")
 
@@ -97,85 +132,103 @@ def read_sequences_dict(root_dir: str, subject_id: str, sequences: Optional[List
     return out
 
 
-def get_spacing(img):
+def get_spacing(img: Optional[SimpleITK.Image]) -> np.ndarray:
+    """
+    Get voxel spacing of a SimpleITK image as a NumPy array.
+
+    If ``img`` is ``None``, returns isotropic spacing ``[1, 1, 1]`` and logs a warning.
+
+    Parameters
+    ----------
+    img : SimpleITK.Image or None
+        Input image from which to read spacing.
+
+    Returns
+    -------
+    np.ndarray
+        The spacing vector as ``(z, y, x)``.
+    """
     if img is not None:
         return np.array(img.GetSpacing())
-    else:
-        logger.warning(f"Sequence empty. Assuming isotropic spacing (1, 1, 1).")
-        return np.array([1, 1, 1])
+    logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1)." )
+    return np.array([1, 1, 1])
 
 
-def build_nifty_image(segmentation):
+def build_nifty_image(segmentation: Union[np.ndarray, list]) -> SimpleITK.Image:
     """
-    Converts a segmentation Numpy array into a SimpleITK Image.
+    Convert a segmentation array into a SimpleITK Image.
 
-    Parameters:
-        segmentation (np.ndarray): The input segmentation as a Numpy array.
+    Parameters
+    ----------
+    segmentation : np.ndarray or list
+        Input segmentation array.
 
-    Returns:
-        SimpleITK.Image: The SimpleITK image created from the segmentation.
-
-    Raises:
-        ValueError: If the input is not a valid Numpy array.
+    Returns
+    -------
+    SimpleITK.Image
+        The created SimpleITK image.
     """
     if not isinstance(segmentation, (np.ndarray, list)):
         raise ValueError("The segmentation input must be a Numpy array or array-like object.")
-
     try:
-        img = GetImageFromArray(segmentation)
-        return img
+        return GetImageFromArray(segmentation)
     except Exception as e:
         raise RuntimeError(f"Error converting segmentation to NIfTI image: {e}")
 
 
-def label_replacement(segmentation: np.array, original_labels: list, new_labels: list) -> np.array:
+def label_replacement(segmentation: np.ndarray, original_labels: List[int], new_labels: List[int]) -> np.ndarray:
     """
-    Maps the values in a segmentation array from original labels to desired new labels.
+    Map label values in a segmentation from original labels to new labels.
 
-    Args:
-        segmentation: The segmentation array containing the original label values.
-        original_labels: A list of original labels present in the segmentation array.
-        new_labels: A list of new labels that will replace the original labels.
+    Parameters
+    ----------
+    segmentation : np.ndarray
+        Segmentation array containing the original label values.
+    original_labels : list of int
+        Original labels present in the segmentation array.
+    new_labels : list of int
+        New labels to replace the original labels.
 
-    Returns:
-        post_seg: A new segmentation array where the original labels have been mapped to the new labels.
-
+    Returns
+    -------
+    np.ndarray
+        A new segmentation array with the remapped labels.
     """
     if len(original_labels) != len(new_labels):
         raise ValueError("The lengths of original labels and new labels must match.")
-
-    # Create a mapping dictionary from original labels to new labels
     mapping = {orig: new for orig, new in zip(original_labels, new_labels)}
-
-    # Vectorized approach: Create a copy of the segmentation array
     post_seg = np.copy(segmentation)
-
-    # Apply the mapping to the entire 3D array
     for orig, new in mapping.items():
         post_seg[segmentation == orig] = new
-
     return post_seg
 
 
 def iterative_labels_replacement(
         root_dir: str,
-        original_labels: list,
-        new_labels: list,
-        ext="_seg",
+        original_labels: List[int],
+        new_labels: List[int],
+        ext: str = "_seg",
         verbose: bool = False
 ):
     """
-    Iteratively replaces labels in segmentation files within a directory and its subdirectories.
+    Iteratively replace labels in segmentation files across a dataset tree.
 
-    This function walks through all files in a specified root_dir directory and its subdirectories,
-    identifies files containing a specified extension (e.g., "_seg" or "_pred"), loads each file as a 3D image array,
-    replaces the labels based on provided mappings, and saves the modified image back to its original location.
+    Walks the directory tree ``root_dir``, finds files whose names contain ``ext``
+    (e.g., "_seg" or "_pred"), loads each file as a 3D array, replaces labels
+    using :func:`label_replacement`, and writes the modified segmentation back in place.
 
-    Args:
-        root_dir: The root_dir directory containing the segmentation files.
-        original_labels: A list of original labels present in the segmentation arrays.
-        new_labels: A list of new labels that will replace the original labels.
-        ext: The file extension pattern to identify segmentation files. Defaults to "_seg".
+    Parameters
+    ----------
+    root_dir : str
+        Root directory containing segmentation files.
+    original_labels : list of int
+        Original label values present in the segmentation arrays.
+    new_labels : list of int
+        New labels that will replace the original labels.
+    ext : str, default "_seg"
+        File-name pattern used to identify segmentation files.
+    verbose : bool, default False
+        If True, log per-file processing details.
     """
 
     processed_files = 0
@@ -183,26 +236,19 @@ def iterative_labels_replacement(
 
     for subdir, _, files in os.walk(root_dir):
         for file in files:
-            # Skip files that do not match the extension criteria
             if ext not in file:
                 skipped_files += 1
                 continue
 
             file_path = str(os.path.join(subdir, file))
             try:
-                # Load the segmentation file as a 3D array
                 seg = load_nii(file_path, as_array=True)
-
-                # If segmentation data is None (e.g., file is corrupted), skip processing
                 if seg is None:
                     logger.warning(f"Skipping file {file_path}: Unable to load segmentation.")
                     skipped_files += 1
                     continue
 
-                # Perform label replacement
                 post_seg = label_replacement(seg, original_labels, new_labels)
-
-                # Save the modified segmentation array back to file
                 WriteImage(build_nifty_image(post_seg), file_path)
 
                 if verbose:
@@ -216,46 +262,32 @@ def iterative_labels_replacement(
     logger.info(f"Iterative label replacement completed: {processed_files} files processed, {skipped_files} files skipped.")
 
 
-# def turn_planes(image, orientation=None):
-#     """
-#     Reorients the image planes based on the provided orientation.
-#
-#     Parameters:
-#     ----------
-#     orientation : list, optional
-#         A list representing the desired plane orientations in order (default is ["axial", "coronal", "sagittal"]).
-#
-#     Returns:
-#     -------
-#     np.ndarray
-#         The reoriented image array.
-#     """
-#
-#     if not orientation:
-#         orientation = ["axial", "coronal", "sagittal"]
-#
-#     # Get index position for each plane
-#     axial = orientation.index("axial")
-#     coronal = orientation.index("coronal")
-#     sagittal = orientation.index("sagittal")
-#
-#     return np.transpose(image, (axial, coronal, sagittal))
-
-
-def count_labels(segmentation, mapping_names=None):
+def count_labels(
+        segmentation: Optional[np.ndarray],
+        mapping_names: Optional[Dict[int, str]] = None
+) -> Dict[Union[int, str], float]:
     """
-    Counts the number of pixels for each unique value in the segmentation.
+    Count the number of pixels/voxels for each unique value in a segmentation.
 
-    Returns:
+    If ``segmentation`` is ``None``, return an empty dict, or a dict with NaN values
+    for keys provided by ``mapping_names``.
+
+    Parameters
+    ----------
+    segmentation : np.ndarray or None
+        Segmentation array to count values from.
+    mapping_names : dict[int, str], optional
+        Mapping to rename label IDs (keys) to friendly names (values).
+
+    Returns
     -------
-    dict
-        A dictionary with the counts of each unique value in the segmentation.
+    dict[Union[int, str], float]
+        Counts per unique label (renamed if ``mapping_names`` is provided).
     """
     if segmentation is None:
         if mapping_names:
-            return {k.lower(): np.nan for k in mapping_names.values()}
-        else:
-            return {}
+            return {k.lower(): np.nan for k in mapping_names.values()}  # type: ignore[return-value]
+        return {}
 
     unique, counts = np.unique(segmentation, return_counts=True)
     pixels_dict = dict(zip(unique, counts))
@@ -266,7 +298,25 @@ def count_labels(segmentation, mapping_names=None):
     return pixels_dict
 
 
-def fit_brain_boundaries(sequence: np.ndarray, padding: int = 1):
+def fit_brain_boundaries(sequence: np.ndarray, padding: int = 1) -> np.ndarray:
+    """
+    Crop a 3D sequence tightly around the non-zero brain region with optional padding.
+
+    The function computes the bounding box around non-zero voxels and returns the
+    cropped subvolume. If the input is all zeros, the input is returned unchanged.
+
+    Parameters
+    ----------
+    sequence : np.ndarray
+        Input 3D array to crop.
+    padding : int, default 1
+        Number of voxels to pad the bounding box on each side.
+
+    Returns
+    -------
+    np.ndarray
+        Cropped subvolume of ``sequence``.
+    """
     seq = sequence.copy()
 
     if np.all(seq == 0):

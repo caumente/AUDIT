@@ -57,13 +57,13 @@ medical image segmentation models. However, you could use AUDIT easily in your o
 
 Directly from PyPI:
 
-```bash
+```python
 pip install auditapp
 ```
 
 Alternatively, clone the repository and install it locally:
 
-```bash
+```python
 git clone https://github.com/caumente/AUDIT.git
 cd AUDIT
 pip install -r requirements.txt
@@ -75,13 +75,13 @@ pip install -r requirements.txt
 Start the interactive web app using our default configuration for data visualization and exploration
 
 Run the following command if you installed AUDIT directly from PyPI:
-```bash
+```python
 auditapp run-app
 ```
 
 Or alternatively, if you cloned the repository and install it locally, run:
 
-```bash
+```python
 python src/audit/app/launcher.py
 ```
 

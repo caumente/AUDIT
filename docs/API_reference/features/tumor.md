@@ -1,10 +1,9 @@
-[//]: # (::: src.features.tumor.TumorFeatures)
-
-
 The `TumorFeatures` class computes various tumor-related metrics based on a segmented 3D medical image, such as lesion 
 size, tumor center of mass, and tumor location relative to the brain's center of mass.
 
-### Overview
+---
+
+## __Overview__
 
 This class provides methods to compute first-order tumor features, focusing on spatial and volumetric characteristics 
 derived from medical image segmentation. It is designed to handle common use cases in medical imaging, such as 
@@ -14,7 +13,6 @@ The class allows customization through optional parameters such as voxel spacing
 makes it highly adaptable to different medical imaging contexts, including various scan types and segmentation 
 algorithms.
 
-
 The following tumor features are available:
 
 - **Tumor Pixel Count**: The number of pixels associated with each tumor label in the segmentation.
@@ -23,109 +21,134 @@ The following tumor features are available:
 - **Tumor Slices**: The image slices in the axial, coronal, and sagittal planes that contain tumor regions.
 - **Tumor Position**: The location of tumor slices in each plane (e.g., lower and upper bounds).
 
+---
 
-### Methods
+## __Methods__
 
-#### `__init__()`
+### `__init__`
 
-**Description**:  
-The constructor initializes a `TumorFeatures` object using a 3D segmented MRI and various optional parameters such as 
-voxel spacing and label mappings. These attributes are used to calculate tumor features like lesion size and tumor 
-location across different planes.
+Constructs all the necessary attributes for the TumorFeatures object.
 
-**Parameters**:
+**Parameters**  
 
-- `segmentation` (`np.ndarray`): A 3D NumPy array representing the segmentation of the medical image.
-- `spacing` (`tuple, optional`): The voxel spacing of the medical image (default is (1, 1, 1)).
-- `mapping_names` (`dict, optional`): A dictionary mapping segmentation values (labels) to human-readable names.
-- `planes` (`list[str]`, optional`): The planes (axial, coronal, sagittal) for tumor slice analysis. Defaults to 
-["axial", "coronal", "sagittal"].
+- **segmentation** (`np.ndarray`): A numpy array representing the segmentation of the medical image.  
+- **spacing** (`tuple`, optional): The voxel spacing of the image (default is `(1, 1, 1)`).  
+- **mapping_names** (`dict`, optional): A dictionary mapping segmentation values to names.  
+- **planes** (`list[str]`, optional): The planes (axial, coronal, sagittal) for tumor slice analysis. Defaults to `["axial", "coronal", "sagittal"]`.
 
-----------------------------  
+---
 
-#### `count_tumor_pixels()`
+### `count_tumor_pixels`
 
-Returns (`dict`):  A dictionary where keys represent segmentation labels (or names) and values represent the pixel 
-count for each label.
+Counts the number of pixels for each unique value in the segmentation.
 
-----------------------------  
+**Returns**  
 
-#### `count_tumor_pixels()`
+- `dict`: A dictionary with the counts of each unique value in the segmentation.
 
-Returns (`dict`): A dictionary containing the total lesion size, keyed by "lesion_size".
+---
 
-----------------------------  
+### `calculate_whole_lesion_size`
 
-#### `get_tumor_center_mass(label=None)`
+Calculates the total lesion size in the segmentation.
 
-**Parameters**:
+**Returns**  
 
-- `label` (`int, optional`): Specifies the label of the tumor for which the center of mass should be calculated. If not 
-provided, the calculation is done for all tumor regions.
+- `dict`: A dictionary containing the lesion size in cubic millimeters.
 
-Return (`np.ndarray`): The 3D coordinates of the tumor’s center of mass.
+---
 
-----------------------------  
+### `get_tumor_center_mass`
 
-#### `get_tumor_slices()`
+Calculates the center of mass for the tumor in the image.
 
-Return (`tuple`): A tuple containing three lists, each representing the indices of slices with tumors in the axial, 
-coronal, and sagittal planes.
+**Parameters**  
 
-----------------------------  
+- **label** (`int`, optional): The label value of the tumor (default is `None`).
 
-#### `calculate_tumor_slices()`
+**Returns**  
 
-Return (`dict`): A dictionary where keys represent the plane names (e.g., "axial_tumor_slice") and values represent the 
-number of tumor-containing slices.
+- `np.ndarray`: The center of mass coordinates adjusted by the voxel spacing.
 
-----------------------------  
+---
 
-#### `calculate_position_tumor_slices()`
+### `get_tumor_slices`
 
-Return (`dict`): A dictionary containing the minimum and maximum slice indices for each plane 
-(e.g., "lower_axial_tumor_slice", "upper_axial_tumor_slice").
+Obtains the slices that contain tumor regions in the axial, coronal, and sagittal planes.
 
-----------------------------
+**Returns**  
 
-#### `calculate_tumor_pixel()`
+- `tuple`: A tuple containing three lists, each representing the indices of slices with tumor presence in each plane.
 
-Return (`dict`): A dictionary where keys represent each tumor label (e.g., "lesion_size_label1") and values represent 
-the lesion size in voxels.
+---
 
-----------------------------  
+### `calculate_tumor_slices`
 
-#### `calculate_tumor_distance()`
+Calculates the number of tumor-containing slices per plane.
 
-**Parameters**:
+**Returns**  
 
-- `brain_centre_mass` (`array-like`): The center of mass of the brain used as a reference point.
+- `dict`: A dictionary where keys represent each plane (e.g., `"axial_tumor_slices"`) and values represent the number of slices with tumor.
 
-Return (`dict`): A dictionary where each key represents the tumor label and the value represents the distance between 
-the tumor and the brain's center of mass.
+---
 
-----------------------------  
+### `calculate_position_tumor_slices`
 
-#### `calculate_tumor_center_mass()`
+Determines the lower and upper tumor slice indices for each plane.
 
-**Parameters**:
+**Returns**  
 
-Return (`dict`):  A dictionary where keys represent each plane and label (e.g., "axial_tumor_center_mass") and values 
-represent the coordinates of the tumor center of mass.
+- `dict`: A dictionary containing the minimum and maximum slice indices for each plane (e.g., `"lower_axial_tumor_slice"`, `"upper_axial_tumor_slice"`).
 
----------------------------- 
+---
 
-#### `extract_features()`
+### `calculate_tumor_pixel`
 
-Returns (`dict`): All tumor features. 
+Computes the number of pixels per tumor label and converts them into volume using voxel spacing.
 
-  - Center of mass per label and plane (e.g., "axial_tumor_center_mass").
-  - Tumor location relative to brain center of mass.
-  - Lesion size per label.
-  - Total lesion size.
-  - Number of tumor-containing slices per plane.
+**Returns**  
+
+- `dict`: A dictionary where keys represent each tumor label (e.g., `"lesion_size_label1"`) and values represent the lesion size in voxels.
+
+---
+
+### `calculate_tumor_distance`
+
+Calculates the Euclidean distance between the tumor center of mass and the brain's center of mass.
+
+**Parameters**  
+
+- **brain_centre_mass** (`array-like`): The center of mass of the brain used as a reference point.
+
+**Returns**  
+
+- `dict`: A dictionary where each key represents the tumor label and the value represents the distance between the tumor and the brain's center of mass.
+
+---
+
+### `calculate_tumor_center_mass`
+
+Calculates the tumor center of mass for each label and plane.
+
+**Returns**  
+
+- `dict`: A dictionary where keys represent each plane and label (e.g., `"axial_tumor_center_mass"`) and values represent the coordinates of the tumor center of mass.
+
+---
+
+### `extract_features`
+
+Extracts all tumor-related features, combining lesion size, center of mass, position, and slice information.
+
+**Returns**  
+
+A dictionary containing all computed tumor features, including:
+
+  - Center of mass per label and plane.  
+  - Tumor location relative to brain center of mass.  
+  - Lesion size per label.  
+  - Total lesion size.  
+  - Number of tumor-containing slices per plane.  
   - Lower and upper bounds of tumor slices.
 
-----------------------------  
-
-
+---

@@ -8,11 +8,11 @@ All extraction and evaluation methods are documented in the [API reference](../A
 
 ---
 
-## ▶️ Run from Repository (Recommended)
+## Run from Repository (Recommended)
 
 Use the following commands to run feature extraction and metric evaluation modules:
 
-```bash
+```python
 python src/audit/feature_extraction.py --config path/to/your/feature_extraction.yaml
 python src/audit/metric_extraction.py --config path/to/your/metric_extraction.yaml
 ```
@@ -22,11 +22,11 @@ python src/audit/metric_extraction.py --config path/to/your/metric_extraction.ya
 
 ---
 
-## ▶️ Run from PyPI Installation
+## Run from PyPI Installation
 
 If installed via PyPI, use the command-line interface:
 
-```bash
+```python
 auditapp feature-extraction --config full/path/to/your/feature_extraction.yaml
 auditapp metric-extraction --config full/path/to/your/metric_extraction.yaml
 ```
@@ -36,7 +36,7 @@ library by default.
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 - Output and log files are saved in the directories specified in your configuration files.
 - Example configuration files are available in the repository.

@@ -12,7 +12,7 @@ The Dice score (or Dice coefficient) is a measure of overlap between the ground 
 
 $$ \text{Dice} = \frac{2 \cdot TP}{2 \cdot TP + FP + FN} $$
 
-Where `TP` is true positives, `FP` is false positives, and `FN` is false negatives.
+Where _TP_ is true positives, _FP_ is false positives, and _FN_ is false negatives.
 
 Interpretation: A higher Dice score indicates better agreement between prediction and ground truth.
 
@@ -70,8 +70,8 @@ segmentation and the corresponding points on the ground truth.
 
 $$ \text{Hausdorff Distance} = \max_{x \in A} \min_{y \in B} d(x, y) $$
 
-Where `A` is the set of points on the predicted segmentation, `B` is the set of points on the ground truth, and 
-`d(x, y)` is the Euclidean distance between points.
+Where _A_ is the set of points on the predicted segmentation, _B_ is the set of points on the ground truth, and 
+_d(x, y)_ is the Euclidean distance between points.
 
 Interpretation: Lower Hausdorff distances indicate that the boundary of the predicted segmentation is closer to the ground truth boundary, implying better shape similarity.
 

@@ -1,6 +1,5 @@
 # BraTS 2024 Tutorial
 
-
 This tutorial guides you step by step through preparing the BraTS 2024 dataset, organizing it, configuring feature 
 extraction, and launching the interactive dashboard to explore your data using the AUDIT framework.
 
@@ -11,6 +10,13 @@ differences that may affect model performance.
 
 AUDIT provides a unified environment to analyze, compare, and visualize these variations across patient cohorts, 
 acquisition sites, and demographic groups.
+
+References:
+
+- [The 2024 Brain Tumor Segmentation (BraTS) Challenge: Glioma Segmentation on Post-treatment MRI](https://arxiv.org/abs/2405.18368)
+
+- [The RSNA-ASNR-MICCAI BraTS 2021 Benchmark on Brain Tumor Segmentation and Radiogenomic Classification](https://arxiv.org/abs/2107.02314)
+
 
 ---
 

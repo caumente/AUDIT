@@ -8,6 +8,12 @@ and launching the interactive dashboard to explore your data—all powered by th
     for both datasets are publicly available in the AUDIT GitHub repository. Simply 
     [download](https://github.com/caumente/AUDIT/tree/main/outputs/features) the CSV files and jump directly to Section 6.
 
+References:
+
+- [The 2024 Brain Tumor Segmentation (BraTS) Challenge: Glioma Segmentation on Post-treatment MRI](https://arxiv.org/abs/2405.18368)
+
+- [The RSNA-ASNR-MICCAI BraTS 2021 Benchmark on Brain Tumor Segmentation and Radiogenomic Classification](https://arxiv.org/abs/2107.02314)
+
 ---
 
 ## 1. Prerequisites & Installation
@@ -20,7 +26,7 @@ managed and won't conflict with other Python packages you may have installed on 
 We recommend creating a new conda environment to avoid conflicts with other packages. Conda provides excellent package 
 management and environment isolation:
 
-```bash
+```python
 conda create -n audit_env python=3.10
 conda activate audit_env
 ```
@@ -33,7 +39,7 @@ it provides the best compatibility with all dependencies.
 Install the core AUDIT package and Jupyter-related dependencies. The AUDIT package includes all necessary tools for 
 feature extraction, metric computation, and visualization:
 
-```bash
+```python
 pip install auditapp
 pip install ipykernel jupyter
 ```
@@ -43,7 +49,7 @@ pip install ipykernel jupyter
 Register the environment so it appears as an option in Jupyter Notebook. This step is crucial for ensuring that Jupyter 
 can access the packages installed in your conda environment:
 
-```bash
+```python
 python -m ipykernel install --user --name=audit_env --display-name "Python (audit_env)"
 ```
 
@@ -52,7 +58,7 @@ This command registers your environment with Jupyter, making it available in the
 
 Now, launch Jupyter Notebook:
 
-```bash
+```python
 jupyter notebook
 ```
 
@@ -96,7 +102,7 @@ directories for datasets, configurations, outputs, and logs. Let's set this up p
 Open your terminal and create a new folder for your project. This will serve as the root directory for all 
 AUDIT-related work:
 
-```bash
+```python
 mkdir brats2025_project
 cd brats2025_project
 ```
@@ -126,7 +132,7 @@ Now, let's create the project folder hierarchy by running the following command.
 to create the project structure (in this case, the current directory):
 
 
-```
+```python
 create_project_structure(base_path="./")
 ```
 
@@ -373,7 +379,7 @@ cpu_cores: 8
 Once you've configured the YAML file with your absolute paths, you're ready to run the extraction. Open a terminal 
 (not your Jupyter notebook) and execute:
 
-```bash
+```python
 auditapp feature-extraction --config /home/usr/brats2025_project/configs/feature_extraction.yaml
 ```
 
@@ -440,7 +446,7 @@ predictions:
 
 With your configuration file properly set up, you're ready to launch the dashboard. Open a terminal and execute:
 
-```bash
+```python
 auditapp run-app --config /home/usr/brats2025_project/configs/app.yaml
 ```
 

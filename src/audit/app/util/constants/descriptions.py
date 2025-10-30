@@ -13,18 +13,18 @@ class UnivariatePage(ConstantsAPP):
 
         self.header = """Univariate feature analysis"""
         self.sub_header = """
-            **Description**: It provides a comprehensive and interactive visualization of single-variable distributions
+            **Description**: The univariate analysis mode provides a comprehensive and interactive visualization of single-variable distributions
             derived from MRI sequences or ground truth segmentations. This univariate analysis is essential for those
             users aiming to explore and understand the distribution of individual features in their datasets. The
             dashboard is equipped with interactive controls that allow users to dynamically adjust the visualization
-            parameters.
+            parameters. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/univariate/) out for more detailed information.
             """
 
         self.description_boxplot = """
             The inclusion of a box plots or violin plots offers a summary of the feature's distribution, highlighting key
             statistics such as the median, quartiles, and potential outliers. These types of visualizations complement 
             the histogram and probability distribution, providing additional insights into the data's spread and 
-            central tendency.
+            central tendency. 
             """
 
         self.description_distribution = """
@@ -46,10 +46,10 @@ class MultivariatePage(ConstantsAPP):
 
         self.header = """Multivariate feature analysis"""
         self.sub_header = """
-            **Description**: The following figure allows for an in-depth exploration of the extracted features from
-            magnetic resonance images (MRI) alongside their corresponding ground truth segmentations. This is achieved
+            **Description**: The multivariate analysis mode allows for an in-depth exploration of the extracted features from
+            magnetic resonance images alongside their corresponding ground truth segmentations. This is achieved
             through a bidimensional scatter plot that facilitates the visualization of complex relationships between
-            different intrinsic features.
+            different intrinsic features. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/multivariate/) out for more detailed information.
             """
         self.description = """
             Each point in the scatter plot represents a single data instance, allowing users to observe how various
@@ -70,7 +70,7 @@ class SegmentationErrorMatrixPage(ConstantsAPP):
         super().__init__()
 
         self.header = """Segmentation Error Matrix"""
-        self.sub_header = """**Description**: The figure below shows a pseudo-confusion matrix that visualizes the 
+        self.sub_header = """**Description**: Thi analysis mode shows a pseudo-confusion matrix that visualizes the 
         performance of a segmentation model at the pixel level. It summarizes how frequently each ground truth label is 
         misclassified as another class, helping identify common errors across anatomical structures or lesion subregions.
         Unlike a standard confusion matrix, this visualization focuses specifically on misclassifications, correctly 
@@ -83,6 +83,8 @@ class SegmentationErrorMatrixPage(ConstantsAPP):
             - Predicted Label (columns): Pixel class predicted by the model.
             - Diagonal cells: Not shown. The matrix highlights only errors.
             - Off-diagonal cells: Indicate how often a true label was wrongly predicted as another class.
+        
+        Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/segmentation_error/) out for more detailed information.
         """
 
 
@@ -92,12 +94,12 @@ class ModelPerformanceAnalysisPage(ConstantsAPP):
 
         self.header = """Model performance analysis"""
         self.sub_header = """
-        **Description:** The following figure allows for the exploration of model performance based on features
-        extracted from magnetic resonance images (MRI) and their corresponding ground truth segmentations. The scatter
+        **Description:** The single model performance analysis mode allows for the exploration of model performance based on features
+        extracted from magnetic resonance images and their corresponding ground truth segmentations. The scatter
         plot displayed visualizes the relationship between a feature aggregated (for all labels) or not on the x-axis
         and a metric on the y-axis. On the left sidebar, users can configure the visualization by selecting different
         models and features. Additionally, the aggregated checkbox allows to aggregate the metric over all regions or
-        analyze them individually
+        analyze them individually. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/single_model/) out for more detailed information.
         """
 
         self.description = """
@@ -113,15 +115,16 @@ class PairwiseModelPerformanceComparisonPage(ConstantsAPP):
 
         self.header = """Pairwise model performance comparison"""
         self.sub_header = """
-        **Description**: The following figure illustrates the percentage difference in a selected
+        **Description**: The pairwise model performance analysis mode illustrates the percentage difference in a selected
         metric between two models across various regions for each subject. In this bar chart, each bar represents the
-        difference in a selected metric for a specific brain region (Average, NEC, ENH, and EDE), comparing the baseline
+        difference in a selected metric for a specific anatomical region (e.g. Average, NEC, ENH, and EDE), comparing the baseline
         model with the benchmark model. The length of each bar indicates the magnitude of the improvement or decline in
         performance, with longer bars representing larger differences. The green color of the bars indicates the overall
         gain achieved by the benchmark model over the baseline model.
 
         Additionally, there is a checkbox labeled "Aggregated," which, when checked, aggregates the metric across all
-        subjects, providing a summarized view of the model's performance differences.
+        subjects, providing a summarized view of the model's performance differences. 
+        Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/pairwise_model/) out for more detailed information.
         """
 
         self.description = """
@@ -154,7 +157,10 @@ class MultiModelPerformanceComparisonsPage(ConstantsAPP):
 
         self.header = """Multi-model performance comparison"""
         self.sub_header = """
-        **Description**: The following table summarizes the mean and standard deviation obtained by the selected models
+        **Description**: The multi-model performance comparison analysis mode allows users to evaluate and compare a 
+        set of segmentation models on a single dataset, across multiple metrics and tumor regions. 
+        
+        First, the following table summarizes the mean and standard deviation obtained by the selected models
         for a set of metrics. The table provides a comprehensive comparison of different segmentation models across
         various tumor regions. Each row corresponds to a specific combination of region and model, and the columns
         present the performance metrics along with their respective standard deviations.
@@ -165,7 +171,7 @@ class MultiModelPerformanceComparisonsPage(ConstantsAPP):
 
         self.description = """
             Additionally, a boxplot is shown to further provide more visual insights about the model performance
-            distribution.
+            distribution. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/multi_model/) out for more detailed information. 
         """
 
 
@@ -175,9 +181,9 @@ class LongitudinalAnalysisPage(ConstantsAPP):
 
         self.header = """Longitudinal analysis"""
         self.sub_header = """
-        **Description**: This plot allows users to assess the evolution of lesion size over time and to evaluate 
-        how well predictions align with ground truth data. The graph presents lesion size (in mm³) along the 
-        vertical axis and six distinct timepoints along the horizontal axis. Two primary curves are displayed:
+        **Description**: This analysis mode allows users to assess the evolution of lesion size over time and to evaluate 
+        how well predictions align with ground truth data. The dashboard presents lesion size (in mm³) along the 
+        vertical axis and a set of timepoints along the horizontal axis. Two primary curves are displayed:
 
         - Observed Lesion Size: Represents the actual measured lesion size for a given subject at each timepoint.
         - Predicted Lesion Size: Represents the lesion size estimated by an AI model or predictive algorithm at the same timepoints.
@@ -198,7 +204,7 @@ class LongitudinalAnalysisPage(ConstantsAPP):
         Together, these visual elements offer a comprehensive overview of how lesion size changes over time and how 
         well those changes are captured by predictive models. The plot is especially useful for identifying timepoints
         where model predictions deviate significantly from actual measurements, enabling a more nuanced understanding 
-        of model performance in a longitudinal context.
+        of model performance in a longitudinal context. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/longitudinal/) out for more detailed information.
         """
 
 
@@ -208,10 +214,11 @@ class SubjectsExplorationPage(ConstantsAPP):
 
         self.header = """Subjects Exploration"""
         self.sub_header = """
-            **Description**: This tab provides a comprehensive exploration of the selected subject, offering detailed
-            insights across several key dimensions. The features are organized into three primary categories: anatomical
-             features, first order statistical features, and second order texture features. Additionally, it provides
-             insights into the nature of the subject compared to the rest of the dataset.
+            **Description**: This analysis mode provides a comprehensive exploration of the selected subject, offering detailed
+            insights across several key dimensions. The features are organized into different categories:
+             first order statistical features, second order texture features, spatial features, tumor features, and, if
+             available, metadata features. Additionally, it provides insights into the nature of the subject compared 
+             to the rest of the dataset. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/subjects_exploration/) out for more detailed information.
             """
         self.description = """
         #####
@@ -219,15 +226,11 @@ class SubjectsExplorationPage(ConstantsAPP):
         """
 
         self.features_explanation = """
-            - Anatomical features refer to the structural characteristics of biological entities. This category includes
-            details about the physical structure, shape, size, and spatial arrangement of tumors.
-    
-            - Statistical features involve numerical attributes derived from MRI quantitative measurements. These features
-             are used to describe the distribution, variability, etc.
-    
-            - Texture features describe patterns and variations within an MRI. These features capture details about the
-            surface characteristics, smoothness, roughness, that are visually discernible but not necessarily related to
-            intensity.
+            - __First-order features__: They are statistical measures derived from the pixel intensity values of an MRI image. These features do not consider the spatial arrangement of the pixels, but rather focus on the intensity distribution itself. Examples include: mean, minimum and maximum intensities, standard deviation, skewness, etc.
+            - __Second-order features__: They focus on the texture of the image, which involves the spatial relationship between pixels. That is, a texture is defined by measuring patterns, repetitions, and variations in pixel intensity. Main second-order features include: entropy, correlation, or contrast.
+            - __Spatial features__: They refer to geometric properties of objects within the MRI image, such as the spatial resolution of the sequences or the organ position within the image.
+            - __Tumor features__: They describe the shape and structure of specific regions, especially abnormal regions such as tumors. For instance, tumor size and tumor location, among others.
+            - __Metadata (optional)__: They characterize a dataset, including demographic information, patients' age, gender, or location. This information should have been provided by the user as a mapping file at the time of extracting the features.
             """
 
         self.iqr_explanation = """

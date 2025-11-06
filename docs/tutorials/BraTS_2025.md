@@ -14,6 +14,12 @@ References:
 
 - [The RSNA-ASNR-MICCAI BraTS 2021 Benchmark on Brain Tumor Segmentation and Radiogenomic Classification](https://arxiv.org/abs/2107.02314)
 
+!!! warning
+
+    The [annotation protocol](https://www.synapse.org/Synapse:syn64153130/wiki/631053) followed in this tutorial was: 
+    Label 0: Background, Label 1: Necrotic core, Label 2: Edema, Label 3: Enhancing tumor. However, we encourage users 
+    to check the protocol used in their datasets.
+
 ---
 
 ## 1. Prerequisites & Installation
@@ -354,9 +360,9 @@ sequences:
 # These values come from the BraTS challenge specification
 labels:
   BKG: 0
-  EDE: 3
-  ENH: 1
-  NEC: 2
+  EDE: 2
+  ENH: 3
+  NEC: 1
 
 # List of features to extract
 # Set to 'true' to enable each feature category
@@ -417,9 +423,9 @@ sequences:
 # Must match the labels defined in feature_extraction.yaml
 labels:
   BKG: 0
-  EDE: 3
-  ENH: 1
-  NEC: 2
+  EDE: 2
+  ENH: 3
+  NEC: 1
 
 # Root paths
 datasets_path: '/home/usr/brats2025_project/datasets'

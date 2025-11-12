@@ -117,7 +117,7 @@ class PairwiseModelPerformanceComparisonPage(ConstantsAPP):
         self.sub_header = """
         **Description**: The pairwise model performance analysis mode illustrates the percentage difference in a selected
         metric between two models across various regions for each subject. In this bar chart, each bar represents the
-        difference in a selected metric for a specific anatomical region (e.g. Average, NEC, ENH, and EDE), comparing the baseline
+        difference in a selected metric for a specific anatomical region (e.g., Average, NEC, ENH, and EDE), comparing the baseline
         model with the benchmark model. The length of each bar indicates the magnitude of the improvement or decline in
         performance, with longer bars representing larger differences. The green color of the bars indicates the overall
         gain achieved by the benchmark model over the baseline model.

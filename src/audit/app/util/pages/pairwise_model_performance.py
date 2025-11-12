@@ -5,15 +5,6 @@ import streamlit as st
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import models_sanity_check
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_aggregation_button
-from audit.app.util.commons.sidebars import setup_button_data_download
-from audit.app.util.commons.sidebars import setup_clip_sidebar
-from audit.app.util.commons.sidebars import setup_improvement_button
-from audit.app.util.commons.sidebars import setup_metrics_customization
-from audit.app.util.commons.sidebars import setup_sidebar_pairwise_models
-from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
-from audit.app.util.commons.sidebars import setup_sidebar_single_metric
-from audit.app.util.commons.sidebars import setup_statistical_test
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import PairwiseModelPerformanceComparisonPage
 from audit.app.util.constants.metrics import Metrics
@@ -56,8 +47,8 @@ class PairwiseModelPerformance(BasePage):
             st.latex(self.descriptions.ratio_formula)
 
         # type of improvement and aggregation
-        improvement_type = setup_improvement_button()
-        agg = setup_aggregation_button()
+        improvement_type = self.sidebar.setup_improvement_button()
+        agg = self.sidebar.setup_aggregation_button()
 
         proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
         if proceed[0]:
@@ -93,25 +84,24 @@ class PairwiseModelPerformance(BasePage):
                     self.run_aggregated(df, improvement_type, selected_metric, selected_set)
 
                     # Perform statistical test
-                    if setup_statistical_test():
+                    if self.sidebar.setup_statistical_test():
                         sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
                             self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
                         )
                         self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
 
-                        setup_button_data_download(df_stats)
+                        self.sidebar.setup_button_data_download(df_stats)
         else:
             st.error(proceed[-1], icon='🚨')
 
-    @staticmethod
-    def setup_sidebar(data, aggregated=True):
+    def setup_sidebar(self, data, aggregated=True):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_set = setup_sidebar_single_dataset(data)
-            baseline_model, benchmark_model = setup_sidebar_pairwise_models(data, selected_set)
-            selected_metric = setup_sidebar_single_metric(data)
-            num_max_subjects, selected_sorted, selected_order = setup_metrics_customization(baseline_model, benchmark_model, aggregated)
+            selected_set = self.sidebar.setup_sidebar_single_dataset(data)
+            baseline_model, benchmark_model = self.sidebar.setup_sidebar_pairwise_models(data, selected_set)
+            selected_metric = self.sidebar.setup_sidebar_single_metric(data)
+            num_max_subjects, selected_sorted, selected_order = self.sidebar.setup_metrics_customization(baseline_model, benchmark_model, aggregated)
 
         return selected_set, baseline_model, benchmark_model, selected_metric, num_max_subjects, selected_sorted, selected_order
 
@@ -153,7 +143,7 @@ class PairwiseModelPerformance(BasePage):
             data = data[data.ID.isin(l[:num_max_subjects])]
 
         # Clip metric
-        clip_low, clip_up = setup_clip_sidebar(data, improvement_type)
+        clip_low, clip_up = self.sidebar.setup_clip_sidebar(data, improvement_type)
         if clip_low is not None and clip_up is not None:
             data[improvement_type] = data[improvement_type].clip(clip_low, clip_up)
 

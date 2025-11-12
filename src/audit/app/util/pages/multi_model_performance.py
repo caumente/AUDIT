@@ -4,11 +4,6 @@ from streamlit_theme import st_theme
 
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_aggregation_button
-from audit.app.util.commons.sidebars import setup_sidebar_multi_metrics
-from audit.app.util.commons.sidebars import setup_sidebar_multi_model
-from audit.app.util.commons.sidebars import setup_sidebar_regions
-from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import MultiModelPerformanceComparisonsPage
 from audit.app.util.constants.metrics import Metrics
@@ -41,7 +36,7 @@ class MultiModelPerformance(BasePage):
         if proceed[0]:
             # Load the data
             raw_metrics = read_datasets_from_dict(metrics_paths)
-            agg = setup_aggregation_button()
+            agg = self.sidebar.setup_aggregation_button()
 
             # calling main function
             selected_set, selected_models, selected_regions, selected_metrics = self.setup_sidebar(raw_metrics)
@@ -76,10 +71,10 @@ class MultiModelPerformance(BasePage):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_set = setup_sidebar_single_dataset(data)
-            selected_models = setup_sidebar_multi_model(data)
-            selected_regions = setup_sidebar_regions(data, aggregated=False)
-            selected_metrics = setup_sidebar_multi_metrics(data)
+            selected_set = self.sidebar.setup_sidebar_single_dataset(data)
+            selected_models = self.sidebar.setup_sidebar_multi_model(data)
+            selected_regions = self.sidebar.setup_sidebar_regions(data, aggregated=False)
+            selected_metrics = self.sidebar.setup_sidebar_multi_metrics(data)
             selected_metrics = [self.metrics.get(m) for m in selected_metrics]
 
         return selected_set, selected_models, selected_regions, selected_metrics

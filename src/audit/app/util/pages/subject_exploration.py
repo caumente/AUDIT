@@ -7,8 +7,6 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
-from audit.app.util.commons.sidebars import setup_sidebar_single_subjects
 from audit.app.util.constants.descriptions import SubjectsExplorationPage
 from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.commons.strings import pretty_string
@@ -47,13 +45,12 @@ class SubjectsExploration(BasePage):
             st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
                      "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
 
-    @staticmethod
-    def setup_sidebar(data):
+    def setup_sidebar(self, data):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_set = setup_sidebar_single_dataset(data)
-            selected_subject = setup_sidebar_single_subjects(data[data.set == selected_set])
+            selected_set = self.sidebar.setup_sidebar_single_dataset(data)
+            selected_subject = self.sidebar.setup_sidebar_single_subjects(data[data.set == selected_set])
 
         return selected_set, selected_subject
 

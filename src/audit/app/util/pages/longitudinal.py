@@ -4,9 +4,6 @@ from streamlit_theme import st_theme
 
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_sidebar_longitudinal_subject
-from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
-from audit.app.util.commons.sidebars import setup_sidebar_single_model
 from audit.app.util.commons.utils import download_longitudinal_plot
 from audit.app.util.constants.descriptions import LongitudinalAnalysisPage
 from audit.utils.internal._csv_helpers import read_datasets_from_dict
@@ -50,7 +47,7 @@ class Longitudinal(BasePage):
 
                 # filter subject
                 df['longitudinal_id'] = df['longitudinal_id'].apply(self.clean_longitudinal_id)
-                selected_subject = setup_sidebar_longitudinal_subject(df)
+                selected_subject = self.sidebar.setup_sidebar_longitudinal_subject(df)
                 df = df[df.longitudinal_id == selected_subject]
 
                 # Main functionality
@@ -60,15 +57,14 @@ class Longitudinal(BasePage):
         else:
             st.error(proceed[-1], icon='🚨')
 
-    @staticmethod
-    def setup_sidebar(data):
+    def setup_sidebar(self, data):
 
         with st.sidebar:
             st.header("Configuration")
 
             # Select datasets
-            selected_set = setup_sidebar_single_dataset(data)
-            selected_model = setup_sidebar_single_model(data)
+            selected_set = self.sidebar.setup_sidebar_single_dataset(data)
+            selected_model = self.sidebar.setup_sidebar_single_model(data)
 
             return selected_set, selected_model
 

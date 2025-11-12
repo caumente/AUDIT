@@ -6,12 +6,6 @@ from streamlit_theme import st_theme
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import dataset_sanity_check
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_aggregation_button
-from audit.app.util.commons.sidebars import setup_sidebar_features
-from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
-from audit.app.util.commons.sidebars import setup_sidebar_regions
-from audit.app.util.commons.sidebars import setup_sidebar_single_metric
-from audit.app.util.commons.sidebars import setup_sidebar_single_model
 from audit.app.util.constants.descriptions import ModelPerformanceAnalysisPage
 from audit.app.util.constants.metrics import Metrics
 from audit.app.util.commons.utils import download_plot
@@ -49,7 +43,7 @@ class SingleModelPerformance(BasePage):
 
             col1, col2 = st.columns([2, 2], gap="small")
             with col1:
-                agg = setup_aggregation_button()
+                agg = self.sidebar.setup_aggregation_button()
                 st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
             with col2:
                 customization_scatter = st.selectbox(label="Customize visualization",
@@ -78,16 +72,15 @@ class SingleModelPerformance(BasePage):
         else:
             st.error(proceed[-1], icon='🚨')
 
-    @staticmethod
-    def setup_sidebar(data, data_paths, aggregated):
+    def setup_sidebar(self, data, data_paths, aggregated):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_set = setup_sidebar_multi_datasets(data_paths)
-            selected_model = setup_sidebar_single_model(data)
-            selected_y_axis = setup_sidebar_single_metric(data)
-            selected_x_axis = setup_sidebar_features(data, name="Feature")
-            selected_regions = setup_sidebar_regions(data, aggregated)
+            selected_set = self.sidebar.setup_sidebar_multi_datasets(data_paths)
+            selected_model = self.sidebar.setup_sidebar_single_model(data)
+            selected_y_axis = self.sidebar.setup_sidebar_single_metric(data)
+            selected_x_axis = self.sidebar.setup_sidebar_features(data, name="Feature")
+            selected_regions = self.sidebar.setup_sidebar_regions(data, aggregated)
 
         return selected_set, selected_model, selected_x_axis, selected_y_axis, selected_regions
 

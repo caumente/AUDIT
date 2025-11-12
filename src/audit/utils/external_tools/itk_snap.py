@@ -1,12 +1,17 @@
 import os
 import platform
 import subprocess
+import colorsys
+
+def get_color(index, total):
+    # Generate distinct colors in RGB using HSV
+    hue = index / max(total, 1)  # spread hues evenly
+    r, g, b = colorsys.hsv_to_rgb(hue, 1, 1)
+    return int(r*255), int(g*255), int(b*255)
 
 
 # TODO: this functionality only works if all the sequences are present
 def run_itk_snap(path, dataset, case, labels=None):
-    os.environ["PATH"] += os.pathsep + "/usr/local/itksnap-4.2.0-20240422-Linux-gcc64/bin"
-
     verification_check = True
     names = ["t1", "t1ce", "t2", "flair", "seg"]
     t1, t1ce, t2, flair, seg = [f"{path}/{dataset}/{dataset}_images/{case}/{case}_{n}.nii.gz" for n in names]
@@ -32,33 +37,23 @@ def run_itk_snap(path, dataset, case, labels=None):
 
 
 def generate_itk_labels(labels, output_file):
-    # TODO: check what happens when using regions instead of labels
-    # Define colors for each label
-    colors = [
-        (0, 0, 0),  # Black for BKG
-        (255, 255, 0),  # Yellow for EDE
-        (255, 0, 0),  # Red for ENH
-        (0, 0, 255),  # Blue for NEC
-    ]
-
-    # Create the file content
+    total_labels = len(labels)
     lines = [
         "# ITK-SNAP Label Description File",
         "# Columns = Index, Red, Green, Blue, Visibility, Opacity, Label Name",
     ]
 
     for name, index in labels.items():
-        color = colors[index]
-        if index == 0:
-            line = f'{index:<2} {color[0]:<3} {color[1]:<3} {color[2]:<3}    0 0 0    "{name}"'
-        else:
-            line = f'{index:<2} {color[0]:<3} {color[1]:<3} {color[2]:<3}    1 1 1    "{name}"'
+        color = get_color(index, total_labels)
+        visibility = 0 if index == 0 else 1
+        opacity = 0 if index == 0 else 1
+        line = f'{index:<2} {color[0]:<3} {color[1]:<3} {color[2]:<3}    {visibility} {visibility} {opacity}    "{name}"'
         lines.append(line)
 
-    # Write the label file
     with open(output_file, "w") as f:
         for line in lines:
             f.write(line + "\n")
+
 
 
 def run_comparison_segmentation_itk_snap(path_seg, path_pred, case, labels=None):

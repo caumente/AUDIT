@@ -179,6 +179,37 @@ brats2024_project/
 ├── BraTS-PTG supplementary demographic information and metadata.xlsx
 ```
 
+To be able to take advantage of all functionalities of AUDIT, for instance the connectivity with ITK-Snap toolkit, we
+recommend locating the sequences and masks under the same folder, and predictions for each model under another. Then,
+The project structure should be the following.
+
+```
+brats2024_project/
+├── datasets/
+├──── BraTS_2024_by_site/
+├────── Duke/
+├──────── Duke_images/
+├────────── BraTS-GLI-02060-100/
+├────────── BraTS-GLI-02060-101/
+├────────── .....
+├──────── Duke_segs/
+├────────── model_1/
+├──────────── BraTS-GLI-02060-100_pred.nii.gz
+├──────────── BraTS-GLI-02060-101_pred.nii.gz
+├────────── .....
+├────────── model_2/
+├──────────── BraTS-GLI-02060-100_pred.nii.gz
+├──────────── BraTS-GLI-02060-101_pred.nii.gz
+├────────── .....
+├────── Indiana/
+├────── Missouri/
+├────── UCSD/
+├────── UCSF/
+├── config/
+├── outputs/
+├── logs/
+├── BraTS-PTG supplementary demographic information and metadata.xlsx
+```
 
 ## 4. Standardize folder and file naming
 
@@ -252,11 +283,11 @@ features to extract, and output paths need to be defined.:
 ```yaml
 # Paths to all the datasets
 data_paths:
-  Duke: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Duke/'
-  Indiana: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Indiana/'
-  Missouri: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Missouri/'
-  UCSD: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/UCSD/'
-  UCSF: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/UCSF/'
+  Duke: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Duke/Duke_images/'
+  Indiana: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Indiana/Indiana_images/'
+  Missouri: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/Missouri/Missouri_images/'
+  UCSD: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/UCSD/UCSD_images/'
+  UCSF: '/home/usr/brats2024_project/datasets/BraTS_2024_by_site/UCSF/UCSF_images/'
 
 # Sequences available
 sequences:
@@ -369,7 +400,16 @@ experiment with different feature sets, and challenge your models to reach the n
 > *Figure 1:* Univariate feature analysis mode. Maximum pixel intensity distribution for T1 sequence.
 
 
+If everything has been set up correctly — especially making sure to include the patients (original sequences and masks)
+within the dataset_images directory (e.g., datasets/Duke/Duke_images/), and ITK has been installed properly as suggested in the documentation,
+then it is possible to click on any of the points of interest and explore them directly in ITK-SNAP.
+In our case, we clicked on the patient Indiana-03062-100.
 
+
+> ![Exploring subject Indiana-03062-100 directly on ITK-SNAP by clicking on a point from the boxplot shown in Figure 1](../assets/tutorials/brats2024_itksnap_l.png#only-light)
+> ![Exploring subject Indiana-03062-100 directly on ITK-SNAP by clicking on a point from the boxplot shown in Figure 1](../assets/tutorials/brats2024_itksnap_d.png#only-dark)
+> *Figure 1:* Univariate feature analysis mode. Maximum pixel intensity distribution for T1 sequence.
+> 
 ---
 
 

@@ -321,12 +321,47 @@ for each operating system. **Information will be added soon.**
 <details>
   <summary>Show configuration</summary>
 
-⚠️ Configuration instructions for Linux OS are not available yet. Please check back later.
+A brief tutorial to install ITK-SNAP 4.4
 
+  1. Download ITK-SNAP 4.4
+  
+  ```bash
+  wget https://downloads.itksnap.org/itksnap-4.4.0-20250909-Linux-x86_64.tar.gz
+  ```
+  
+  2. Extract and move to `/opt`
+  
+  ```bash
+  sudo tar -xvzf itksnap-4.4.0-20250909-Linux-x86_64.tar.gz -C /opt
+  sudo mv /opt/itksnap-4.4.0-20250909-Linux-x86_64 /opt/itksnap
+  ```
+  
+  3. Create a wrapper script to run from anywhere
+  
+  ```bash
+  sudo nano /usr/local/bin/itksnap
+  ```
+  
+  File content:
+  
+  ```bash
+  #!/bin/bash
+  DIR=/opt/itksnap
+  "$DIR/bin/itksnap" "$@"
+  ```
+  
+  Make it executable:
+  
+  ```bash
+  sudo chmod +x /usr/local/bin/itksnap
+  ```
+  
+  4. Run ITK-SNAP 4.4
+  
+  ```bash
+  itksnap
+  ```
 
-```bash
-# Placeholder for future configuration commands
-```
 </details>
 
 

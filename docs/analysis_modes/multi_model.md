@@ -42,7 +42,7 @@ same view. Instead, its purpose is to provide a focused and detailed evaluation 
 a specific dataset, ensuring a consistent and fair comparison, as all models are evaluated on the exact same subjects.
 
 It is important that the segmentation labels and the ground truth labels must be aligned properly; otherwise, the 
-analysis mode will not work correctly. You can follow this [tutorial](../tutorials/postprocessing_segmentations.md) where it is explained how to modify the 
+analysis mode will not work correctly. You can follow this [tutorial](../tutorials/Lumiere_postprocessing.md) where it is explained how to modify the 
 dataset labels to ensure proper alignment.
 
 

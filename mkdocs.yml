@@ -73,8 +73,8 @@ nav:
   - Tutorials:
       - BraTS 2025: tutorials/BraTS_2025.md
       - BraTS 2024 - Site analysis: tutorials/BraTS_2024.md
-      - Preprocessing dataset: tutorials/preprocessing.md
-      - Postprocessing segmentations: tutorials/postprocessing_segmentations.md
+      - LUMIERE preprocessing: tutorials/Lumiere_preprocessing.md
+      - LUMIERE postprocessing: tutorials/Lumiere_postprocessing.md
   - About:
     - License: about/LICENSE.md
     - Release notes: about/release-notes.md

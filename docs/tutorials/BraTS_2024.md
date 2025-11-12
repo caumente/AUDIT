@@ -3,7 +3,7 @@
 This tutorial guides you step by step through preparing the BraTS 2024 dataset, organizing it, configuring feature 
 extraction, and launching the interactive dashboard to explore your data using the AUDIT framework.
 
-Unlike BraTS 2025, this dataset includes a demographic mapping file containing valuable metadata such as glioma type, 
+Unlike [BraTS 2025](BraTS_2025.md), this dataset includes a demographic mapping file containing valuable metadata such as glioma type, 
 MRI scanner specifications, magnetic field strength, and patient demographics. This enables a deeper analysis—not only 
 exploring dataset structure and image-derived features but also uncovering potential biases or acquisition-related 
 differences that may affect model performance.
@@ -20,8 +20,8 @@ References:
 !!! warning
 
     The [annotation protocol](https://www.synapse.org/Synapse:syn64153130/wiki/631053) followed in this tutorial was: 
-    Label 0: Background, Label 1: Necrotic core, Label 2: Edema, Label 3: Enhancing tumor. However, we encourage users 
-    to check the protocol used in their datasets.
+    Label 0: Background, Label 1: Non-enhancing tumor core, Label 2: surrounding non-enhancing FLAIR hyperintensity, 
+    Label 3: Enhancing tumor, Label 4: resection cavity. However, we encourage users to check the protocol used in their datasets.
 
 ---
 
@@ -268,9 +268,10 @@ sequences:
 # Mapping of labels to their numeric values
 labels:
   BKG: 0
-  EDE: 3
-  ENH: 1
-  NEC: 2
+  NETC: 1
+  SNFH: 2
+  ET: 3
+  RC: 4
 
 # List of features to extract
 features:
@@ -316,9 +317,10 @@ sequences:
 # Mapping of labels to their numeric values
 labels:
   BKG: 0
-  EDE: 3
-  ENH: 1
-  NEC: 2
+  NETC: 1
+  SNFH: 2
+  ET: 3
+  RC: 4
 
 # Root paths
 datasets_path: '/home/c062o/Documents/example/brats2024_project/datasets/BraTS_2024_by_site'

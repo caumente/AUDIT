@@ -40,7 +40,7 @@ This documentation is structured to help you get the most out of AUDIT:
 - **[Getting Started](getting_started/installation.md)**: Learn how to install AUDIT and set up your first project.
 - **[API Reference](API_reference/features/index.md)**: Detailed reference for all library classes and methods.
 - **[Analysis modes](analysis_modes/home_page.md)**: Explore the dashboard included in the web app.
-- **[Tutorials](tutorials/preprocessing.md)**: Hands-on examples demonstrating common use cases.
+- **[Tutorials](tutorials/Lumiere_preprocessing.md)**: Hands-on examples demonstrating common use cases.
 - **[About](about/LICENSE.md)**: Check latest AUDIT release and license terms.
 
 

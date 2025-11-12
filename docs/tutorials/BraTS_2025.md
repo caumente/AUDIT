@@ -1,7 +1,7 @@
 # BraTS 2025 Tutorial
 
-This tutorial guides you step-by-step through preparing the **BraTS 2025 dataset**, organizing it, extracting features, 
-and launching the interactive dashboard to explore your data—all powered by the **AUDIT framework**.
+This tutorial guides you step-by-step through preparing the BraTS 2025 dataset, organizing it, extracting features, 
+and launching the interactive dashboard to explore your data—all powered by the AUDIT framework.
 
 !!! note "Working with limited resources?"
     If you have computational or storage constraints, you can skip the feature extraction entirely! Pre-extracted features 
@@ -84,7 +84,7 @@ The BraTS 2025 dataset is one of the most comprehensive brain tumor segmentation
 multimodal MRI scans with expert annotations. Understanding how to properly access and organize this data is essential 
 for working with AUDIT.
 
-The BraTS 2025 dataset is hosted on Synapse and **requires prior registration**. Please follow the [official 
+The BraTS 2025 dataset is hosted on Synapse and requires prior registration. Please follow the [official 
 instructions](https://www.synapse.org/Synapse:syn64153130/wiki/) from the challenge and to BraTS 2025
 [Data Access](https://www.synapse.org/Synapse:syn64377310) section to download the data. For this tutorial, we will take advantage of both the training and 
 validation datasets. 
@@ -121,7 +121,7 @@ All subsequent paths will be relative to this directory.
 AUDIT library requires a specific base structure for the project to function correctly. This structure separates 
 raw data, configurations, outputs, and logs into organized directories. To create this structure, let's start by 
 creating a new Jupyter notebook in your project directory and importing some necessary functions from 
-the __file_manager__ module.
+the _file_manager_ module.
 
 Open Jupyter (if not already open), create a new notebook and import the required utilities:
 

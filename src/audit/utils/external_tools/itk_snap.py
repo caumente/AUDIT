@@ -1,4 +1,5 @@
 import os
+import glob
 import platform
 import subprocess
 import colorsys
@@ -10,30 +11,67 @@ def get_color(index, total):
     return int(r*255), int(g*255), int(b*255)
 
 
-# TODO: this functionality only works if all the sequences are present
 def run_itk_snap(path, dataset, case, labels=None):
-    verification_check = True
-    names = ["t1", "t1ce", "t2", "flair", "seg"]
-    t1, t1ce, t2, flair, seg = [f"{path}/{dataset}/{dataset}_images/{case}/{case}_{n}.nii.gz" for n in names]
+    case_dir = f"{path}/{dataset}/{dataset}_images/{case}"
 
+    # Find all NIfTI files in the case directory
+    nifti_files = sorted(
+        glob.glob(f"{case_dir}/{case}_*.nii.gz") +
+        glob.glob(f"{case_dir}/{case}_*.nii")
+    )
+
+    if len(nifti_files) == 0:
+        return False
+
+    # Detect segmentation file (if present)
+    seg = None
+    for f in nifti_files:
+        if f.endswith("_seg.nii.gz") or f.endswith("_seg.nii"):
+            seg = f
+            break
+
+    # Collect anatomical images (exclude segmentation)
+    images = [f for f in nifti_files if f != seg]
+
+    if len(images) == 0:
+        return False  # No anatomical images found
+
+    # Determine the main image (-g) using a priority list
+    priority = ["t1ce", "t1", "t2", "flair"]
+    g_image = None
+
+    for p in priority:
+        for img in images:
+            if img.lower().endswith(f"_{p}.nii.gz") or img.lower().endswith(f"_{p}.nii"):
+                g_image = img
+                break
+        if g_image:
+            break
+
+    # If no priority match, fall back to the first image
+    if g_image is None:
+        g_image = images[0]
+
+    # Remaining images go to -o
+    additional_images = [img for img in images if img != g_image]
+
+    # Build the ITK-SNAP command
+    command = open_itk_command() + ["-g", g_image]
+
+    if seg:
+        command += ["-s", seg]
+
+    if len(additional_images) > 0:
+        command += ["-o"] + additional_images
+
+    # Optional labels
     if labels:
         labels_path = "./src/audit/configs/itk_labels.txt"
         generate_itk_labels(labels, labels_path)
-        command = open_itk_command() + ["-l", labels_path, "-g", t1ce, "-s", seg, "-o"] + [t1, t2, flair]
-    else:
-        command = open_itk_command() + ["-g", t1ce, "-s", seg, "-o"] + [t1, t2, flair]
+        command += ["-l", labels_path]
 
-    # Checking if both path exist
-    if os.path.exists(t1ce) and os.path.exists(seg):
-        subprocess.run(command)
-    # elif os.path.exists(t1ce) and not os.path.exists(seg_path):
-    #     subprocess.run(["open", "-n", "-a", "ITK-SNAP", "--args", "-g", img_path])
-    # elif not os.path.exists(t1ce) and os.path.exists(seg_path):
-    #     subprocess.run(["open", "-n", "-a", "ITK-SNAP", "--args", "-s", seg_path])
-    else:
-        verification_check = False
-
-    return verification_check
+    subprocess.run(command)
+    return True
 
 
 def generate_itk_labels(labels, output_file):
@@ -57,8 +95,6 @@ def generate_itk_labels(labels, output_file):
 
 
 def run_comparison_segmentation_itk_snap(path_seg, path_pred, case, labels=None):
-    from audit.utils.sequences.sequences import read_sequences_dict
-
     verification_check = True
     t1 = f"{path_seg}/{case}/{case}_t1.nii.gz"
     t1ce = f"{path_seg}/{case}/{case}_t1ce.nii.gz"

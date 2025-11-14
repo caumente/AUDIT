@@ -406,9 +406,9 @@ then it is possible to click on any of the points of interest and explore them d
 In our case, we clicked on the patient Indiana-03062-100.
 
 
-> ![Exploring subject Indiana-03062-100 directly on ITK-SNAP by clicking on a point from the boxplot shown in Figure 1](../assets/tutorials/brats2024_itksnap_l.png#only-light)
-> ![Exploring subject Indiana-03062-100 directly on ITK-SNAP by clicking on a point from the boxplot shown in Figure 1](../assets/tutorials/brats2024_itksnap_d.png#only-dark)
-> *Figure 1:* Univariate feature analysis mode. Maximum pixel intensity distribution for T1 sequence.
+> ![ITK-SNAP by clicking on a point](../assets/tutorials/brats2024_itksnap_l.png#only-light)
+> ![ITK-SNAP by clicking on a point](../assets/tutorials/brats2024_itksnap_d.png#only-dark)
+> *Figure 2:* Subject Indiana-03062-100 exploration directly on ITK-SNAP by clicking on a point from the boxplot shown in Figure 1.
 > 
 ---
 

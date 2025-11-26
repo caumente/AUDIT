@@ -20,7 +20,7 @@ References:
 - [BraTS orchestrator : Democratizing and Disseminating state-of-the-art brain tumor image analysis](https://arxiv.org/abs/2506.13807)
 
 
-!!! warning
+!!! note
 
     The [annotation protocol](https://www.synapse.org/Synapse:syn64153130/wiki/631053) followed in this tutorial was: 
     Label 0: Background, Label 1: Non-enhancing tumor core, Label 2: surrounding non-enhancing FLAIR hyperintensity, 
@@ -425,10 +425,12 @@ we used the models presented at MICCAI 2025, specifically the top 4 ranked model
 For this purpose, we leveraged the [brats](https://github.com/BrainLesion/BraTS) library, which contains the Docker 
 containers for each of the models:
 
-2025	1st	Ishika Jain, et al.	N/A	❌	BraTS25_1
-2025	2nd	Qu Lin, et al.	N/A	✅	BraTS25_2
-2025	3rd	Liwei Jin, et al.	N/A	✅	BraTS25_3A
-2025	3rd	Adrian Celaya, et al.	N/A	❌	BraTS25_3B
+| Year | Rank | Authors | Paper | Available | Model ID |
+|------|------|---------|-------|-----------|----------|
+| 2025 | 1st | Ishika Jain, et al. | N/A | ❌ | BraTS25_1 |
+| 2025 | 2nd | Qu Lin, et al. | N/A | ✅ | BraTS25_2 |
+| 2025 | 3rd | Liwei Jin, et al. | N/A | ✅ | BraTS25_3A |
+| 2025 | 3rd | Adrian Celaya, et al. | N/A | ❌ | BraTS25_3B |
 
 After performing inference on the 5 subdatasets (Duke, Indiana, Missouri, UCSD, and UCSF) with each of the 4 models, 
 your project structure should look like the following, for example for subject Duke-02060-100:
@@ -457,7 +459,7 @@ brats2024_project/
 ```
 
 !!! danger "Important"
-    The suffixes *_seg* and *_pred* are reserved keywords within AUDIT and are necessary for metric calculation.
+    The suffixes **_seg** and **_pred** are reserved keywords within AUDIT and are necessary for metric calculation.
 
 ## 8. Run metric extraction
 
@@ -586,9 +588,9 @@ The segmentation error matrix allows you to analyze in detail which regions your
 matrix normalized at the ground truth level. For more details about how this analysis mode works, consult the 
 [documentacion](./../analysis_modes/segmentation_error.md).
 
-> ![Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_l.png#only-light)
-> ![Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_d.png#only-dark)
-> *Figure 3:* Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1.
+> ![Segmentation error matrix for Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_l.png#only-light)
+> ![Segmentation error matrix for Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_d.png#only-dark)
+> *Figure 3:* Segmentation error matrix for the Duke dataset and BraTS2025_1 model.
 
 The matrix is analyzed at a global level, encompassing all errors made by the model at a high level throughout the 
 entire dataset. The main problem of the model is confusing Background with the SNFH region. Therefore, developers 
@@ -599,8 +601,8 @@ at the actual region level, so it must be interpreted carefully.
 If we focus on a specific subject, for example patient Duke-02060-100, we can analyze whether this same pattern holds 
 in absolute terms:
 
-> ![Segmentation error matrix para el paciente Duke-02060-100 del dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_patient_l.png#only-light)
-> ![Segmentation error matrix para el paciente Duke-02060-100 del dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_patient_d.png#only-dark)
+> ![Segmentation error matrix for patient Duke-02060-100 from Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_patient_l.png#only-light)
+> ![Segmentation error matrix for patient Duke-02060-100 from Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_patient_d.png#only-dark)
 > *Figure 4:* Segmentation error matrix for patient Duke-02060-100 from the Duke dataset and BraTS2025_1 model.
 
 The behavior of confusing Background and SNFH that we observed at the dataset level also holds in absolute terms for 
@@ -622,8 +624,8 @@ For more details about how this analysis mode works, consult the [documentation]
 Ideally, what we would expect to see is a plot where we don't visualize any specific trend, indicating that there is 
 no bias. That is precisely what we observe in the following figure:
 
-> ![Single model performance analysis el modelo BraTS2025_1](../assets/tutorials/brats2024_single_model_performance_l.svg#only-light)
-> ![Single model performance analysis el modelo BraTS2025_1](../assets/tutorials/brats2024_single_model_performance_d.svg#only-dark)
+> ![Single model performance analysis for BraTS2025_1 model](../assets/tutorials/brats2024_single_model_performance_l.svg#only-light)
+> ![Single model performance analysis for BraTS2025_1 model](../assets/tutorials/brats2024_single_model_performance_d.svg#only-dark)
 > *Figure 5:* Performance analysis of the BraTS2025_1 model as a function of tumor location for each subset.
 
 As we can see, the model has been trained with data that is robust enough in terms of tumor location not to have 
@@ -646,9 +648,9 @@ Let's make a comparison taking the BraTS25_3A model as the baseline model and Br
 having the dataset divided by Site, we can analyze the differences individually. We will use the Dice metric as it is 
 the most widely reported in medical segmentation problems.
 
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_agg_pairwise_model_performance_l.png#only-light)
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_agg_pairwise_model_performance_d.png#only-dark)
-> *Figure 6:* Pairwise model performance comparison between BraTS3A and BraTS_3B models for the Duke subset.
+> ![Pairwise model performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_agg_pairwise_model_performance_l.png#only-light)
+> ![Pairwise model performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_agg_pairwise_model_performance_d.png#only-dark)
+> *Figure 6:* Pairwise model performance comparison between BraTS25_3A and BraTS25_3B models for the Duke subset.
 
 On average, the BraTS 3B model improved the performance of the BraTS 3A model by up to 1.42% for the Dice metric. The 
 improvement came mainly from better segmentation of the RC region, and to a lesser extent from the NETC and ET regions. 
@@ -660,9 +662,9 @@ difference. When performing the Wilcoxon signed-rank statistical test due to the
 it is verified that there are no significant differences to reject the null hypothesis. Therefore, on this specific 
 subset, the behavior of both models is similar.
 
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_statistical_test_l.png#only-light)
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_statistical_test_d.png#only-dark)
-> *Figure 7:* Statistical test results between models 3A and 3B to verify if the differences are statistically significant.
+> ![Statistical test results for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_statistical_test_l.png#only-light)
+> ![Statistical test results for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_statistical_test_d.png#only-dark)
+> *Figure 7:* Statistical test results between models BraTS25_3A and BraTS25_3B to verify if the differences are statistically significant.
 
 
 #### 10.3.4 Pair-wise model performance - Disaggregated view
@@ -678,12 +680,12 @@ name, by baseline model performance, benchmark model performance, sort ascending
 performance of models BraTS_3A and BraTS_3B on the UCSF subset.
 
 
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-light)
-> ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-dark)
-> *Figure 8:* Resultados del de la comparacion entee los modelos 3A y 3B a nivel sujeto.
+> ![Pairwise patient-level performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-light)
+> ![Pairwise patient-level performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_pairwise_per_patient_d.png#only-dark)
+> *Figure 8:* Comparison results between models BraTS25_3A and BraTS25_3B at the subject level.
 
  
-As can be observed, model B, our benchmark, has clearly improved the results obtained by baseline model A in cases 
+As can be observed, BraTS25_3B, our benchmark, has clearly improved the results obtained by baseline BraTS25_3A in cases 
 UCSF-00005-100 and UCSF-00005-101, going from values around 0.70 to values of 0.94. This same exercise should be done 
 for those patients for which performance was poor, to understand what the weaknesses of our model are.
 

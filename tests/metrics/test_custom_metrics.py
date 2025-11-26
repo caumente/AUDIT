@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import numpy as np
 import pytest
 from scipy.spatial.distance import directed_hausdorff
@@ -21,49 +21,57 @@ from src.audit.metrics.segmentation_metrics import specificity
 @pytest.fixture
 def mock_segmentation_binary_labels():
     """Fixture to create a mock 3D segmentation array with multiple labels."""
-    return np.array([
-        [[1, 0, 0], [0, 1, 1], [1, 0, 0]],
-        [[1, 1, 1], [1, 1, 0], [1, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [
+            [[1, 0, 0], [0, 1, 1], [1, 0, 0]],
+            [[1, 1, 1], [1, 1, 0], [1, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
+    )
 
 
 @pytest.fixture
 def mock_ground_truth_binary_labels():
     """Fixture to create a mock 3D ground truth array with multiple labels."""
-    return np.array([
-        [[1, 0, 0], [0, 1, 0], [1, 0, 0]],
-        [[1, 1, 1], [1, 1, 0], [1, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [
+            [[1, 0, 0], [0, 1, 0], [1, 0, 0]],
+            [[1, 1, 1], [1, 1, 0], [1, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
+    )
 
 
 @pytest.fixture
 def mock_segmentation_multiple_labels():
     """Fixture to create a mock 3D segmentation array with multiple labels."""
-    return np.array([
-        [[1, 0, 0], [0, 1, 1], [1, 0, 0]],
-        [[1, 2, 2], [2, 2, 0], [1, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [
+            [[1, 0, 0], [0, 1, 1], [1, 0, 0]],
+            [[1, 2, 2], [2, 2, 0], [1, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
+    )
 
 
 @pytest.fixture
 def mock_ground_truth_multiple_labels():
     """Fixture to create a mock 3D segmentation array with multiple labels."""
-    return np.array([
-        [[1, 0, 0], [0, 0, 0], [1, 0, 0]],
-        [[1, 2, 2], [2, 1, 0], [2, 0, 0]],
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-    ])
+    return np.array(
+        [
+            [[1, 0, 0], [0, 0, 0], [1, 0, 0]],
+            [[1, 2, 2], [2, 1, 0], [2, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
+    )
 
 
 @pytest.fixture
 def mock_segmentation_empty():
     """Fixture for a segmentation with no labels (empty segmentation)."""
-    return np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                     [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                     [[0, 0, 0], [0, 0, 0], [0, 0, 0]]])
+    return np.array(
+        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]]]
+    )
 
 
 @pytest.fixture

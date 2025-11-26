@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from unittest import mock
 
 import numpy as np
@@ -102,7 +102,9 @@ def test_read_sequences_dict_with_missing_sequences():
     sequences = ["_t1", "_t2", "_flair"]
 
     # Mock os.path.isfile to simulate file existence
-    with mock.patch("os.path.isfile") as mock_isfile, mock.patch("src.audit.utils.sequences.sequences.load_nii") as mock_load_nii:
+    with mock.patch("os.path.isfile") as mock_isfile, mock.patch(
+        "src.audit.utils.sequences.sequences.load_nii"
+    ) as mock_load_nii:
         # Only mock _t1 as existing
         mock_isfile.side_effect = lambda x: x == "/mock/path/subject_1/subject_1_t1.nii.gz"
         mock_load_nii.return_value = mock_nii_image

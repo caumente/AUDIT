@@ -1,15 +1,16 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from pathlib import Path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 import argparse
+from pathlib import Path
 
-from audit.utils.internal._config_helpers import load_config_file, check_app_config
+from audit.utils.internal._config_helpers import check_app_config
+from audit.utils.internal._config_helpers import load_config_file
 
 
 def run_streamlit_app(config):
-
     # Get the path to the APP.py file
     app_path = Path(__file__).resolve().parent / "APP.py"
 
@@ -29,10 +30,10 @@ def main():
     # Command-line argument parsing
     parser = argparse.ArgumentParser(description="AUDIT web APP.")
     parser.add_argument(
-        '--config',
+        "--config",
         type=str,
-        default='./configs/app.yml',  # Path relative to the script location
-        help="Path to the configuration file for web app."
+        default="./configs/app.yml",  # Path relative to the script location
+        help="Path to the configuration file for web app.",
     )
     args = parser.parse_args()
 

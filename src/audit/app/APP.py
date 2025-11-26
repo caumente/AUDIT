@@ -1,24 +1,26 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import warnings
 from pathlib import Path
+
 import streamlit as st
 from PIL import Image
 from streamlit_theme import st_theme
 
-from audit.utils.internal._config_helpers import load_config_file
+from audit.app.util.constants.features import Features
 from audit.app.util.pages.home_page import HomePage
 from audit.app.util.pages.longitudinal import Longitudinal
-from audit.app.util.pages.single_model_performance import SingleModelPerformance
 from audit.app.util.pages.multi_model_performance import MultiModelPerformance
 from audit.app.util.pages.multivariate_feature import MultivariateFeature
 from audit.app.util.pages.pairwise_model_performance import PairwiseModelPerformance
 from audit.app.util.pages.segmentation_error_matrix import SegmentationErrorMatrix
+from audit.app.util.pages.single_model_performance import SingleModelPerformance
 from audit.app.util.pages.subject_exploration import SubjectsExploration
 from audit.app.util.pages.univariate_feature import UnivariateFeature
-from audit.app.util.constants.features import Features
+from audit.utils.internal._config_helpers import load_config_file
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -38,7 +40,7 @@ class AUDIT:
             {"title": "Pairwise model performance", "page": PairwiseModelPerformance(config)},
             {"title": "Multi-model performance", "page": MultiModelPerformance(config)},
             {"title": "Longitudinal analysis", "page": Longitudinal(config)},
-            {"title": "Subjects exploration", "page": SubjectsExploration(config)}
+            {"title": "Subjects exploration", "page": SubjectsExploration(config)},
         ]
 
     def add_page(self, title, page_instance):
@@ -73,11 +75,7 @@ class AUDIT:
         st.sidebar.markdown("## Main Menu")
 
         # Sidebar for selecting pages
-        selected_page = st.sidebar.selectbox(
-            "Select Page",
-            self.pages,
-            format_func=lambda page: page["title"]
-        )
+        selected_page = st.sidebar.selectbox("Select Page", self.pages, format_func=lambda page: page["title"])
         st.sidebar.markdown("---")
 
         # Run the selected page

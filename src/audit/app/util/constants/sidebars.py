@@ -16,17 +16,13 @@ class Sidebar:
         self.metrics_dict = self.metrics.get_metrics()
         self.orderby_dict = self.metrics.orderby
 
-
     @staticmethod
     def setup_sidebar_multi_datasets(data_paths):
         with st.sidebar.expander("Datasets", expanded=True):
             selected_sets = st.multiselect(
-                label="Select datasets to visualize:",
-                options=data_paths.keys(),
-                default=data_paths.keys()
+                label="Select datasets to visualize:", options=data_paths.keys(), default=data_paths.keys()
             )
         return selected_sets
-
 
     @staticmethod
     def setup_sidebar_single_dataset(data):
@@ -35,7 +31,6 @@ class Sidebar:
 
         return selected_set
 
-
     def setup_sidebar_single_metric(self, data):
         available_metrics = [k for k, v in self.metrics_dict.items() if v in data.columns]
         with st.sidebar.expander("Metrics", expanded=True):
@@ -43,18 +38,14 @@ class Sidebar:
 
         return selected_metric
 
-
     def setup_sidebar_multi_metrics(self, data):
         available_metrics = [k for k, v in self.metrics_dict.items() if v in data.columns]
         with st.sidebar.expander("Metrics", expanded=True):
             selected_metrics = st.multiselect(
-                label="Select metrics to analyze:",
-                options=available_metrics,
-                default=available_metrics[0]
+                label="Select metrics to analyze:", options=available_metrics, default=available_metrics[0]
             )
 
         return selected_metrics
-
 
     @staticmethod
     def setup_sidebar_single_model(data):
@@ -67,20 +58,20 @@ class Sidebar:
     def setup_sidebar_multi_model(data):
         with st.sidebar.expander("Models", expanded=True):
             selected_models = st.multiselect(
-                label="Select models to analyze:",
-                options=list(data.model.unique()),
-                default=list(data.model.unique())
+                label="Select models to analyze:", options=list(data.model.unique()), default=list(data.model.unique())
             )
 
         return selected_models
-
 
     @staticmethod
     def setup_sidebar_pairwise_models(data, selected_set):
         with st.sidebar.expander("Models", expanded=True):
             models_available = data[data.set == selected_set].model.unique()
             if len(models_available) < 2:
-                st.error("Pairwise comparison requires metrics from at least two different models. Please, select other dataset", icon="🚨")
+                st.error(
+                    "Pairwise comparison requires metrics from at least two different models. Please, select other dataset",
+                    icon="🚨",
+                )
                 return None, None
             baseline_model = st.selectbox("Select the baseline model:", options=models_available, index=0)
             benchmark_model = st.selectbox("Select the benchmark model:", options=models_available, index=1)
@@ -89,66 +80,51 @@ class Sidebar:
 
         return baseline_model, benchmark_model
 
-
     def setup_sidebar_features(self, data, name, c_index=0, f_index=0, key=None):
         with st.sidebar.expander(name, expanded=True):
             select_category = st.selectbox(
-                label="Feature category:",
-                options=self.features.categories,
-                index=c_index,
-                key=f"c_{key}"
+                label="Feature category:", options=self.features.categories, index=c_index, key=f"c_{key}"
             )
-            available_features = [k for k, v in self.features.get_features(select_category).items() if v in data.columns]
+            available_features = [
+                k for k, v in self.features.get_features(select_category).items() if v in data.columns
+            ]
             selected_feature = st.selectbox(
-                label="Feature name:",
-                options=available_features,
-                index=f_index,
-                key=f"f_{key}"
+                label="Feature name:", options=available_features, index=f_index, key=f"f_{key}"
             )
             selected_feature = self.features.get_features(select_category).get(selected_feature, None)
 
         return selected_feature
 
-
     def setup_sidebar_color(self, data, name, c_index=0, f_index=0, key=None):
         with st.sidebar.expander(name, expanded=True):
             select_color_category = st.selectbox(
-                label="Feature category:",
-                options=["Dataset"] + self.features.categories,
-                index=c_index,
-                key=f"c_{key}"
+                label="Feature category:", options=["Dataset"] + self.features.categories, index=c_index, key=f"c_{key}"
             )
 
             if select_color_category == "Dataset":
-                select_color_axis = 'Dataset'
+                select_color_axis = "Dataset"
             else:
-                available_features = [k for k, v in self.features.get_features(select_color_category).items() if
-                                      v in data.columns]
+                available_features = [
+                    k for k, v in self.features.get_features(select_color_category).items() if v in data.columns
+                ]
                 select_color_axis = st.selectbox(
-                    label="Feature name:",
-                    options=available_features,
-                    index=f_index,
-                    key=f"f_{key}"
+                    label="Feature name:", options=available_features, index=f_index, key=f"f_{key}"
                 )
                 select_color_axis = self.features.get_features(select_color_category).get(select_color_axis, None)
 
         return select_color_axis
 
-
     def setup_highlight_subject(self, data):
         with st.sidebar.expander(label="Highlight subject"):
-            selected_sets = st.selectbox(
-                label="Dataset:", options=data.set.unique(), index=0
-            )
+            selected_sets = st.selectbox(label="Dataset:", options=data.set.unique(), index=0)
 
             highlight_subject = st.selectbox(
                 label="Enter subject ID to highlight",
                 options=[None] + list(data[data.set == selected_sets].ID.unique()),
-                index=0
+                index=0,
             )
 
         return highlight_subject
-
 
     def setup_histogram_options(self, plot_type):
         """
@@ -176,11 +152,15 @@ class Sidebar:
                     )
                 elif option == "Bins size":
                     bins_size = st.number_input(
-                        "Select bins size", min_value=1, max_value=None, value=1000, step=1, placeholder="Type a number..."
+                        "Select bins size",
+                        min_value=1,
+                        max_value=None,
+                        value=1000,
+                        step=1,
+                        placeholder="Type a number...",
                     )
 
         return n_bins, bins_size
-
 
     @staticmethod
     def setup_filtering_options(df, feature):
@@ -231,13 +211,12 @@ class Sidebar:
 
         return filtering_method, remove_low, remove_up, clip_low, clip_up, num_std_devs
 
-
     def setup_metrics_customization(self, baseline_model, benchmark_model, aggregated):
         mapping_performance = {
-                    f"subject ID": "ID",
-                    f"Performance ({baseline_model})": f"{baseline_model}",
-                    f"Performance ({benchmark_model})": f"{benchmark_model}",
-                    }
+            f"subject ID": "ID",
+            f"Performance ({baseline_model})": f"{baseline_model}",
+            f"Performance ({benchmark_model})": f"{benchmark_model}",
+        }
         num_max_subjects, selected_sorted, selected_order = None, None, None
         if not aggregated:
             with st.sidebar.expander("Customization", expanded=True):
@@ -251,22 +230,16 @@ class Sidebar:
 
         return num_max_subjects, mapping_performance.get(selected_sorted), self.orderby_dict.get(selected_order)
 
-
     @staticmethod
     def setup_improvement_button():
         improvement_type = st.selectbox(
-            label="Type of comparison",
-            options=["relative", "absolute", "ratio"],
-            format_func=pretty_string,
-            index=0
+            label="Type of comparison", options=["relative", "absolute", "ratio"], format_func=pretty_string, index=0
         )
         return improvement_type
-
 
     @staticmethod
     def setup_aggregation_button():
         return st.checkbox("Aggregated.", value=True, help="It aggregates all the subjects, if enabled.")
-
 
     @staticmethod
     def setup_clip_sidebar(data, feature):
@@ -275,8 +248,8 @@ class Sidebar:
             metric_clip = st.checkbox(
                 "Clip the metric",
                 help="It restricts the range of the metrics by capping values below and "
-                     "above a threshold to the lower and upper bound selected, if "
-                     "enabled.",
+                "above a threshold to the lower and upper bound selected, if "
+                "enabled.",
             )
 
             if metric_clip:
@@ -290,17 +263,15 @@ class Sidebar:
 
         return clip_low, clip_up
 
-
     @staticmethod
     def setup_statistical_test():
         statistical_test = st.checkbox(
             label="Perform statistical test",
             help="It performs statistical tests to evaluate whether exist statistical "
-                 "differences between the model performance, if enabled.",
+            "differences between the model performance, if enabled.",
         )
 
         return statistical_test
-
 
     @staticmethod
     def setup_button_data_download(df):
@@ -311,7 +282,6 @@ class Sidebar:
             mime="text/csv",
         )
 
-
     @staticmethod
     def setup_sidebar_regions(data, aggregated):
         selected_regions = None
@@ -319,33 +289,25 @@ class Sidebar:
             with st.sidebar.expander("Regions", expanded=True):
                 available_regions = list(data.region.unique())
                 selected_regions = st.multiselect(
-                    label="Select the regions to visualize:",
-                    options=available_regions,
-                    default=available_regions
+                    label="Select the regions to visualize:", options=available_regions, default=available_regions
                 )
 
         return selected_regions
-
 
     @staticmethod
     def setup_sidebar_longitudinal_subject(data):
         with st.sidebar.expander("Subjects", expanded=True):
             subject_selected = st.selectbox(
-                label="Select a subject to visualize:",
-                options=sorted(data.longitudinal_id.unique()),
-                index=0
+                label="Select a subject to visualize:", options=sorted(data.longitudinal_id.unique()), index=0
             )
 
         return subject_selected
-
 
     @staticmethod
     def setup_sidebar_single_subjects(data):
         with st.sidebar.expander("Subjects", expanded=True):
             subject_selected = st.selectbox(
-                label="Select a subject to visualize:",
-                options=sorted(data.ID.unique()),
-                index=0
+                label="Select a subject to visualize:", options=sorted(data.ID.unique()), index=0
             )
 
         return subject_selected
@@ -361,7 +323,7 @@ def setup_sidebar_plot_customization(key=None):
                 "Legend Position",
                 options=["top left", "top right", "bottom left", "bottom right"],
                 index=1,
-                key=f"{key}_select"
+                key=f"{key}_select",
             )
         if legend_position:
             legend_x = 0 if "left" in legend_position else 1
@@ -379,12 +341,22 @@ def setup_sidebar_plot_customization(key=None):
         # Customize the plot title
         font_size = st.slider("Font size", min_value=4, max_value=48, value=14, key=f"{key}_font")
 
-    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, x_axis_label, y_axis_label, plot_title, font_size
+    return (
+        show_legend,
+        legend_position,
+        legend_x,
+        legend_y,
+        legend_xanchor,
+        legend_yanchor,
+        x_axis_label,
+        y_axis_label,
+        plot_title,
+        font_size,
+    )
 
 
 def setup_sidebar_matrix_customization(classes, key=None):
     with st.expander("Customize Confusion Matrix Plot", expanded=False):
-
         # Customize axis labels
         x_axis_label = st.text_input("X-axis Label", value="Predicted Labels", key=f"{key}_xlab")
         y_axis_label = st.text_input("Y-axis Label", value="True Labels", key=f"{key}_ylab")
@@ -408,7 +380,7 @@ def setup_sidebar_multimodel_plot(classes, key=None):
                 "Legend Position",
                 options=["top left", "top right", "bottom left", "bottom right"],
                 index=1,
-                key=f"{key}_select"
+                key=f"{key}_select",
             )
         if legend_position:
             legend_x = 0 if "left" in legend_position else 1
@@ -435,7 +407,19 @@ def setup_sidebar_multimodel_plot(classes, key=None):
         x_axis_label = st.text_input("X-axis Label", value="Y axis label", key=f"{key}_xlab")
         y_axis_label = st.text_input("Y-axis Label", value="X axis label", key=f"{key}_ylab")
 
-    return show_legend, legend_position, legend_x, legend_y, legend_xanchor, legend_yanchor, class_labels, plot_title, font_size, y_axis_label, x_axis_label
+    return (
+        show_legend,
+        legend_position,
+        legend_x,
+        legend_y,
+        legend_xanchor,
+        legend_yanchor,
+        class_labels,
+        plot_title,
+        font_size,
+        y_axis_label,
+        x_axis_label,
+    )
 
 
 def setup_sidebar_longitudinal_plot(key=None):

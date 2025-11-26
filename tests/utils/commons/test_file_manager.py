@@ -1,27 +1,26 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+import os
+from pathlib import Path
 from unittest.mock import patch
 
-from pathlib import Path
-import os
-
 import pytest
-from src.audit.utils.commons.file_manager import (
-    create_project_structure,
-    list_dirs,
-    list_files,
-    rename_dirs,
-    rename_files,
-    add_string_dirs,
-    add_string_files,
-    copy_files_by_extension,
-    move_files_to_parent,
-    organize_files_into_dirs,
-    organize_subdirs_into_named_dirs,
-    delete_files_by_extension,
-    delete_dirs_by_pattern
-)
+
+from src.audit.utils.commons.file_manager import add_string_dirs
+from src.audit.utils.commons.file_manager import add_string_files
+from src.audit.utils.commons.file_manager import copy_files_by_extension
+from src.audit.utils.commons.file_manager import create_project_structure
+from src.audit.utils.commons.file_manager import delete_dirs_by_pattern
+from src.audit.utils.commons.file_manager import delete_files_by_extension
+from src.audit.utils.commons.file_manager import list_dirs
+from src.audit.utils.commons.file_manager import list_files
+from src.audit.utils.commons.file_manager import move_files_to_parent
+from src.audit.utils.commons.file_manager import organize_files_into_dirs
+from src.audit.utils.commons.file_manager import organize_subdirs_into_named_dirs
+from src.audit.utils.commons.file_manager import rename_dirs
+from src.audit.utils.commons.file_manager import rename_files
 
 
 @pytest.fixture
@@ -76,8 +75,9 @@ def test_create_project_structure_copy_configs_no_source(tmp_path, monkeypatch):
     base = tmp_path / "project"
 
     # Patch pkg_resources.files to simulate missing configs folder
-    monkeypatch.setattr("src.audit.utils.commons.file_manager.pkg_resources.files",
-                        lambda package: Path("/nonexistent/configs"))
+    monkeypatch.setattr(
+        "src.audit.utils.commons.file_manager.pkg_resources.files", lambda package: Path("/nonexistent/configs")
+    )
 
     create_project_structure(base, copy_configs=True)
     configs_folder = base / "configs"
@@ -114,6 +114,7 @@ def test_create_project_structure_copy_configs_with_files(tmp_path):
     assert "config1.yml" in copied_names
     assert "config2.yml" in copied_names
     assert len(copied_files) == 2
+
 
 def test_create_project_structure_copy_configs_false(tmp_path, monkeypatch):
     base = tmp_path / "project"
@@ -463,6 +464,7 @@ def test_add_string_dirs_basic(tmp_path):
     assert "pre_folder1_suf" in renamed_dirs
     assert "pre_folder2_suf" in renamed_dirs
 
+
 def test_add_string_dirs_safe_mode(tmp_path, capsys):
     d1 = tmp_path / "folder1"
     d1.mkdir()
@@ -474,6 +476,7 @@ def test_add_string_dirs_safe_mode(tmp_path, capsys):
     # Ensure original folder still exists
     assert (tmp_path / "folder1").exists()
 
+
 def test_add_string_dirs_verbose(tmp_path, capsys):
     d1 = tmp_path / "folder1"
     d1.mkdir()
@@ -482,6 +485,7 @@ def test_add_string_dirs_verbose(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "Renamed:" in captured.out
     assert (tmp_path / "folder1_suf").exists()
+
 
 def test_add_string_dirs_nested(tmp_path):
     parent = tmp_path / "parent"
@@ -496,11 +500,13 @@ def test_add_string_dirs_nested(tmp_path):
     renamed_child = list((tmp_path / "X_parent").iterdir())[0].name
     assert renamed_child == "X_child"
 
+
 def test_add_string_dirs_invalid_path(tmp_path):
     invalid_path = tmp_path / "nonexistent"
 
     with pytest.raises(FileNotFoundError):
         add_string_dirs(invalid_path)
+
 
 def test_add_string_dirs_not_directory(tmp_path):
     f = tmp_path / "file.txt"
@@ -522,6 +528,7 @@ def test_add_string_files_basic(tmp_path):
     assert "pre_file1_suf.txt" in renamed_files
     assert "pre_file2_suf.txt" in renamed_files
 
+
 def test_add_string_files_safe_mode(tmp_path, capsys):
     f = tmp_path / "file.txt"
     f.write_text("data")
@@ -532,6 +539,7 @@ def test_add_string_files_safe_mode(tmp_path, capsys):
     # Original file should still exist
     assert (tmp_path / "file.txt").exists()
 
+
 def test_add_string_files_verbose(tmp_path, capsys):
     f = tmp_path / "file.txt"
     f.write_text("data")
@@ -540,6 +548,7 @@ def test_add_string_files_verbose(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "Renamed:" in captured.out
     assert (tmp_path / "file_end.txt").exists()
+
 
 def test_add_string_files_nested(tmp_path):
     folder = tmp_path / "folder"
@@ -551,6 +560,7 @@ def test_add_string_files_nested(tmp_path):
 
     renamed_file = list((tmp_path / "folder").iterdir())[0].name
     assert renamed_file == "X_file.txt"
+
 
 def test_add_string_files_with_ext(tmp_path):
     f1 = tmp_path / "file1.nii.gz"
@@ -564,16 +574,19 @@ def test_add_string_files_with_ext(tmp_path):
     assert (tmp_path / "file1_new.nii.gz").exists()
     assert (tmp_path / "file2.txt").exists()  # untouched
 
+
 def test_add_string_files_invalid_path(tmp_path):
     invalid = tmp_path / "nonexistent"
     with pytest.raises(FileNotFoundError):
         add_string_files(invalid)
+
 
 def test_add_string_files_not_directory(tmp_path):
     f = tmp_path / "file.txt"
     f.write_text("data")
     with pytest.raises(NotADirectoryError):
         add_string_files(f)
+
 
 def test_add_string_files_file_exists(tmp_path):
     f = tmp_path / "file.txt"
@@ -601,6 +614,7 @@ def test_copy_files_basic(tmp_path):
     copied_names = sorted([f.name for f in copied])
     assert copied_names == ["a.txt", "b.txt"]
 
+
 def test_copy_files_safe_mode(tmp_path, capsys):
     src = tmp_path / "src"
     dst = tmp_path / "dst"
@@ -613,6 +627,7 @@ def test_copy_files_safe_mode(tmp_path, capsys):
     assert "[SAFE MODE] Would copy" in captured.out
     # Destination folder should still be empty
     assert not list(dst.iterdir())
+
 
 def test_copy_files_overwrite(tmp_path):
     src = tmp_path / "src"
@@ -631,6 +646,7 @@ def test_copy_files_overwrite(tmp_path):
     copy_files_by_extension(src, dst, ".txt", safe_mode=False, overwrite=True)
     assert (dst / "a.txt").read_text() == "NEW"
 
+
 def test_copy_files_no_matching_files(tmp_path, capsys):
     src = tmp_path / "src"
     dst = tmp_path / "dst"
@@ -642,6 +658,7 @@ def test_copy_files_no_matching_files(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "No files with the extension '.txt' were found" in captured.out
     assert list(dst.iterdir()) == []
+
 
 def test_copy_files_recursive(tmp_path):
     src = tmp_path / "src"
@@ -658,7 +675,9 @@ def test_copy_files_recursive(tmp_path):
 import os
 import shutil
 from pathlib import Path
+
 import pytest
+
 from src.audit.utils.commons.file_manager import move_files_to_parent
 
 

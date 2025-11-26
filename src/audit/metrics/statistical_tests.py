@@ -1,9 +1,9 @@
 import numpy as np
+from scipy.stats import levene
 from scipy.stats import mannwhitneyu
 from scipy.stats import shapiro
 from scipy.stats import ttest_rel
 from scipy.stats import wilcoxon
-from scipy.stats import levene
 from statsmodels.stats.diagnostic import lilliefors
 
 
@@ -50,8 +50,11 @@ def paired_ttest(sample_a, sample_b, alpha=0.05):
 
     # Check if the samples are identical
     if np.array_equal(sample_a, sample_b):
-        return {"p-value": 1.0, "interpretation": f"Given the alpha {alpha}, fail to reject the null hypothesis. There "
-                                                  f"is no significant difference between the samples."}
+        return {
+            "p-value": 1.0,
+            "interpretation": f"Given the alpha {alpha}, fail to reject the null hypothesis. There "
+            f"is no significant difference between the samples.",
+        }
 
     # Perform paired t-test if both samples are normal
     t_stat, p_value = ttest_rel(sample_a, sample_b, nan_policy="omit")
@@ -92,8 +95,10 @@ def wilcoxon_test(sample_a, sample_b, alpha=0.05):
 
     # Check if samples are identical (early exit with p-value = 1)
     if np.array_equal(sample_a, sample_b):
-        return {"p-value": 1.0,
-                "interpretation": f"Given the significance level {alpha}, it fails to reject the null hypothesis. The differences between both samples are not statistically significant."}
+        return {
+            "p-value": 1.0,
+            "interpretation": f"Given the significance level {alpha}, it fails to reject the null hypothesis. The differences between both samples are not statistically significant.",
+        }
 
     # Perform Wilcoxon signed-rank test
     w_stat, p_value = wilcoxon(sample_a, sample_b, nan_policy="omit")
@@ -101,7 +106,8 @@ def wilcoxon_test(sample_a, sample_b, alpha=0.05):
     # Handle cases with NaN p-values (invalid results)
     if p_value != p_value:  # NaN check
         raise ValueError(
-            "The Wilcoxon test returned an invalid p-value. This may be due to identical values or other issues with the input data.")
+            "The Wilcoxon test returned an invalid p-value. This may be due to identical values or other issues with the input data."
+        )
 
     # Interpret the result
     if p_value <= alpha:
@@ -228,7 +234,7 @@ def levene_variance_test(groups, alpha=0.05):
         "Statistic": stat_sci,
         "P-value": p_value_sci,
         "Homoscedastic": homoscedastic,
-        "Null hypothesis interpretation": interpretation
+        "Null hypothesis interpretation": interpretation,
     }
 
 
@@ -275,4 +281,3 @@ def homoscedasticity_test(*groups, alpha=0.05):
     - dict: Result dictionary from Levene's test, including interpretation.
     """
     return levene_variance_test(groups=list(groups), alpha=alpha)
-

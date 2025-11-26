@@ -2,14 +2,15 @@ import pandas as pd
 import streamlit as st
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
+from audit.app.util.commons.checks import none_check
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.utils import download_longitudinal_plot
 from audit.app.util.constants.descriptions import LongitudinalAnalysisPage
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.internal._csv_helpers import read_datasets_from_dict
-from audit.visualization.time_series import plot_longitudinal_lesions
 from audit.visualization.commons import update_longitudinal_plot
-from audit.app.util.commons.checks import none_check
+from audit.visualization.time_series import plot_longitudinal_lesions
+
 
 class Longitudinal(BasePage):
     def __init__(self, config):
@@ -42,11 +43,11 @@ class Longitudinal(BasePage):
                     data=merged,
                     sets=selected_set,
                     models=selected_model,
-                    features=["ID", "set", "longitudinal_id", "time_point", "lesion_size_whole", "lesion_size_pred"]
+                    features=["ID", "set", "longitudinal_id", "time_point", "lesion_size_whole", "lesion_size_pred"],
                 )
 
                 # filter subject
-                df['longitudinal_id'] = df['longitudinal_id'].apply(self.clean_longitudinal_id)
+                df["longitudinal_id"] = df["longitudinal_id"].apply(self.clean_longitudinal_id)
                 selected_subject = self.sidebar.setup_sidebar_longitudinal_subject(df)
                 df = df[df.longitudinal_id == selected_subject]
 
@@ -55,10 +56,9 @@ class Longitudinal(BasePage):
             else:
                 st.error("Metric datasets must contain tumor size variable", icon="🚨")
         else:
-            st.error(proceed[-1], icon='🚨')
+            st.error(proceed[-1], icon="🚨")
 
     def setup_sidebar(self, data):
-
         with st.sidebar:
             st.header("Configuration")
 
@@ -70,9 +70,14 @@ class Longitudinal(BasePage):
 
     @staticmethod
     def merge_features_metrics(features_df, metrics_df):
-        features_df = features_df.loc[~features_df['longitudinal_id'].isna(), :]
+        features_df = features_df.loc[~features_df["longitudinal_id"].isna(), :]
         if "SIZE" in metrics_df.columns:
-            metrics_df = metrics_df.groupby(["ID", "model", "set"])["SIZE"].sum().reset_index().rename(columns={"SIZE": "lesion_size_pred"})
+            metrics_df = (
+                metrics_df.groupby(["ID", "model", "set"])["SIZE"]
+                .sum()
+                .reset_index()
+                .rename(columns={"SIZE": "lesion_size_pred"})
+            )
         elif "lesion_size_pred" in metrics_df.columns:
             metrics_df = metrics_df.groupby(["ID", "model", "set"])["lesion_size_pred"].sum().reset_index()
         else:
@@ -86,7 +91,7 @@ class Longitudinal(BasePage):
     def clean_longitudinal_id(value):
         value_str = str(value)
 
-        if value_str.endswith('.0'):
+        if value_str.endswith(".0"):
             return int(value_str[:-2])
 
         return value_str
@@ -97,9 +102,12 @@ class Longitudinal(BasePage):
         st.markdown(self.descriptions.description)
         col1, col2 = st.columns([1, 1], gap="small")
         with col2:
-            customization_longitudinal = st.selectbox(label="Customize visualization",
-                                                      options=["Standard visualization", "Custom visualization"],
-                                                      index=0, key="longitudinal")
+            customization_longitudinal = st.selectbox(
+                label="Customize visualization",
+                options=["Standard visualization", "Custom visualization"],
+                index=0,
+                key="longitudinal",
+            )
 
         if customization_longitudinal == "Custom visualization":
             self.render_longitudinal_analysis_with_customization(data)
@@ -113,7 +121,9 @@ class Longitudinal(BasePage):
 
     def render_longitudinal_analysis_with_customization(self, data):
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:

@@ -2,13 +2,14 @@ import os
 import re
 import shutil
 from pathlib import Path
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
+
 from audit.utils.internal._config_helpers import init_app_yaml
 from audit.utils.internal._config_helpers import init_feature_extraction_yaml
 from audit.utils.internal._config_helpers import init_metric_extraction_yaml
-
-from typing import Dict
-from typing import Optional
-from typing import Union, List
 
 
 def create_project_structure(base_path: str = "./"):
@@ -85,10 +86,7 @@ def create_project_structure(base_path: str = "./"):
 
 
 def list_dirs(
-    path: Union[str, Path],
-    recursive: bool = False,
-    full_path: bool = False,
-    pattern: str = None
+    path: Union[str, Path], recursive: bool = False, full_path: bool = False, pattern: str = None
 ) -> List[str]:
     """
     List directories in a given path.
@@ -147,7 +145,7 @@ def list_files(
     recursive: bool = False,
     full_path: bool = False,
     pattern: str = None,
-    extensions: list[str] | None = None
+    extensions: list[str] | None = None,
 ) -> List[str]:
     """
     List files in a given directory.
@@ -209,11 +207,7 @@ def list_files(
 
 
 def rename_dirs(
-    root_dir: Union[str, Path],
-    old_name: str,
-    new_name: str,
-    verbose: bool = False,
-    safe_mode: bool = True
+    root_dir: Union[str, Path], old_name: str, new_name: str, verbose: bool = False, safe_mode: bool = True
 ) -> None:
     """
     Rename directories recursively by replacing a substring in their names.
@@ -276,11 +270,7 @@ def rename_dirs(
 
 
 def add_string_dirs(
-    root_dir: Union[str, Path],
-    prefix: str = "",
-    suffix: str = "",
-    verbose: bool = False,
-    safe_mode: bool = True
+    root_dir: Union[str, Path], prefix: str = "", suffix: str = "", verbose: bool = False, safe_mode: bool = True
 ) -> None:
     """
     Add a prefix and/or suffix to all directories and subdirectories.
@@ -343,11 +333,7 @@ def add_string_dirs(
 
 
 def rename_files(
-    root_dir: Union[str, Path],
-    old_name: str = "",
-    new_name: str = "",
-    verbose: bool = False,
-    safe_mode: bool = True
+    root_dir: Union[str, Path], old_name: str = "", new_name: str = "", verbose: bool = False, safe_mode: bool = True
 ) -> None:
     """
     Recursively rename files by replacing a substring in their filenames.
@@ -414,12 +400,7 @@ def rename_files(
 
 
 def copy_files_by_extension(
-        src_dir: str,
-        dst_dir: str,
-        ext: str,
-        safe_mode: bool = True,
-        overwrite: bool = False,
-        verbose: bool = False
+    src_dir: str, dst_dir: str, ext: str, safe_mode: bool = True, overwrite: bool = False, verbose: bool = False
 ):
     """
     Copy all files with a specific extension from one directory to another.
@@ -531,11 +512,7 @@ def delete_files_by_extension(root_dir: str, ext: str, verbose: bool = False, sa
 
 
 def delete_dirs_by_pattern(
-        root_dir: str,
-        pattern: str,
-        match_type: str = 'contains',
-        verbose: bool = False,
-        safe_mode: bool = True
+    root_dir: str, pattern: str, match_type: str = "contains", verbose: bool = False, safe_mode: bool = True
 ):
     """
     Deletes folders matching a pattern in a path and its subdirectories.
@@ -562,7 +539,7 @@ def delete_dirs_by_pattern(
     if not root_path.exists():
         raise ValueError(f"Root directory '{root_dir}' does not exist.")
 
-    allowed_match_types = ['contains', 'starts', 'ends', 'exact']
+    allowed_match_types = ["contains", "starts", "ends", "exact"]
     if match_type not in allowed_match_types:
         raise ValueError(f"match_type must be one of {allowed_match_types}, got '{match_type}'")
 
@@ -573,13 +550,13 @@ def delete_dirs_by_pattern(
     for subdir, dirs, _ in os.walk(root_path, topdown=False):
         for dir_name in sorted(dirs):
             match = False
-            if match_type == 'contains' and pattern in dir_name:
+            if match_type == "contains" and pattern in dir_name:
                 match = True
-            elif match_type == 'starts' and dir_name.startswith(pattern):
+            elif match_type == "starts" and dir_name.startswith(pattern):
                 match = True
-            elif match_type == 'ends' and dir_name.endswith(pattern):
+            elif match_type == "ends" and dir_name.endswith(pattern):
                 match = True
-            elif match_type == 'exact' and dir_name == pattern:
+            elif match_type == "exact" and dir_name == pattern:
                 match = True
 
             if match:
@@ -609,11 +586,7 @@ def delete_dirs_by_pattern(
 
 
 def move_files_to_parent(
-    root_dir: str,
-    levels_up: int = 1,
-    ext: str | None = None,
-    verbose: bool = False,
-    safe_mode: bool = True
+    root_dir: str, levels_up: int = 1, ext: str | None = None, verbose: bool = False, safe_mode: bool = True
 ) -> None:
     """
     Move files (optionally filtered by extension) from subdirectories
@@ -687,7 +660,7 @@ def move_files_to_parent(
             print(f"Total files moved: {moved_files}")
 
 
-def organize_files_into_dirs(root_dir, extension='.nii.gz', verbose=False, safe_mode: bool = True):
+def organize_files_into_dirs(root_dir, extension=".nii.gz", verbose=False, safe_mode: bool = True):
     """
     Organizes files into folders based on their filenames. Each file will be moved into a folder named
     after the file (excluding the extension).
@@ -737,7 +710,7 @@ def organize_files_into_dirs(root_dir, extension='.nii.gz', verbose=False, safe_
             continue  # Skip files that don't match the extension
 
         # Extract file name without extension
-        file_name = file[:-len(extension)] if extension else os.path.splitext(file)[0]
+        file_name = file[: -len(extension)] if extension else os.path.splitext(file)[0]
 
         folder_name = os.path.join(root_dir, file_name)
 
@@ -768,10 +741,7 @@ def organize_files_into_dirs(root_dir, extension='.nii.gz', verbose=False, safe_
 
 
 def organize_subdirs_into_named_dirs(
-        root_dir: str,
-        join_char: str = "-",
-        verbose: bool = False,
-        safe_mode: bool = True
+    root_dir: str, join_char: str = "-", verbose: bool = False, safe_mode: bool = True
 ) -> Dict[str, List[str]]:
     """
     Organizes subfolders into combined named folders.
@@ -869,7 +839,7 @@ def organize_subdirs_into_named_dirs(
     return summary
 
 
-def add_suffix_to_files(root_dir, suffix='_pred', ext='.nii.gz', verbose=False, safe_mode: bool = True):
+def add_suffix_to_files(root_dir, suffix="_pred", ext=".nii.gz", verbose=False, safe_mode: bool = True):
     """
     Adds a suffix to all files with a specific extension in a folder and its subdirectories.
 
@@ -902,7 +872,7 @@ def add_suffix_to_files(root_dir, suffix='_pred', ext='.nii.gz', verbose=False, 
             # Check if the file has the specified extension
             if file.endswith(ext):
                 old_file_path = os.path.join(root, file)
-                new_file_name = file.replace(ext, f'{suffix}{ext}')
+                new_file_name = file.replace(ext, f"{suffix}{ext}")
                 new_file_path = os.path.join(root, new_file_name)
 
                 if safe_mode:
@@ -933,7 +903,7 @@ def add_string_files(
     suffix: str = "",
     ext: Optional[str] = None,
     verbose: bool = False,
-    safe_mode: bool = True
+    safe_mode: bool = True,
 ) -> None:
     """
     Add a prefix and/or suffix to all files in a folder and its subfolders.
@@ -989,7 +959,7 @@ def add_string_files(
 
                 # Respect multi-part ext if provided, otherwise use splitext
                 if ext and file.endswith(ext):
-                    name = file[:-len(ext)]
+                    name = file[: -len(ext)]
                     file_ext = ext
                 else:
                     name, file_ext = os.path.splitext(file)

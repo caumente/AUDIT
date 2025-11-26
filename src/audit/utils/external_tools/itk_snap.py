@@ -1,24 +1,22 @@
-import os
+import colorsys
 import glob
+import os
 import platform
 import subprocess
-import colorsys
+
 
 def get_color(index, total):
     # Generate distinct colors in RGB using HSV
     hue = index / max(total, 1)  # spread hues evenly
     r, g, b = colorsys.hsv_to_rgb(hue, 1, 1)
-    return int(r*255), int(g*255), int(b*255)
+    return int(r * 255), int(g * 255), int(b * 255)
 
 
 def run_itk_snap(path, dataset, case, labels=None):
     case_dir = f"{path}/{dataset}/{dataset}_images/{case}"
 
     # Find all NIfTI files in the case directory
-    nifti_files = sorted(
-        glob.glob(f"{case_dir}/{case}_*.nii.gz") +
-        glob.glob(f"{case_dir}/{case}_*.nii")
-    )
+    nifti_files = sorted(glob.glob(f"{case_dir}/{case}_*.nii.gz") + glob.glob(f"{case_dir}/{case}_*.nii"))
 
     if len(nifti_files) == 0:
         return False
@@ -85,13 +83,14 @@ def generate_itk_labels(labels, output_file):
         color = get_color(index, total_labels)
         visibility = 0 if index == 0 else 1
         opacity = 0 if index == 0 else 1
-        line = f'{index:<2} {color[0]:<3} {color[1]:<3} {color[2]:<3}    {visibility} {visibility} {opacity}    "{name}"'
+        line = (
+            f'{index:<2} {color[0]:<3} {color[1]:<3} {color[2]:<3}    {visibility} {visibility} {opacity}    "{name}"'
+        )
         lines.append(line)
 
     with open(output_file, "w") as f:
         for line in lines:
             f.write(line + "\n")
-
 
 
 def run_comparison_segmentation_itk_snap(path_seg, path_pred, case, labels=None):

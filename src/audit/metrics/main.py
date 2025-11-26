@@ -1,4 +1,7 @@
 import os
+from multiprocessing import Lock
+from multiprocessing import Manager
+from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +12,6 @@ from colorama import Fore
 from loguru import logger
 from pymia.evaluation.metric import metric
 from pymia.evaluation.writer import CSVStatisticsWriter
-from multiprocessing import Pool, Manager, Lock
 
 from audit.metrics.segmentation_metrics import calculate_metrics
 from audit.metrics.segmentation_metrics import one_hot_encoding
@@ -70,7 +72,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
         subject=subject_id,
         regions=label_names,
         metrics=metrics_to_extract,
-        spacing=spacing
+        spacing=spacing,
     )
 
     # from list of dict to dataframe
@@ -122,7 +124,7 @@ def extract_audit_metrics(config_file) -> pd.DataFrame:
                         "subject_id": subject_id,
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
-                        "model_name": model_name
+                        "model_name": model_name,
                     }
 
                     data = pd.DataFrame()
@@ -134,7 +136,6 @@ def extract_audit_metrics(config_file) -> pd.DataFrame:
         return raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
 
     if cpu_cores > 1:
-
         manager = Manager()
         shared_data = manager.dict()
         lock = Lock()
@@ -153,7 +154,7 @@ def extract_audit_metrics(config_file) -> pd.DataFrame:
                         "subject_id": subject_id,
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
-                        "model_name": model_name
+                        "model_name": model_name,
                     }
 
                     tasks.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
@@ -223,34 +224,35 @@ def aggregate_results(pymia_evaluator, model_name):
 
 def compute_statistics(pymia_evaluator, config, model_name):
     functions = {
-        'MEAN': np.mean,
-        'MEDIAN': np.median,
-        'STD': np.std,
-        'MIN': np.min,
-        'MAX': np.max,
-        'Q1': lambda x: np.percentile(x, 25),
-        'Q3': lambda x: np.percentile(x, 75),
-        'CI_2.5': lambda x: np.percentile(x, 2.5),
-        'CI_5': lambda x: np.percentile(x, 5),
-        'CI_95': lambda x: np.percentile(x, 95),
-        'CI_97.5': lambda x: np.percentile(x, 97.5),
+        "MEAN": np.mean,
+        "MEDIAN": np.median,
+        "STD": np.std,
+        "MIN": np.min,
+        "MAX": np.max,
+        "Q1": lambda x: np.percentile(x, 25),
+        "Q3": lambda x: np.percentile(x, 75),
+        "CI_2.5": lambda x: np.percentile(x, 2.5),
+        "CI_5": lambda x: np.percentile(x, 5),
+        "CI_95": lambda x: np.percentile(x, 95),
+        "CI_97.5": lambda x: np.percentile(x, 97.5),
     }
-    CSVStatisticsWriter(f"{config['output_path']}/stats/{model_name}/{config['filename']}.csv", delimiter=',',
-                        functions=functions).write(pymia_evaluator.results)
+    CSVStatisticsWriter(
+        f"{config['output_path']}/stats/{model_name}/{config['filename']}.csv", delimiter=",", functions=functions
+    ).write(pymia_evaluator.results)
 
 
 def instantiate_pymia_metrics(selected_metrics: list):
     # Dict of available pymia metrics
     metric_map = {
-        'haus': (metric.HausdorffDistance, {'percentile': 100}),
-        'dice': (metric.DiceCoefficient, {}),
-        'sens': (metric.Sensitivity, {}),
-        'spec': (metric.Specificity, {}),
-        'accu': (metric.Accuracy, {}),
-        'jacc': (metric.JaccardCoefficient, {}),
-        'prec': (metric.Precision, {}),
-        'auc': (metric.AreaUnderCurve, {}),
-        'fnr': (metric.FalseNegativeRate, {}),
+        "haus": (metric.HausdorffDistance, {"percentile": 100}),
+        "dice": (metric.DiceCoefficient, {}),
+        "sens": (metric.Sensitivity, {}),
+        "spec": (metric.Specificity, {}),
+        "accu": (metric.Accuracy, {}),
+        "jacc": (metric.JaccardCoefficient, {}),
+        "prec": (metric.Precision, {}),
+        "auc": (metric.AreaUnderCurve, {}),
+        "fnr": (metric.FalseNegativeRate, {}),
         # add here more
     }
 
@@ -263,7 +265,8 @@ def instantiate_pymia_metrics(selected_metrics: list):
                 metrics.append(metric_class(metric=metric_name, **params))
             else:
                 print(
-                    f"The '{metric_name}' is not available. Go to src.metric.main.instantiate_pymia_metrics method to include it.")
+                    f"The '{metric_name}' is not available. Go to src.metric.main.instantiate_pymia_metrics method to include it."
+                )
         return metrics
 
     return create_metrics(selected_metrics)
@@ -296,7 +299,6 @@ def extract_pymia_metrics(config_file):
         # loop over all the elements in the root_dir folder
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
             for n, subject_id in enumerate(subjects_list):
-
                 pbar.set_postfix_str(f"{Fore.CYAN}Current subject: {Fore.LIGHTBLUE_EX}{subject_id}{Fore.CYAN}")
                 pbar.update(1)
                 if n % 10 == 0 and n > 0:
@@ -309,7 +311,9 @@ def extract_pymia_metrics(config_file):
             raw_metrics = aggregate_results(evaluator, model_name)
 
             if config_file.get("calculate_stats", None):
-                Path(os.path.join(config_file['output_path'], 'stats', f'{model_name}')).mkdir(parents=True, exist_ok=True)
+                Path(os.path.join(config_file["output_path"], "stats", f"{model_name}")).mkdir(
+                    parents=True, exist_ok=True
+                )
                 compute_statistics(evaluator, config_file, model_name)
             evaluator.clear()
 

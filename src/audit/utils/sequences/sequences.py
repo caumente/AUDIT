@@ -49,8 +49,9 @@ def load_nii(path_folder: str, as_array: bool = False) -> Optional[Union[SimpleI
         return None
 
 
-def load_nii_by_subject_id(root_dir: str, subject_id: str, seq: str = "_seg", as_array: bool = False
-                           ) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
+def load_nii_by_subject_id(
+    root_dir: str, subject_id: str, seq: str = "_seg", as_array: bool = False
+) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
     """
     Load a specific NIfTI sequence for a subject ID from a dataset tree.
 
@@ -83,7 +84,9 @@ def load_nii_by_subject_id(root_dir: str, subject_id: str, seq: str = "_seg", as
     return load_nii(nii_path, as_array=as_array)
 
 
-def read_sequences_dict(root_dir: str, subject_id: str, sequences: Optional[List[str]] = None) -> Dict[str, Optional[np.ndarray]]:
+def read_sequences_dict(
+    root_dir: str, subject_id: str, sequences: Optional[List[str]] = None
+) -> Dict[str, Optional[np.ndarray]]:
     """
     Read multiple NIfTI sequences for a subject and return them as a dictionary.
 
@@ -150,7 +153,7 @@ def get_spacing(img: Optional[SimpleITK.Image]) -> np.ndarray:
     """
     if img is not None:
         return np.array(img.GetSpacing())
-    logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1)." )
+    logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1).")
     return np.array([1, 1, 1])
 
 
@@ -204,11 +207,7 @@ def label_replacement(segmentation: np.ndarray, original_labels: List[int], new_
 
 
 def iterative_labels_replacement(
-        root_dir: str,
-        original_labels: List[int],
-        new_labels: List[int],
-        ext: str = "_seg",
-        verbose: bool = False
+    root_dir: str, original_labels: List[int], new_labels: List[int], ext: str = "_seg", verbose: bool = False
 ):
     """
     Iteratively replace labels in segmentation files across a dataset tree.
@@ -259,12 +258,13 @@ def iterative_labels_replacement(
                 logger.error(f"Error processing file {file_path}: {e}")
                 skipped_files += 1
 
-    logger.info(f"Iterative label replacement completed: {processed_files} files processed, {skipped_files} files skipped.")
+    logger.info(
+        f"Iterative label replacement completed: {processed_files} files processed, {skipped_files} files skipped."
+    )
 
 
 def count_labels(
-        segmentation: Optional[np.ndarray],
-        mapping_names: Optional[Dict[int, str]] = None
+    segmentation: Optional[np.ndarray], mapping_names: Optional[Dict[int, str]] = None
 ) -> Dict[Union[int, str], float]:
     """
     Count the number of pixels/voxels for each unique value in a segmentation.
@@ -335,6 +335,6 @@ def fit_brain_boundaries(sequence: np.ndarray, padding: int = 1) -> np.ndarray:
     ymax = min(seq.shape[1] - 1, ymax + padding)
     xmax = min(seq.shape[2] - 1, xmax + padding)
 
-    seq = seq[zmin:zmax + 1, ymin:ymax + 1, xmin:xmax + 1]
+    seq = seq[zmin : zmax + 1, ymin : ymax + 1, xmin : xmax + 1]
 
     return seq

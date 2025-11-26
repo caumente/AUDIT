@@ -3,17 +3,17 @@ import streamlit as st
 from streamlit_plotly_events import plotly_events
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import UnivariatePage
-from audit.utils.internal._csv_helpers import read_datasets_from_dict
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.external_tools.itk_snap import run_itk_snap
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.boxplot import boxplot_highlighter
+from audit.visualization.commons import update_plot_customization
 from audit.visualization.histograms import custom_distplot
 from audit.visualization.histograms import custom_histogram
-from audit.visualization.commons import update_plot_customization
 
 
 class UnivariateFeature(BasePage):
@@ -40,11 +40,12 @@ class UnivariateFeature(BasePage):
 
         # Set up sidebar and plot options
         selected_sets, selected_feature = self.setup_sidebar(df, features_paths)
-        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = self.sidebar.setup_filtering_options(df, selected_feature)
+        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = self.sidebar.setup_filtering_options(
+            df, selected_feature
+        )
 
         proceed = health_checks(selected_sets, [selected_feature])
         if proceed[0]:
-
             # filtering data
             df = processing_data(
                 data=df,
@@ -55,15 +56,18 @@ class UnivariateFeature(BasePage):
                 remove_up=r_up,
                 clip_low=c_low,
                 clip_up=c_up,
-                num_std_devs=num_std_devs
+                num_std_devs=num_std_devs,
             )
             try:
                 self.main(df, datasets_paths, selected_feature, labels)
             except TypeError:
-                st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
-                    "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
+                st.error(
+                    "Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
+                    "columns are numeric, otherwise it is not possible to run the algorithm",
+                    icon="🚨",
+                )
         else:
-            st.error(proceed[-1], icon='🚨')
+            st.error(proceed[-1], icon="🚨")
 
     def setup_sidebar(self, data, data_paths):
         with st.sidebar:
@@ -74,8 +78,17 @@ class UnivariateFeature(BasePage):
 
         return selected_sets, select_feature
 
-    def boxplot_logic(self, datasets_root_path, data, feature, labels, plot_type, highlight_subject, customization='Standard visualization'):
-        if customization == 'Standard visualization':
+    def boxplot_logic(
+        self,
+        datasets_root_path,
+        data,
+        feature,
+        labels,
+        plot_type,
+        highlight_subject,
+        customization="Standard visualization",
+    ):
+        if customization == "Standard visualization":
             selected_points = self.render_boxplot(data, feature, plot_type, highlight_subject)
         else:
             selected_points = self.render_boxplot_with_customization(data, feature, plot_type, highlight_subject)
@@ -93,7 +106,7 @@ class UnivariateFeature(BasePage):
             color_var="set",
             plot_type=plot_type,
             highlight_point=highlight_subject,
-            template=self.template
+            template=self.template,
         )
         selected_points = plotly_events(boxplot_fig, click_event=True, override_height=None)
         download_plot(boxplot_fig, label="Univariate Analysis", filename="univariate_analysis")
@@ -104,7 +117,9 @@ class UnivariateFeature(BasePage):
         st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
 
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:
@@ -115,7 +130,7 @@ class UnivariateFeature(BasePage):
                 color_var="set",
                 plot_type=plot_type,
                 highlight_point=highlight_subject,
-                template=self.template
+                template=self.template,
             )
 
         # Column 2: Customization panel
@@ -148,15 +163,17 @@ class UnivariateFeature(BasePage):
             st.markdown(self.descriptions.description)
 
     def render_probability_distribution_with_customization(self, data, feature):
-
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:
             try:
-                distplot_fig = custom_distplot(data, x_axis=feature, color_var="set", histnorm="probability",
-                                           template=self.template)
+                distplot_fig = custom_distplot(
+                    data, x_axis=feature, color_var="set", histnorm="probability", template=self.template
+                )
             except np.linalg.LinAlgError as e:
                 st.write(":red[Error generating the histogram: KDE failed due to singular covariance matrix.]")
                 st.write(":red[This may happen when the data has low variance or is nearly constant.]")
@@ -183,8 +200,9 @@ class UnivariateFeature(BasePage):
         if n_bins:
             fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=n_bins, template=self.template)
         elif bins_size:
-            fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size,
-                                   template=self.template)
+            fig = custom_histogram(
+                data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size, template=self.template
+            )
         else:
             st.write(":red[Please, select the number of bins or bins size]")
 
@@ -194,18 +212,22 @@ class UnivariateFeature(BasePage):
             st.markdown(self.descriptions.description)
 
     def render_histogram_with_customization(self, data, feature, n_bins, bins_size):
-
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:
             histogram = None
             if n_bins:
-                histogram_fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=n_bins, template=self.template)
+                histogram_fig = custom_histogram(
+                    data, x_axis=feature, color_var="set", n_bins=n_bins, template=self.template
+                )
             elif bins_size:
-                histogram_fig = custom_histogram(data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size,
-                                                 template=self.template)
+                histogram_fig = custom_histogram(
+                    data, x_axis=feature, color_var="set", n_bins=None, bins_size=bins_size, template=self.template
+                )
             else:
                 st.write(":red[Please, select the number of bins or bins size]")
 
@@ -220,8 +242,8 @@ class UnivariateFeature(BasePage):
                 download_plot(histogram_fig, label="Data Distribution", filename="distribution")
                 st.markdown(self.descriptions.description)
 
-    def histogram_logic(self, data, plot_type, feature, n_bins, bins_size, customization='Standard visualization'):
-        if customization == 'Standard visualization':
+    def histogram_logic(self, data, plot_type, feature, n_bins, bins_size, customization="Standard visualization"):
+        if customization == "Standard visualization":
             if plot_type == "Probability":
                 self.render_probability_distribution(data, feature)
             else:
@@ -258,10 +280,7 @@ class UnivariateFeature(BasePage):
                 st.session_state.last_opened_case_itk = selected_case
                 dataset = data[data.ID == selected_case]["set"].unique()[0]
                 verification_check = run_itk_snap(
-                    path=datasets_root_path,
-                    dataset=dataset,
-                    case=selected_case,
-                    labels=labels
+                    path=datasets_root_path, dataset=dataset, case=selected_case, labels=labels
                 )
                 if not verification_check:
                     st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
@@ -271,7 +290,6 @@ class UnivariateFeature(BasePage):
                     info_placeholder.write(f"Opened case {selected_case} in ITK-SNAP")
 
     def main(self, data, datasets_paths, select_feature_name, labels):
-
         highlight_subject = self.sidebar.setup_highlight_subject(data)
 
         # Visualize boxplot
@@ -279,10 +297,19 @@ class UnivariateFeature(BasePage):
         st.markdown(self.descriptions.description_boxplot)
         col1, col2 = st.columns([1, 1], gap="small")
         with col1:
-            plot_type = st.selectbox(label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0)
+            plot_type = st.selectbox(
+                label="Type of plot to visualize", options=["Box + Points", "Box", "Violin"], index=0
+            )
         with col2:
-            customization_boxplot = st.selectbox(label="Customize visualization", options=["Standard visualization", "Custom visualization"], index=0, key="boxplot")
-        self.boxplot_logic(datasets_paths, data, select_feature_name, labels, plot_type, highlight_subject, customization_boxplot)
+            customization_boxplot = st.selectbox(
+                label="Customize visualization",
+                options=["Standard visualization", "Custom visualization"],
+                index=0,
+                key="boxplot",
+            )
+        self.boxplot_logic(
+            datasets_paths, data, select_feature_name, labels, plot_type, highlight_subject, customization_boxplot
+        )
 
         st.markdown("---")
 
@@ -292,6 +319,11 @@ class UnivariateFeature(BasePage):
         with col1:
             plot_type = st.selectbox(label="Type of plot to visualize", options=["Histogram", "Probability"], index=1)
         with col2:
-            customization_histogram = st.selectbox(label="Customize visualization", options=["Standard visualization", "Custom visualization"], index=0, key="histogram")
+            customization_histogram = st.selectbox(
+                label="Customize visualization",
+                options=["Standard visualization", "Custom visualization"],
+                index=0,
+                key="histogram",
+            )
         n_bins, bins_size = self.sidebar.setup_histogram_options(plot_type)
         self.histogram_logic(data, plot_type, select_feature_name, n_bins, bins_size, customization_histogram)

@@ -1,18 +1,20 @@
 import os
-from streamlit_theme import st_theme
 
 import numpy as np
 import streamlit as st
 from stqdm import stqdm
+from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
+from audit.app.util.commons.checks import none_check
 from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
-from audit.metrics.error_matrix import errors_per_class, normalize_matrix_per_row
+from audit.app.util.pages.base_page import BasePage
+from audit.metrics.error_matrix import errors_per_class
+from audit.metrics.error_matrix import normalize_matrix_per_row
 from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap
 from audit.utils.sequences.sequences import load_nii_by_subject_id
-from audit.visualization.confusion_matrices import plt_confusion_matrix
 from audit.visualization.commons import update_segmentation_matrix_plot
-from audit.app.util.commons.checks import none_check
+from audit.visualization.confusion_matrices import plt_confusion_matrix
+
 
 class SegmentationErrorMatrix(BasePage):
     def __init__(self, config):
@@ -37,8 +39,9 @@ class SegmentationErrorMatrix(BasePage):
         proceed = none_check(labels=labels_dict, predictions=predictions, raw_datasets=raw_datasets)
         if proceed[0]:
             # Setup sidebar
-            selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(predictions,raw_datasets)
-
+            selected_dataset, selected_model, selected_id, gt_path, pred_path, subjects_in_path = self.setup_sidebar(
+                predictions, raw_datasets
+            )
 
             col1, col2 = st.columns([2, 2], gap="small")
             with col1:
@@ -46,7 +49,7 @@ class SegmentationErrorMatrix(BasePage):
                 normalized = st.checkbox(
                     "Normalized per ground truth label",
                     value=True,
-                    help="It normalizes the errors per class, if enabled."
+                    help="It normalizes the errors per class, if enabled.",
                 )
 
                 if selected_id == "All":
@@ -56,17 +59,20 @@ class SegmentationErrorMatrix(BasePage):
                         help="It averages the errors per number of subjects within the corresponding dataset, if enabled.",
                     )
             with col2:
-                customization_matrix = st.selectbox(label="Customize visualization",
-                                                     options=["Standard visualization", "Custom visualization"],
-                                                     index=0,
-                                                     key="matrix")
+                customization_matrix = st.selectbox(
+                    label="Customize visualization",
+                    options=["Standard visualization", "Custom visualization"],
+                    index=0,
+                    key="matrix",
+                )
 
             if customization_matrix == "Custom visualization":
                 col1, col2 = st.columns([4, 1], gap="small")
                 with col1:
                     if selected_id == "All":
-                        fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged,
-                                                  normalized)
+                        fig = self.visualize_aggregated(
+                            gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized
+                        )
                     else:
                         fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
                 with col2:
@@ -75,7 +81,9 @@ class SegmentationErrorMatrix(BasePage):
                     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
             else:
                 if selected_id == "All":
-                    fig = self.visualize_aggregated(gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized)
+                    fig = self.visualize_aggregated(
+                        gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized
+                    )
                 else:
                     fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
 
@@ -111,7 +119,6 @@ class SegmentationErrorMatrix(BasePage):
 
         return selected_dataset, selected_model, selected_id, ground_truth_path, predictions_path, subjects_in_path
 
-
     @staticmethod
     def compute_confusion_matrix(seg, pred, labels, normalized):
         """
@@ -146,7 +153,9 @@ class SegmentationErrorMatrix(BasePage):
             np.array: Accumulated confusion matrix.
         """
         accumulated = None
-        for subject_id in stqdm(subjects_in_path, desc=f"Calculating confusion matrix for {len(subjects_in_path)} subjects"):
+        for subject_id in stqdm(
+            subjects_in_path, desc=f"Calculating confusion matrix for {len(subjects_in_path)} subjects"
+        ):
             seg = load_nii_by_subject_id(root_dir=gt_path, subject_id=subject_id, seq="_seg", as_array=True)
             pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=subject_id, seq="_pred", as_array=True)
             cm = errors_per_class(seg, pred, list(labels))

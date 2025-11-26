@@ -1,9 +1,11 @@
 import os
+from multiprocessing import Lock
+from multiprocessing import Manager
+from multiprocessing import Pool
 
 import pandas as pd
 from colorama import Fore
 from loguru import logger
-from multiprocessing import Pool, Manager, Lock
 
 from audit.features.spatial import SpatialFeatures
 from audit.features.statistical import StatisticalFeatures
@@ -25,7 +27,9 @@ def check_multiprocessing(config_file):
         cpu_cores = os.cpu_count()
 
     if not isinstance(cpu_cores, int) or cpu_cores <= 0:
-        logger.info(f"Invalid cpu_cores value: {cpu_cores} in feature_extraction.yml file, defaulting to os.cpu_count()")
+        logger.info(
+            f"Invalid cpu_cores value: {cpu_cores} in feature_extraction.yml file, defaulting to os.cpu_count()"
+        )
         cpu_cores = os.cpu_count()
 
     logger.info(f"Using {cpu_cores} CPU cores for processing")
@@ -41,13 +45,13 @@ def initializer(shared_df, lock):
 
 def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.DataFrame:
     """Process a single subject to extract features"""
-    path_images = params.get('path_images')
-    subject_id = params.get('subject_id')
-    available_sequences = params.get('available_sequences')
-    seq_reference = params.get('seq_reference')
-    features_to_extract = params.get('features_to_extract')
-    numeric_label = params.get('numeric_label')
-    label_names = params.get('label_names')
+    path_images = params.get("path_images")
+    subject_id = params.get("subject_id")
+    available_sequences = params.get("available_sequences")
+    seq_reference = params.get("seq_reference")
+    features_to_extract = params.get("features_to_extract")
+    numeric_label = params.get("numeric_label")
+    label_names = params.get("label_names")
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
 
     # read sequences and segmentation
@@ -59,7 +63,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
     seg_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_seg"))
 
     # extract first order (statistical) information from sequences
-    if 'statistical' in features_to_extract:
+    if "statistical" in features_to_extract:
         stats_features = {
             key: StatisticalFeatures(seq[seq > 0]).extract_features()
             for key, seq in sequences.items()
@@ -67,7 +71,7 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
         }
 
     # extract second order (texture) information from sequences
-    if 'texture' in features_to_extract:
+    if "texture" in features_to_extract:
         texture_feats = {
             key: TextureFeatures(seq, remove_empty_planes=True).extract_features()
             for key, seq in sequences.items()
@@ -75,24 +79,18 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
         }
 
     # calculate spatial features (dimensions and center mass)
-    if 'spatial' in features_to_extract:
+    if "spatial" in features_to_extract:
         sf = SpatialFeatures(sequence=sequences.get(seq_reference.replace("_", "")), spacing=sequences_spacing)
         spatial_features = sf.extract_features()
 
     # calculate tumor features
-    if 'tumor' in features_to_extract:
-        tf = TumorFeatures(
-            segmentation=seg, spacing=seg_spacing, mapping_names=dict(zip(numeric_label, label_names))
-        )
-        tumor_features = tf.extract_features(sf.center_mass.values() if 'spatial' in features_to_extract else {})
+    if "tumor" in features_to_extract:
+        tf = TumorFeatures(segmentation=seg, spacing=seg_spacing, mapping_names=dict(zip(numeric_label, label_names)))
+        tumor_features = tf.extract_features(sf.center_mass.values() if "spatial" in features_to_extract else {})
 
     # Add info to the main df
     subject_info_df = store_subject_information(
-        subject_id,
-        spatial_features,
-        tumor_features,
-        stats_features,
-        texture_feats
+        subject_id, spatial_features, tumor_features, stats_features, texture_feats
     )
 
     if cpu_cores == 1:
@@ -128,7 +126,6 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
     data = pd.DataFrame()
     if cpu_cores == 1:
-
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
             for subject_id in subjects_list:
                 logger.info(f"Processing subject: {subject_id}")
@@ -138,13 +135,13 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                 pbar.update(1)
 
                 params = {
-                    'path_images': path_images,
-                    'subject_id': subject_id,
-                    'label_names': label_names,
-                    'numeric_label': numeric_label,
-                    'seq_reference': seq_reference,
-                    'features_to_extract': features_to_extract,
-                    'available_sequences': available_sequences
+                    "path_images": path_images,
+                    "subject_id": subject_id,
+                    "label_names": label_names,
+                    "numeric_label": numeric_label,
+                    "seq_reference": seq_reference,
+                    "features_to_extract": features_to_extract,
+                    "available_sequences": available_sequences,
                 }
 
                 subject_info_df = process_subject(data, params, cpu_cores)
@@ -153,7 +150,6 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
         data = extract_longitudinal_info(config_file, data, dataset_name)
 
     if cpu_cores > 1:
-
         manager = Manager()
         shared_data = manager.dict()
         lock = Lock()
@@ -164,13 +160,13 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
                 for subject_id in subjects_list:
                     params = {
-                        'path_images': path_images,
-                        'subject_id': subject_id,
-                        'label_names': label_names,
-                        'numeric_label': numeric_label,
-                        'seq_reference': seq_reference,
-                        'features_to_extract': features_to_extract,
-                        'available_sequences': available_sequences
+                        "path_images": path_images,
+                        "subject_id": subject_id,
+                        "label_names": label_names,
+                        "numeric_label": numeric_label,
+                        "seq_reference": seq_reference,
+                        "features_to_extract": features_to_extract,
+                        "available_sequences": available_sequences,
                     }
                     results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 
@@ -190,11 +186,7 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
 
 
 def store_subject_information(
-        subject_id: str,
-        spatial_features: dict,
-        tumor_features: dict,
-        stats_features: dict,
-        texture_feats: dict
+    subject_id: str, spatial_features: dict, tumor_features: dict, stats_features: dict, texture_feats: dict
 ) -> pd.DataFrame:
     """
     Stores the extracted features for a single subject in a DataFrame.
@@ -299,7 +291,9 @@ def load_and_merge_metadata(data: pd.DataFrame, config_file: dict, dataset_name:
     for meta_name, filepath in dataset_metadata.items():
         # Handle undefined or empty paths gracefully
         if not filepath or not isinstance(filepath, str) or filepath.strip() == "":
-            logger.warning(f"Metadata entry '{meta_name}' for dataset '{dataset_name}' has no valid file path, skipping.")
+            logger.warning(
+                f"Metadata entry '{meta_name}' for dataset '{dataset_name}' has no valid file path, skipping."
+            )
             continue
 
         if not os.path.exists(filepath):

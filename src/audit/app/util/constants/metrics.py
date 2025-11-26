@@ -10,10 +10,7 @@ class Metrics:
             "Sensitivity": "SENS",
         }
 
-        self.orderby = {
-            "Ascending": True,
-            "Descending": False
-        }
+        self.orderby = {"Ascending": True, "Descending": False}
 
     def get_metrics(self):
         return self.metrics

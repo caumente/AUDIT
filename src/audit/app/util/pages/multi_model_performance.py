@@ -2,15 +2,15 @@ import pandas as pd
 import streamlit as st
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
+from audit.app.util.commons.checks import none_check
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import MultiModelPerformanceComparisonsPage
 from audit.app.util.constants.metrics import Metrics
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.boxplot import models_performance_boxplot
 from audit.visualization.commons import update_multimodel_plot
-from audit.app.util.commons.checks import none_check
 
 
 class MultiModelPerformance(BasePage):
@@ -46,7 +46,7 @@ class MultiModelPerformance(BasePage):
                 models=selected_models,
                 sets=selected_set,
                 regions=selected_regions,
-                features=["ID", 'region', 'model', 'set'] + selected_metrics
+                features=["ID", "region", "model", "set"] + selected_metrics,
             )
 
             data_melted = self.main_table(df, agg)
@@ -56,16 +56,19 @@ class MultiModelPerformance(BasePage):
             with col1:
                 st.markdown(self.descriptions.description)
             with col2:
-                customization_boxplot = st.selectbox(label="Customize visualization",
-                                                     options=["Standard visualization", "Custom visualization"], index=0,
-                                                     key="multimodel")
+                customization_boxplot = st.selectbox(
+                    label="Customize visualization",
+                    options=["Standard visualization", "Custom visualization"],
+                    index=0,
+                    key="multimodel",
+                )
 
             if customization_boxplot == "Standard visualization":
                 self.visualize_data(data_melted, agg)
             else:
                 self.visualize_data_with_customization(data_melted, labels_dict, agg)
         else:
-            st.error(proceed[-1], icon='🚨')
+            st.error(proceed[-1], icon="🚨")
 
     def setup_sidebar(self, data):
         with st.sidebar:
@@ -86,7 +89,9 @@ class MultiModelPerformance(BasePage):
 
     def visualize_data_with_customization(self, data, labels_dict, agg):
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
         with col1:
             fig = models_performance_boxplot(data, aggregated=agg, template=self.template)
         with col2:

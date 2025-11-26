@@ -2,15 +2,15 @@ import streamlit as st
 from streamlit_plotly_events import plotly_events
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import MultivariatePage
-from audit.utils.internal._csv_helpers import read_datasets_from_dict
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.external_tools.itk_snap import run_itk_snap
-from audit.visualization.scatter_plots import multivariate_features_highlighter
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.commons import update_plot_customization
+from audit.visualization.scatter_plots import multivariate_features_highlighter
 
 
 class MultivariateFeature(BasePage):
@@ -44,7 +44,7 @@ class MultivariateFeature(BasePage):
             )
             st.markdown(self.descriptions.description)
         else:
-            st.error(proceed[-1], icon='🚨')
+            st.error(proceed[-1], icon="🚨")
 
     def setup_sidebar(self, data, data_paths):
         with st.sidebar:
@@ -52,15 +52,17 @@ class MultivariateFeature(BasePage):
             selected_sets = self.sidebar.setup_sidebar_multi_datasets(data_paths)
             x_axis = self.sidebar.setup_sidebar_features(data, name="Features (X axis)", key="feat_x")
             y_axis = self.sidebar.setup_sidebar_features(data, name="Features (Y axis)", key="feat_y", f_index=1)
-            color_axis= self.sidebar.setup_sidebar_color(data, name="Color feature", key="feat_col")
+            color_axis = self.sidebar.setup_sidebar_color(data, name="Color feature", key="feat_col")
 
         return selected_sets, [x_axis, y_axis, color_axis]
 
     def scatter_plot_logic(self, data, x_axis, y_axis, color_axis, customization):
-        if customization == 'Standard visualization':
+        if customization == "Standard visualization":
             selected_points, highlight_subject = self.render_scatter_plot(data, x_axis, y_axis, color_axis)
         else:
-            selected_points, highlight_subject = self.render_scatter_plot_with_customization(data, x_axis, y_axis, color_axis)
+            selected_points, highlight_subject = self.render_scatter_plot_with_customization(
+                data, x_axis, y_axis, color_axis
+            )
 
         return selected_points, highlight_subject
 
@@ -76,7 +78,7 @@ class MultivariateFeature(BasePage):
             y_label=self.features.get_pretty_feature_name(y_axis),
             legend_title=self.features.get_pretty_feature_name(color_axis) if color_axis != "Dataset" else None,
             highlight_point=highlight_subject,
-            template=self.template
+            template=self.template,
         )
 
         selected_points = plotly_events(fig, click_event=True, override_height=None)
@@ -88,7 +90,9 @@ class MultivariateFeature(BasePage):
         highlight_subject = self.sidebar.setup_highlight_subject(data)
 
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:
@@ -101,7 +105,7 @@ class MultivariateFeature(BasePage):
                 y_label=self.features.get_pretty_feature_name(y_axis),
                 legend_title=self.features.get_pretty_feature_name(color_axis) if color_axis != "Dataset" else None,
                 highlight_point=highlight_subject,
-                template=self.template
+                template=self.template,
             )
         # Column 2: Customization panel
         with col2:
@@ -135,10 +139,7 @@ class MultivariateFeature(BasePage):
                 st.session_state.last_opened_case_itk = selected_case
                 dataset = data[data.ID == selected_case]["set"].unique()[0]
                 verification_check = run_itk_snap(
-                    path=datasets_root_path,
-                    dataset=dataset,
-                    case=selected_case,
-                    labels=labels
+                    path=datasets_root_path, dataset=dataset, case=selected_case, labels=labels
                 )
                 if not verification_check:
                     st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
@@ -151,9 +152,14 @@ class MultivariateFeature(BasePage):
         with col1:
             st.markdown("**Click on a point to visualize it in ITK-SNAP app.**")
         with col2:
-            customization_scatter = st.selectbox(label="Customize visualization",
-                                             options=["Standard visualization", "Custom visualization"], index=0,
-                                             key="scatter")
-        selected_points, highlight_subject = self.scatter_plot_logic(data, x_axis, y_axis, color_axis, customization_scatter)
+            customization_scatter = st.selectbox(
+                label="Customize visualization",
+                options=["Standard visualization", "Custom visualization"],
+                index=0,
+                key="scatter",
+            )
+        selected_points, highlight_subject = self.scatter_plot_logic(
+            data, x_axis, y_axis, color_axis, customization_scatter
+        )
         selected_case = self.get_case_from_point(data, selected_points, highlight_subject)
         self.manage_itk_opening(data, datasets_root_path, labels, selected_points, selected_case)

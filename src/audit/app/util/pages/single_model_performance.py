@@ -3,17 +3,17 @@ import streamlit as st
 from streamlit_plotly_events import plotly_events
 from streamlit_theme import st_theme
 
-from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import dataset_sanity_check
+from audit.app.util.commons.checks import none_check
 from audit.app.util.commons.data_preprocessing import processing_data
+from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import ModelPerformanceAnalysisPage
 from audit.app.util.constants.metrics import Metrics
-from audit.app.util.commons.utils import download_plot
-from audit.utils.internal._csv_helpers import read_datasets_from_dict
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.commons.strings import pretty_string
-from audit.visualization.scatter_plots import multivariate_metric_feature
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.commons import update_plot_customization
-from audit.app.util.commons.checks import none_check
+from audit.visualization.scatter_plots import multivariate_metric_feature
 
 
 class SingleModelPerformance(BasePage):
@@ -46,31 +46,35 @@ class SingleModelPerformance(BasePage):
                 agg = self.sidebar.setup_aggregation_button()
                 st.markdown("**Double click on a point to highlight it in red and then visualize it disaggregated.**")
             with col2:
-                customization_scatter = st.selectbox(label="Customize visualization",
-                                                     options=["Standard visualization", "Custom visualization"], index=0,
-                                                     key="single_model")
+                customization_scatter = st.selectbox(
+                    label="Customize visualization",
+                    options=["Standard visualization", "Custom visualization"],
+                    index=0,
+                    key="single_model",
+                )
             merged_data = self.merge_features_and_metrics(features=features_df, metrics=metrics_df, aggregate=agg)
 
             # Setup sidebar
-            selected_sets, selected_model, feature, metric, selected_regions = self.setup_sidebar(data=merged_data,
-                                                                                             data_paths=metrics_paths,
-                                                                                             aggregated=agg)
+            selected_sets, selected_model, feature, metric, selected_regions = self.setup_sidebar(
+                data=merged_data, data_paths=metrics_paths, aggregated=agg
+            )
             if not dataset_sanity_check(selected_sets):
                 st.error("Please, select a dataset from the left sidebar", icon="🚨")
             else:
-                df = processing_data(merged_data, sets=selected_sets, models=selected_model, regions=selected_regions,
-                                     features=['ID', 'model', feature, self.metrics.get(metric, None), 'set', 'region'])
+                df = processing_data(
+                    merged_data,
+                    sets=selected_sets,
+                    models=selected_model,
+                    regions=selected_regions,
+                    features=["ID", "model", feature, self.metrics.get(metric, None), "set", "region"],
+                )
                 self.scatter_plot_logic(
-                    data=df,
-                    x_axis=feature,
-                    y_axis=metric,
-                    aggregated=agg,
-                    customization=customization_scatter
+                    data=df, x_axis=feature, y_axis=metric, aggregated=agg, customization=customization_scatter
                 )
 
                 st.markdown(self.descriptions.description)
         else:
-            st.error(proceed[-1], icon='🚨')
+            st.error(proceed[-1], icon="🚨")
 
     def setup_sidebar(self, data, data_paths, aggregated):
         with st.sidebar:
@@ -92,8 +96,8 @@ class SingleModelPerformance(BasePage):
         metrics_df = metrics.drop(columns=drop_cols).groupby(group_cols).mean().reset_index()
 
         # Add 'region' column with value 'All' if it doesn't exist after aggregation
-        if 'region' not in metrics_df.columns:
-            metrics_df['region'] = 'ALL'
+        if "region" not in metrics_df.columns:
+            metrics_df["region"] = "ALL"
 
         # Merge aggregated metrics with features
         merged = metrics_df.merge(features, on=["ID", "set"])
@@ -111,7 +115,7 @@ class SingleModelPerformance(BasePage):
             color="Dataset",
             facet_col="region" if not aggregated else None,
             highlighted_subjects=st.session_state.highlighted_subjects,
-            template=self.template
+            template=self.template,
         )
         if not aggregated:
             fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -123,7 +127,9 @@ class SingleModelPerformance(BasePage):
 
     def render_scatter_plot_with_customization(self, data, x_axis, y_axis, aggregated):
         # Create a layout with two columns: one for the plot and another for the customization panel
-        col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
+        col1, col2 = st.columns(
+            [4, 1], gap="small"
+        )  # Column 1 is larger for the plot, column 2 is smaller for the customization panel
 
         # Column 1: Display the plot
         with col1:
@@ -136,7 +142,7 @@ class SingleModelPerformance(BasePage):
                 color="Dataset",
                 facet_col="region" if not aggregated else None,
                 highlighted_subjects=st.session_state.highlighted_subjects,
-                template=self.template
+                template=self.template,
             )
             if not aggregated:
                 scatter_metric.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
@@ -176,13 +182,12 @@ class SingleModelPerformance(BasePage):
             )
 
     def scatter_plot_logic(self, data, x_axis, y_axis, aggregated, customization):
-
         # Initialize session state for highlighted subjects
         if "highlighted_subjects" not in st.session_state:
             st.session_state.highlighted_subjects = []
             st.session_state.dict_cases = {}
 
-        if customization == 'Standard visualization':
+        if customization == "Standard visualization":
             selected_points = self.render_scatter_plot(data, x_axis, y_axis, aggregated)
         else:
             selected_points = self.render_scatter_plot_with_customization(data, x_axis, y_axis, aggregated)

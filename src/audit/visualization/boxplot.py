@@ -82,10 +82,10 @@ def boxplot(data, x_axis, color_var, x_label=None, plot_type="Box"):
     return fig
 
 
-def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", highlight_point=None, template='light'):
+def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", highlight_point=None, template="light"):
     if x_label is None:
         x_label = f"{pretty_string(x_axis)}"
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     # Map each unique value in color_var to a color from the palette
     color_palette = constants.discrete_color_palette
@@ -192,11 +192,11 @@ def boxplot_highlighter(data, x_axis, color_var, x_label=None, plot_type="Box", 
     return fig
 
 
-def models_performance_boxplot(data, points="outliers", aggregated=None, template='light'):
+def models_performance_boxplot(data, points="outliers", aggregated=None, template="light"):
     facet_row, height = None, 500
     if not aggregated:
         facet_row, height = "region", 800
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     fig = px.box(
         data,

@@ -1,7 +1,8 @@
+import argparse
 import os
 import sys
-import argparse
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from datetime import datetime
 from pathlib import Path
@@ -11,8 +12,10 @@ from colorama import Fore
 from loguru import logger
 
 from audit.features.main import extract_features
-from audit.utils.internal._config_helpers import load_config_file, check_feature_extraction_config, configure_logging
 from audit.utils.commons.strings import fancy_print
+from audit.utils.internal._config_helpers import check_feature_extraction_config
+from audit.utils.internal._config_helpers import configure_logging
+from audit.utils.internal._config_helpers import load_config_file
 
 
 def run_feature_extraction(config_path):
@@ -33,8 +36,8 @@ def run_feature_extraction(config_path):
 
     # initializing log
     logger.remove()
-    if config.get('logger', None):
-        logger.add(sink=sys.stdout, level=config['logger'])
+    if config.get("logger", None):
+        logger.add(sink=sys.stdout, level=config["logger"])
     current_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     configure_logging(log_filename=f"{logs_path}/{current_time}.log")
     logger.info(f"Config file: \n{pformat(config)}")
@@ -58,10 +61,10 @@ def main():
     # Command-line argument parsing
     parser = argparse.ArgumentParser(description="Feature extraction for AUDIT.")
     parser.add_argument(
-        '--config',
+        "--config",
         type=str,
-        default='./configs/feature_extraction.yml',  # Path relative to the script location
-        help="Path to the configuration file for feature extraction (default is './configs/feature_extraction.yml')."
+        default="./configs/feature_extraction.yml",  # Path relative to the script location
+        help="Path to the configuration file for feature extraction (default is './configs/feature_extraction.yml').",
     )
     args = parser.parse_args()
 

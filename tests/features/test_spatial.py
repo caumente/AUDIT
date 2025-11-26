@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import numpy as np
 import pytest
@@ -31,6 +31,9 @@ def mock_non_isotropic_spacing():
 
 def test_calculate_brain_center_mass(mock_sequence, mock_isotropic_spacing):
     """Test the calculation of brain center of mass with isotropic spacing."""
+    print("Mock sequence sum:", np.sum(mock_sequence))
+    print("Mock sequence shape:", mock_sequence.shape)
+
     spatial_features = SpatialFeatures(mock_sequence, mock_isotropic_spacing)
     result = spatial_features.calculate_anatomical_center_mass()
 

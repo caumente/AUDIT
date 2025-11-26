@@ -12,7 +12,6 @@ constants = Dashboard()
 def multivariate_features(
     data, x_axis, y_axis, y_label=None, x_label=None, color="Dataset", log_x=False, log_y=False, legend_title=None
 ):
-
     if y_label is None:
         y_label = f"{pretty_string(y_axis)}"
 
@@ -75,9 +74,8 @@ def multivariate_features_highlighter(
     log_y=False,
     legend_title=None,
     highlight_point=None,
-    template='light'
+    template="light",
 ):
-
     if y_label is None:
         y_label = f"{pretty_string(y_axis)}"
 
@@ -87,7 +85,7 @@ def multivariate_features_highlighter(
     if legend_title is None:
         legend_title = f"{pretty_string(color)}"
 
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     # define the scatterplot
     if color == "Dataset":
@@ -158,9 +156,8 @@ def multivariate_metric_feature(
     color: str = "Dataset",
     facet_col: str = None,
     highlighted_subjects: list = None,
-    template='light'
+    template="light",
 ):
-
     if y_label is None:
         y_label = f"{pretty_string(y_axis)}"
 
@@ -173,7 +170,7 @@ def multivariate_metric_feature(
 
     # Use a predefined Plotly color palette
     color_palette = constants.discrete_color_palette
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     fig = px.scatter(
         data,
@@ -193,7 +190,7 @@ def multivariate_metric_feature(
         xaxis_title=x_label,
         yaxis_title=y_label,
         legend_title=color,
-        legend=dict(yanchor="top", xanchor="right")
+        legend=dict(yanchor="top", xanchor="right"),
     )
 
     fig.for_each_xaxis(lambda x: x.update(title_text=x_label))

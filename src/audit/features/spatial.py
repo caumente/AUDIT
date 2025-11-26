@@ -53,7 +53,7 @@ class SpatialFeatures:
             return {
                 "axial_plane_center_of_mass": np.nan,
                 "coronal_plane_center_of_mass": np.nan,
-                "sagittal_plane_center_of_mass": np.nan
+                "sagittal_plane_center_of_mass": np.nan,
             }
 
         # Get the indices of the non-zero voxels
@@ -85,14 +85,14 @@ class SpatialFeatures:
             return {
                 "axial_plane_resolution": np.nan,
                 "coronal_plane_resolution": np.nan,
-                "sagittal_plane_resolution": np.nan
+                "sagittal_plane_resolution": np.nan,
             }
 
         axial, coronal, sagittal = self.sequence.shape
         dimensions = {
             "axial_plane_resolution": int(axial),
             "coronal_plane_resolution": int(coronal),
-            "sagittal_plane_resolution": int(sagittal)
+            "sagittal_plane_resolution": int(sagittal),
         }
         return dimensions
 

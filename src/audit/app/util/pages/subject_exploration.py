@@ -5,11 +5,11 @@ import streamlit as st
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.data_preprocessing import processing_data
 from audit.app.util.constants.descriptions import SubjectsExplorationPage
-from audit.utils.internal._csv_helpers import read_datasets_from_dict
+from audit.app.util.pages.base_page import BasePage
 from audit.utils.commons.strings import pretty_string
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 
 
 class SubjectsExploration(BasePage):
@@ -42,8 +42,11 @@ class SubjectsExploration(BasePage):
         try:
             self.show_outlier_information(subject_data, rest_data)
         except TypeError:
-            st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
-                     "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
+            st.error(
+                "Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
+                "columns are numeric, otherwise it is not possible to run the algorithm",
+                icon="🚨",
+            )
 
     def setup_sidebar(self, data):
         with st.sidebar:
@@ -82,7 +85,9 @@ class SubjectsExploration(BasePage):
                 q1 = data[c].quantile(0.25)
                 q3 = data[c].quantile(0.75)
                 iqr = q3 - q1
-                outliers_iqr[c] = (subject[c].values[0] < (q1 - deviation * iqr)) or (subject[c].values[0] > (q3 + deviation * iqr))
+                outliers_iqr[c] = (subject[c].values[0] < (q1 - deviation * iqr)) or (
+                    subject[c].values[0] > (q3 + deviation * iqr)
+                )
 
         median = [f"{data[c].median():.2f}" for c in outliers_iqr.keys()]
         mean_std_combined = [f"{data[c].mean():.2f} ± {data[c].std():.2f}" for c in outliers_iqr.keys()]
@@ -114,4 +119,3 @@ class SubjectsExploration(BasePage):
             st.write(outliers[outliers["Is Outlier"] == True].drop(columns=["Is Outlier"]))
         else:
             st.write("The subject is not an outlier for any of the features")
-

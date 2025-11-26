@@ -7,6 +7,7 @@ class ConstantsAPP:
         self.description = ""
         self.contact = "[Contact us - MIA group](%s)" % self.mia_url
 
+
 class UnivariatePage(ConstantsAPP):
     def __init__(self):
         super().__init__()
@@ -35,6 +36,8 @@ class UnivariatePage(ConstantsAPP):
             the nuances of the distribution, histograms and probability plots enable researchers to uncover hidden 
             trends and better understand the variability within their datasets.           
         """
+
+
 # Boxplot: This visualization provides a concise summary of the data’s distribution, showcasing key statistics such as the median, quartiles, and potential outliers. It is particularly effective for comparing multiple groups or datasets, offering a clear view of variability and central tendency.
 #
 # Violin Plot: Combining the features of a boxplot with a detailed representation of the data's density, the violin plot offers a richer visualization of the distribution's shape. It is especially useful for identifying multimodal distributions or subtle patterns within the dat
@@ -143,9 +146,7 @@ class PairwiseModelPerformanceComparisonPage(ConstantsAPP):
         """
 
         self.absolute_formula = r"""\text{Absolute} = M_{\text{Benchmark model}} - M_{\text{Baseline model}}"""
-        self.relative_formula = (
-            r"""\text{Relative} = \frac{M_{\text{Benchmark model}} - M_{\text{Baseline model}}}{M_{\text{Baseline model}}}"""
-        )
+        self.relative_formula = r"""\text{Relative} = \frac{M_{\text{Benchmark model}} - M_{\text{Baseline model}}}{M_{\text{Baseline model}}}"""
         self.ratio_formula = r"""\text{Ratio} = \frac{M_{\text{Benchmark model}}}{M_{\text{Baseline model}}}"""
 
         self.colorbar = {"decrease": "#ffbf69", "increase": "#90be6d"}

@@ -1,4 +1,3 @@
-import sys
 import os
 import re
 import sys
@@ -200,7 +199,7 @@ def check_path_access(path: str, name: str) -> None:
     try:
         os.makedirs(path, exist_ok=True)
     except (PermissionError, FileNotFoundError, OSError) as _:
-        logger.error(f'Cannot access {name}: {path}')
+        logger.error(f"Cannot access {name}: {path}")
         sys.exit(1)
 
 
@@ -334,7 +333,9 @@ def check_app_config(config: dict) -> None:
                 sys.exit(1)
             for prediction_name, src_path in predictions[dataset_name].items():
                 if prediction_name is None or src_path is None:
-                    logger.error(f"Not set predictions: {dataset_name}: {prediction_name}: {src_path} in the app.yml file")
+                    logger.error(
+                        f"Not set predictions: {dataset_name}: {prediction_name}: {src_path} in the app.yml file"
+                    )
                     sys.exit(1)
                 check_path_existence(src_path, prediction_name, dataset_name, "predictions")
 

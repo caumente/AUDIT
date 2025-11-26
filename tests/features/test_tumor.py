@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import numpy as np
 import pytest
 
@@ -12,7 +12,11 @@ from src.audit.features.tumor import TumorFeatures
 def mock_segmentation():
     """Fixture to create a mock 3D segmentation array for testing tumor features."""
     return np.array(
-        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [1, 1, 1], [0, 1, 1]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+        [
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [1, 1, 1], [0, 1, 1]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
     )
 
 
@@ -20,7 +24,11 @@ def mock_segmentation():
 def mock_segmentation_multiple_labels():
     """Fixture to create a mock 3D segmentation array with multiple labels."""
     return np.array(
-        [[[1, 0, 0], [0, 0, 0], [0, 0, 0]], [[1, 2, 2], [2, 2, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+        [
+            [[1, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[1, 2, 2], [2, 2, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
     )
 
 
@@ -28,7 +36,11 @@ def mock_segmentation_multiple_labels():
 def mock_zero_segmentation():
     """Fixture to create a mock 3D sequence array with all values defined to 0 for testing texture features."""
     return np.array(
-        [[[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0], [0, 0, 0]],]
+        [
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        ]
     )
 
 
@@ -196,7 +208,7 @@ def test_calculate_lesion_size_with_isotropic_spacing():
 
     # Check that the lesion size matches the total number of pixels in the segmentation
     assert result == {
-        "lesion_size_whole": 1000 * 2 ** 3
+        "lesion_size_whole": 1000 * 2**3
     }, "Result should match the total number of pixels for a full segmentation."
 
 
@@ -208,7 +220,7 @@ def test_calculate_lesion_size_with_non_isotropic_spacing():
 
     # Check that the lesion size is scaled correctly by the voxel spacing
     assert result == {
-        "lesion_size_whole": 1000 * 0.5 ** 2 * 4
+        "lesion_size_whole": 1000 * 0.5**2 * 4
     }, "Result should be scaled by the product of the voxel spacing."
 
 

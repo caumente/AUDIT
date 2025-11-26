@@ -6,11 +6,11 @@ from audit.visualization.constants import Dashboard
 constants = Dashboard()
 
 
-def aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set, template='light'):
+def aggregated_pairwise_model_performance(data, improvement_type, selected_metric, selected_set, template="light"):
     units = ""
     if improvement_type == "relative":
         units = "%"
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     fig = go.Figure()
     fig.add_trace(
@@ -32,11 +32,11 @@ def aggregated_pairwise_model_performance(data, improvement_type, selected_metri
     return fig
 
 
-def individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type, template='light'):
+def individual_pairwise_model_performance(data, baseline_model, benchmark_model, improvement_type, template="light"):
     units = ""
     if improvement_type == "relative":
         units = "%"
-    template = constants.dark_theme if template == 'dark' else constants.light_theme
+    template = constants.dark_theme if template == "dark" else constants.light_theme
 
     figures = []
     metric, set_ = data.metric.unique()[0], data.set.unique()[0]

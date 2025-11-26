@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def create_custom_cmap(theme='light'):
+def create_custom_cmap(theme="light"):
     """
     Create a custom colormap based on the selected theme.
     Args:
@@ -11,8 +11,8 @@ def create_custom_cmap(theme='light'):
     Returns:
         list: Plotly color scale.
     """
-    if theme == 'dark':
-        start_color = np.array([14, 17, 23]) / 255.0   # 0e1117
+    if theme == "dark":
+        start_color = np.array([14, 17, 23]) / 255.0  # 0e1117
         end_color = np.array([140, 140, 140]) / 255.0
         cmap_colors = np.linspace(start_color, end_color, 100)
     else:
@@ -28,7 +28,7 @@ def create_custom_cmap(theme='light'):
     return plotly_colorscale
 
 
-def add_grid_lines(fig, matrix_shape, theme='light'):
+def add_grid_lines(fig, matrix_shape, theme="light"):
     """
     Add grid lines to the heatmap figure.
     Args:
@@ -36,7 +36,7 @@ def add_grid_lines(fig, matrix_shape, theme='light'):
         matrix_shape (tuple): Shape of the matrix (rows, cols).
         theme (str): 'light' or 'dark' for color of grid lines.
     """
-    grid_color = "#dee2e6" if theme == 'dark' else "black"
+    grid_color = "#dee2e6" if theme == "dark" else "black"
 
     nrows, ncols = matrix_shape
     shapes = []
@@ -61,7 +61,7 @@ def add_grid_lines(fig, matrix_shape, theme='light'):
     fig.update_layout(shapes=shapes)
 
 
-def create_annotations(matrix, classes, normalized=True, theme='light'):
+def create_annotations(matrix, classes, normalized=True, theme="light"):
     """
     Annotate the heatmap with values.
     Args:
@@ -84,14 +84,14 @@ def create_annotations(matrix, classes, normalized=True, theme='light'):
                         y=classes[i],
                         xref="x1",
                         yref="y1",
-                        font=dict(color="black" if theme == 'light' else "white", size=30),
+                        font=dict(color="black" if theme == "light" else "white", size=30),
                         showarrow=False,
                     )
                 )
     return annotations
 
 
-def update_axes(fig, classes, theme='light'):
+def update_axes(fig, classes, theme="light"):
     """
     Update the x and y axes for the heatmap.
     Args:
@@ -99,7 +99,7 @@ def update_axes(fig, classes, theme='light'):
         classes (list): List of class labels.
         theme (str): 'light' or 'dark' for color of axis labels.
     """
-    text_color = 'black' if theme == 'light' else '#dee2e6'
+    text_color = "black" if theme == "light" else "#dee2e6"
 
     fig.update_xaxes(
         tickangle=0,
@@ -124,7 +124,7 @@ def update_axes(fig, classes, theme='light'):
     )
 
 
-def plt_confusion_matrix(matrix, classes, theme='light', normalized=True):
+def plt_confusion_matrix(matrix, classes, theme="light", normalized=True):
     """
     Plotly version of the confusion matrix visualization with custom colormap and grid lines.
     Args:
@@ -150,7 +150,7 @@ def plt_confusion_matrix(matrix, classes, theme='light', normalized=True):
             zmax=np.max(matrix),
             colorbar=dict(
                 thickness=20,
-                outlinecolor="black" if theme == 'light' else "#dee2e6",
+                outlinecolor="black" if theme == "light" else "#dee2e6",
                 outlinewidth=2,
                 ticks="outside",
             ),
@@ -172,8 +172,8 @@ def plt_confusion_matrix(matrix, classes, theme='light', normalized=True):
 
     # Set layout properties
     fig.update_layout(
-        plot_bgcolor="white" if theme == 'light' else "#0e1117",
-        paper_bgcolor="white" if theme == 'light' else "#0e1117",
+        plot_bgcolor="white" if theme == "light" else "#0e1117",
+        paper_bgcolor="white" if theme == "light" else "#0e1117",
         width=600,
         height=600,
         xaxis=dict(showgrid=False, zeroline=False),
@@ -221,7 +221,7 @@ def plt_confusion_matrix_plotly(matrix, classes, normalized=True):
         fig.update_layout(shapes=shapes)
 
     # Create the custom color scale
-    custom_blues_cmap = create_custom_cmap('light')
+    custom_blues_cmap = create_custom_cmap("light")
 
     classes_to_remove = []
     x = matrix.copy()
@@ -327,7 +327,6 @@ def plt_confusion_matrix_plotly_dark(matrix, classes, normalized=True):
         go.Figure: Plotly figure object.
     """
 
-
     def add_grid_lines_dark(fig, matrix_shape):
         nrows, ncols = matrix_shape
         shapes = []
@@ -352,7 +351,7 @@ def plt_confusion_matrix_plotly_dark(matrix, classes, normalized=True):
         fig.update_layout(shapes=shapes)
 
     # Create the custom color scale
-    custom_dark_cmap = create_custom_cmap('dark')
+    custom_dark_cmap = create_custom_cmap("dark")
 
     # Process matrix (removing empty classes if needed)
     classes_to_remove = []

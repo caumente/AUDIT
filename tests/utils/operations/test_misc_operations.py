@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 from src.audit.utils.commons.strings import add_prefix_dict
 from src.audit.utils.commons.strings import capitalizer
 from src.audit.utils.commons.strings import pretty_string

@@ -187,7 +187,8 @@ class TumorFeatures:
         # calculating number of pixels per label. If some of them does not exist, will be defined to 0 by default
         number_pixels = self.count_tumor_pixels()
         number_pixels.update(
-            {label.lower(): 0 for label in self.mapping_names.values() if label.lower() not in number_pixels})
+            {label.lower(): 0 for label in self.mapping_names.values() if label.lower() not in number_pixels}
+        )
 
         # removing background from labels
         number_pixels.pop("bkg", None)
@@ -201,7 +202,7 @@ class TumorFeatures:
     def calculate_tumor_distance(self, brain_centre_mass):
         tumor_location = {}
 
-        if np.isnan(list(brain_centre_mass)).any()or not bool(brain_centre_mass):
+        if np.isnan(list(brain_centre_mass)).any() or not bool(brain_centre_mass):
             logger.warning("Tumor location calculation failed. Assigning (nan, nan, nan)")
             return {f"{k}_tumor_location": np.nan for k in self.tumor_centre_mass_per_label}
 
@@ -262,5 +263,5 @@ class TumorFeatures:
             **self.number_pixels,
             **self.lesion_size,
             **self.tumor_slices,
-            **self.position_tumor_slices
+            **self.position_tumor_slices,
         }

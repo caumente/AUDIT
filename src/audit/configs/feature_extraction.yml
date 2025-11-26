@@ -20,12 +20,6 @@ labels:
   ENH: 1
   NEC: 2
 
-# metadata information available. ID column must be present in all metadata files
-metadata:
-  BraTS2020:
-    name_mapping: '/home/usr/AUDIT/BraTS2020/name_mapping.csv'
-    survival_info: '/home/usr/AUDIT/BraTS2020/survival_info.csv'
-
 # List of features to extract
 features:
   statistical: true

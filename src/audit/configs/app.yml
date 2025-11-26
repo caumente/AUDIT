@@ -12,11 +12,6 @@ labels:
   ENH: 1
   NEC: 2
 
-# metadata cols from the features extracted
-metadata_cols:
-  - 'age'
-  - 'survival_days'
-
 # Root path for datasets, features extracted, and metrics extracted
 datasets_path: './datasets'  # '/home/usr/AUDIT/datasets'
 features_path: './outputs/features'  # '/home/usr/AUDIT/outputs/features'

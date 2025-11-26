@@ -417,21 +417,22 @@ In our case, we clicked on the patient Indiana-03062-100.
 
 ## 7. Perform inference
 
-In addition to analyzing data distributions, studying correlations, identifying anomalous subjects, and many other 
-analyses, one of AUDIT's main functionalities is the evaluation of AI medical segmentation models. To perform inference, 
-we used the models presented at MICCAI 2025, specifically the top 4 ranked models in the Adult Glioma Segmentation 
-(Pre & Post-Treatment) challenge.
+Ademas de analizar la districucion de los datos, estudiar correlaciones, sujetos anomalos y muchas otras cosas, una de las
+funcionalidades principales de AUDIT es la evaluacion de modelos de segmentacion. Para realizar la inferencia, hemos 
+hecho uso de los modelos presentados en MICCAI 2025, especificamente de los 4 mejor rankeados en la competicion 
+Adult Glioma Segmentation (Pre & Post-Treatment). 
 
-For this purpose, we leveraged the [brats](https://github.com/BrainLesion/BraTS) library, which contains the Docker 
-containers for each of the models:
+Para ello, nos apoyamos en la libreria [brats](https://github.com/BrainLesion/BraTS) la cual contiene los contenedores 
+Docker de cada uno de los modelos:
 
 2025	1st	Ishika Jain, et al.	N/A	❌	BraTS25_1
 2025	2nd	Qu Lin, et al.	N/A	✅	BraTS25_2
 2025	3rd	Liwei Jin, et al.	N/A	✅	BraTS25_3A
 2025	3rd	Adrian Celaya, et al.	N/A	❌	BraTS25_3B
 
-After performing inference on the 5 subdatasets (Duke, Indiana, Missouri, UCSD, and UCSF) with each of the 4 models, 
-your project structure should look like the following, for example for subject Duke-02060-100:
+
+Tras realizar la inferencia sobre los 5 subdatasets (Duke, Indiana, Missouri, UCSD, and UCSF) con cada uno de los 4 modelos,
+deberemos tener una estructura de carpetas como la siguiente, por ejemplo para el paciente Duke-02060-100
 
 ```
 brats2024_project/
@@ -457,16 +458,17 @@ brats2024_project/
 ```
 
 !!! danger "Important"
-    The suffixes *_seg* and *_pred* are reserved keywords within AUDIT and are necessary for metric calculation.
+    Es importante tener en cuenta que las terminaciones *_seg* y *_pred* son palabras reservada dentro de AUDIT y son necesarias
+    para poder realizar el calculo de las metricas.
 
 ## 8. Run metric extraction
 
-Now that the datasets are ready, let's configure metric extraction. Just as we did previously, we now need to configure 
-the file named `metric_extraction.yaml`.
+Now that the datasets are ready, let’s configure the metric extraction. al igual que hicimos anteriormente, ahora necesitamos
+configurar el archivo de configuracion llamado `metric_extraction.yaml`. 
 
-Here we provide the config file needed to extract metrics for the Duke dataset. Paths to datasets, sequence names, 
-label mappings, metrics to compute, and output paths need to be defined. The same configuration file should be prepared 
-for each of the other datasets.
+Here we provide the config file needed para extraer las metricas del dataset Duke. In it, paths to datasets, sequences names, labels mapping, 
+features to extract, and output paths need to be defined. El mismo archivo de configuracion deberia prepararse para cada uno de los otros
+datasets.
 
 ```yaml
 # Path to the raw dataset
@@ -519,17 +521,14 @@ auditapp metric-extraction --config /home/usr/projects/configs/metric_extraction
 After execution, `/home/usr/brats2024_project/outputs/metrics` will contain the extracted metrics for all the datasets.
     
 
-!!! danger "Important"
-    All paths must be absolute. Otherwise, AUDIT may fall back to its internal default config files.
-
 ## 9. Launch the dashboard (with predictions)
 
-Now that we have generated all predictions and extracted both features and metrics, we can relaunch the dashboard as 
-we did in step 6. However, in this case we must include new lines in our configuration file to enable reading of the
-predictions.
+Ahora que hemos generado todas las predicciones, tenemos las features y metricas extraidas, podemos relanzar el dashboard
+de nuevo tal y como se hizo en el paso 6. Sin embargo, en este caso debemos incluir nuevas lineas en nuestro archivo de configuracion
+para que sea capaz de leer las predicciones. 
 
-Here we provide the remaining portion of the configuration file started in section 6. Users should concatenate this 
-information with the previous configuration.
+Aqui proporcionamos la parte restante del archivo de configuracion iniciado en la seccion 6. Los usuarios deberan 
+concatenar la informacion de ambos.
 
 ```yaml
 # Paths for metric extraction CSV files
@@ -569,7 +568,8 @@ predictions:
     BraTS2025_3B: "${datasets_path}/UCSF/UCSF_seg/BraTS25_3B"
 ```
 
-Launch the app again with:
+Relancemos la app nuevamente:
+
 
 ```bash
 auditapp run-app --config /home/usr/projects/configs/app.yaml
@@ -577,105 +577,117 @@ auditapp run-app --config /home/usr/projects/configs/app.yaml
 
 ## 10. Model evaluation
 
-AUDIT presents different analysis modes to evaluate model behavior, from high-level granularity down to fine-grained 
-details at the patient and region level. Some of the analyses we can perform include the following:
+AUDIT presenta diferentes analysis modes para analizar el comportamiento de los modelos, desde granularidades mas 
+altas hasta detalles mas finos a nivel de paciente y de region. Algunos de los analisis que podemos realizar son los 
+siguientes
 
 ### 10.1 Segmentation error matrix
 
-The segmentation error matrix allows you to analyze in detail which regions your model confuses. It is a pseudo-confusion 
-matrix normalized at the ground truth level. For more details about how this analysis mode works, consult the 
-[documentacion](./../analysis_modes/segmentation_error.md).
+La matriz de segmentacion te permite analizar en detalle cuales de las regiones son las que confunde tu modelo. Es una
+pseudo matriz de confusion normalizada a nivel de ground truth. Para mas detalles acerca de como funciona este analysis mode
+consultar la [documentacion](./../analysis_modes/segmentation_error.md).
+
 
 > ![Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_l.png#only-light)
 > ![Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_d.png#only-dark)
 > *Figure 3:* Segmentation error matrix para el dataset Duke y el modelo BraTS2025_1.
 
-The matrix is analyzed at a global level, encompassing all errors made by the model at a high level throughout the 
-entire dataset. The main problem of the model is confusing Background with the SNFH region. Therefore, developers 
-should focus on finding strategies to minimize this weakness. The next most frequent confusion is predicting Background 
-when the actual label is RC. However, it's important to note that this evaluation is done as a percentage normalized 
-at the actual region level, so it must be interpreted carefully.
+La matriz esta analizada a nivel global, es decir, comprende todos los errores cometidos por el modelo a alto nivel
+a lo largo de todo el conjunto de datos. El principal problema que tiene el modelo es confundie el Background con la
+region SNFH. Por lo tanto, los desarrolladores deberian poner enfasis en buscar estrategias para minimizar este punto 
+debil del modelo. La siguiente region mas frecuente que confunde el modelo es el predecir como Background lo que en 
+realidad es RC. Sin embargo, hay que tener en cuenta que esta evaluacion se esta haciendo en porcentaje normalizada 
+a nivel de actual region, con lo que hay que entenderlo cuidadosamente.
 
-If we focus on a specific subject, for example patient Duke-02060-100, we can analyze whether this same pattern holds 
-in absolute terms:
+Si nos centramos en uno de los sujetos concretos, por ejemplo el paciente Duke-02060-100, podemos analizar si ese mismo
+patron que se cumple en terminos absolutos:
 
 > ![Segmentation error matrix para el paciente Duke-02060-100 del dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_patient_l.png#only-light)
 > ![Segmentation error matrix para el paciente Duke-02060-100 del dataset Duke y el modelo BraTS2025_1](../assets/tutorials/brats2024_segmentation_matrix_patient_d.png#only-dark)
-> *Figure 4:* Segmentation error matrix for patient Duke-02060-100 from the Duke dataset and BraTS2025_1 model.
+> *Figure 4:* Segmentation error matrix para el paciente Duke-02060-100 del dataset Duke y el modelo BraTS2025_1.
 
-The behavior of confusing Background and SNFH that we observed at the dataset level also holds in absolute terms for 
-this specific patient. A total of 2,905 voxels were labeled as Background when they were actually voxels labeled as 
-tumoral by the medical experts (SNFH). However, for this specific patient, there are a total of 2,106 voxels that were 
-labeled as Background again, but actually belonged to the ET region.
 
-This is why it's crucial to understand not only the general behavior of the model, but also the specific cases. Now 
-that we know that for this specific patient the ET region was incorrectly labeled, we should analyze in detail the MRI 
-characteristics of this patient to see if there is any peculiarity that makes that region especially difficult to segment.
+El comportamiento de confundir Background y SNFH que veiamos que tenia el modelo en terminos generales a nivel de dataset
+tambien se cumple en terminos absolutos para este paciente en concreto. Un total de 2,905 voxeles fueron etiquetados
+como Bakground cuanto en realidad eran voxeles etiquetados como tumorales por el medico (SNFH). sin embargo, para este paciente
+concreto, hay un total de 2,106 voxeles que fueron etiquetados como background nuevamente, pero que pertenecian a la 
+region ET.
+
+Es por ello que es muy importante entender, no solo los comportamiento generales del modelo, si no los particulares. Y 
+ahora que ya conocemos que para este paciente concreto la region ET fue etiquetada incorrectamente, deberiamos analizar
+en detalle las caracteristicas de la MRI de este paciente para ver si existe alguna particularidad en el que haga que esa region sea
+especialmente dificil de segmentar.
+
 
 ### 10.2 Single model performance
 
-Analyzing model performance as a function of different characteristics allows us to understand whether our model has 
-any bias. For example, we can answer questions such as: does my model perform better when predicting tumors that are 
-far from the brain's center of mass, or does our model predict better for tumors belonging to a specific pathology? 
-For more details about how this analysis mode works, consult the [documentation](./../analysis_modes/single_model.md).
+El analizar el performance del modelo en funcion de diferentes caracteristicas nos permite entender si nuestro modelo
+tiene algun tipo de sesgo. Por ejemplo, podemos responder a preguntas tales como, es mi modelo mejor prediciendo tumores
+que se encuentras lejos del centro de masas del cerebro, o predice mejor nuestro modelo aquellos tumores pertenecientes
+a alguna patologia concreta? Para mas detalles acerca de como funciona este analysis mode consultar 
+la [documentacion](./../analysis_modes/single_model.md).
 
-Ideally, what we would expect to see is a plot where we don't visualize any specific trend, indicating that there is 
-no bias. That is precisely what we observe in the following figure:
+Idealmente, lo que esperariamos tener es un diagrama en el que no visualicemos ninguna tendencia especifica, esto indicara
+que no existe sesgo alguno. Eso es precisamente es lo que observamos en la figura sigiente
 
 > ![Single model performance analysis el modelo BraTS2025_1](../assets/tutorials/brats2024_single_model_performance_l.svg#only-light)
 > ![Single model performance analysis el modelo BraTS2025_1](../assets/tutorials/brats2024_single_model_performance_d.svg#only-dark)
-> *Figure 5:* Performance analysis of the BraTS2025_1 model as a function of tumor location for each subset.
+> *Figure 5:* Analisis del comportamiento del modelo BraTS2025_1 en funcion de la localizacion del tumor para cada uno de los subconjuntos
 
-As we can see, the model has been trained with data that is robust enough in terms of tumor location not to have 
-problems with different locations.
+Como vemos, el modelo ha sido entrenado con unos datos lo suficientemente robustos en terminos de localizacion del tumor
+como para no tener problemas con diferentes localizaciones.
+
 
 !!! note
-    We recommend that users conduct their own analyses and draw their own conclusions, as certain correlations may not 
-    be linear, and transformations such as logarithmic could reveal hidden trends.
+    Recomendamos que el usuario realice sus propios analisis y obtengas sus propias conclusiones, ya que ciertas correlaciones
+    podrian no ser lineales, y transformaciones tales como la logaritmica podrian mostras tendencias ocultas.
+
 
 
 ### 10.3 Pair-wise model performance
 
-The BraTS competition awarded third place to two different models, here called BraTS25_3A and BraTS25_3B on the private 
-test set. We don't have access to it and are evaluating the models on the training set itself. However, this is 
-sufficient for our demonstrative purposes.
+La competicion de BraTS adjudico el tercer puesto a dos modelos diferentes, aqui llamados BraTS25_3A y BraTS25_3A sobre
+el conjunto de test privado. Nosotros no disponemos de ello, y estamos evaluando los modelos sobre el propio conjunto 
+de entrenamiento. Sin embargo, esto nos es suficientes para nuestro proposito demostrativo.
 
 #### 10.3.1 Pair-wise model performance - Aggregated view
 
-Let's make a comparison taking the BraTS25_3A model as the baseline model and BraTS25_3B as the benchmark. In our case,
-having the dataset divided by Site, we can analyze the differences individually. We will use the Dice metric as it is 
-the most widely reported in medical segmentation problems.
+Hagamos una comparacion tomando como baseline model el modelo BraTS25_3A y como benchmark el BraTS25_3A. En nuestro caso,
+al tener el dataset dividido por Site, podemos analizar las diferencias invididualmente. Usaremos la metrica Dice por
+ser la mas ampliamente reportada en problemas de segmentacion medica.
 
 > ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_agg_pairwise_model_performance_l.png#only-light)
 > ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_agg_pairwise_model_performance_d.png#only-dark)
-> *Figure 6:* Pairwise model performance comparison between BraTS3A and BraTS_3B models for the Duke subset.
+> *Figure 6:* Pairwise model performance comparison entre los modelos BraTS3A y BraTS_3B para el subnconjunto Duke.
 
-On average, the BraTS 3B model improved the performance of the BraTS 3A model by up to 1.42% for the Dice metric. The 
-improvement came mainly from better segmentation of the RC region, and to a lesser extent from the NETC and ET regions. 
-However, the model worsened its performance for the SNFH region by around 1%.
+En promedio, el modelo BraTS 3B consiguio mejorar el perfomance del modelo BraTS 3A hasta un 1.42% para la metrica Dice.
+La mejora vino propiciada principalmente por una mejor segmentacion de la region RC, y en menor medida por las regiones
+NETC y ET. En cambio, el modelo empeoro su rendimiento para la region SNFH entorno a un 1%.
 
-AUDIT also provides an estimation of whether the differences are statistically significant. For example, if we select 
-the Missouri subset, we can verify that the average differences between both models are 0.09%, apparently a minimal 
-difference. When performing the Wilcoxon signed-rank statistical test due to the violation of parametric assumptions, 
-it is verified that there are no significant differences to reject the null hypothesis. Therefore, on this specific 
-subset, the behavior of both models is similar.
+AUDIT tambien propociona una estimacion de si las diferencias son estadisticamente significativas. Por ejemplo, si elegimos
+el subconjunto Missouri, podemos comprobar que las diferencias promedio entre ambos modelos son del 0.09%, es decir,
+aparentemente una diferencia minima. Al realizar el test estadisto de Wilcoxon signed-rank debido a la violacion de las
+asunciones parametricas, se comprueba que no existen diferencias significativas para rechazar la hipotesis nula. Con lo que
+sobre este subconjunto especifico, el comportamiento de ambos modelos es similar.
 
 > ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_statistical_test_l.png#only-light)
 > ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_statistical_test_d.png#only-dark)
-> *Figure 7:* Statistical test results between models 3A and 3B to verify if the differences are statistically significant.
+> *Figure 7:* Resultados del test estadistico entre los modelos 3A y 3B para comprobar si las diferencias son estasiticamente significativas.
 
 
 #### 10.3.4 Pair-wise model performance - Disaggregated view
 
-In general, artificial intelligence models in the field of medical imaging are analyzed at a high level, comparing 
-general metrics such as mean or median, and sometimes not even providing a measure of variance. This is why it's 
-essential to understand how the model behaves at the patient level, why the model fails in some specific cases, 
-and to ensure that the new version of the model we develop not only achieves better average results but also 
-generalizes well and doesn't make significant errors on certain patients that we were already able to segment correctly.
+En general los modelos de inteligencia artificial en el campo de la imagen medica se analizan a alto nivel, es decir,
+comparando metricas generales tales como la media o la mediana y a veces ni si quiera se proporciona una medida
+de la varianza. Es por ello que es fundamental entender a nivel paciente como se comporta el modelo, porque para algunos
+casos especificos el modelo falla, estar seguros que la nueva version del modelo que desarrollamos no solo obtiene mejores
+resultados promedio si no que generaliza bien y no comete errores importantes en ciertos pacientes que ya eramos capaces
+de segmentar correctamente.
 
-With AUDIT we can analyze model performance at the patient level. We can obtain a Top-K patients to analyze either by 
-name, by baseline model performance, benchmark model performance, sort ascending or descending, etc. Let's compare the 
-performance of models BraTS_3A and BraTS_3B on the UCSF subset.
+Con AUDIT podemos analizar a nivel paciente el rendimiento de 
+los modelos. Podemos obtener un Top-K paciente a analizar ya sea por nombre, por rendimiento del baseline model, del 
+benchmark model, ordenar ascentende o descendentemente, etc. Comparemos el rendimiento de los modelos 3A y 3B sobre
+el subset UCSF.
 
 
 > ![Pairwise model performance analysis el modelo BraTS2025_3A y 3B](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-light)
@@ -683,17 +695,19 @@ performance of models BraTS_3A and BraTS_3B on the UCSF subset.
 > *Figure 8:* Resultados del de la comparacion entee los modelos 3A y 3B a nivel sujeto.
 
  
-As can be observed, model B, our benchmark, has clearly improved the results obtained by baseline model A in cases 
-UCSF-00005-100 and UCSF-00005-101, going from values around 0.70 to values of 0.94. This same exercise should be done 
-for those patients for which performance was poor, to understand what the weaknesses of our model are.
+Como puede observarse, el modelo B, nuestro benchmark, a mejorado claramente el resultado obtenido por el modelo baseline A
+en los casos UCSF-00005-100 y UCSF-00005-101, pasando de valores de entorno a 0.70 a valores de 0.94. Este mismo ejercicio
+deberia hacerse para aquellos pacientes para los cuales se ha tenido uin pero rendimiento, y asi entender cuales son
+las debilidades de nuestro modelo. 
 
 
 ---
 
 ## 11. Conclusions
 
-Throughout this tutorial we have presented some of the features that AUDIT provides. It not only allows analyzing 
-differences in distributions, but its strength lies in model evaluation and low-level comparison—analyses that often 
-go unnoticed when presenting results in the field of medical imaging.
+A lo largo de este tutorial hemos presentado alguna de las caracteristicas que proporciona AUDIT. No solo permite
+analizar diferencias en distribuciones si no que su punto fuerte es la evaluacion de modelo y la comparativa a bajo nivel, 
+analisis que a medida pasan desapercibidos cuando se presentan resultados en el campo de la imagen medica.
+
 
 

@@ -1,95 +1,150 @@
-[//]: # (::: src.features.statistical.StatisticalFeatures)
-
-
 The `StatisticalFeatures` class provides a convenient way to compute several common statistical metrics from a given
 array of data.
 
-### Overview
+---
 
-The class utilizes **NumPy** for efficient numerical operations and **SciPy** for computing first-order statistical
+## __Overview__
+
+This class utilizes **NumPy** for efficient numerical operations and **SciPy** for computing first-order statistical
 features. By encapsulating these features in a class, users can easily compute various statistical
 properties of a dataset with minimal boilerplate code.
 
 The following statistical features are available:
 
-- **Maximum intensity**: The highest value in the MRI.
-- **Minimum intensity**: The lowest value in the MRI.
-- **Mean intensity**: The average value of the MRI.
-- **Median intensity**: The middle value of the MRI when sorted.
-- **Standard deviation intensity**: A measure of the amount of variation or dispersion of the values.
-- **Range intensity**: The difference between the maximum and minimum values.
-- **Skewness**: A measure of the asymmetry of the distribution of pixel values.
+- **Maximum intensity**: The highest value in the MRI.  
+- **Minimum intensity**: The lowest value in the MRI.  
+- **Mean intensity**: The average value of the MRI.  
+- **Median intensity**: The middle value of the MRI when sorted.  
+- **Standard deviation intensity**: A measure of the amount of variation or dispersion of the values.  
+- **Range intensity**: The difference between the maximum and minimum values.  
+- **Skewness**: A measure of the asymmetry of the distribution of pixel values.  
+- **Kurtosis**: A measure of the "tailedness" of the intensity distribution.
 
-### Methods
+---
 
-#### `__init__()`
+## __Methods__
 
-**Description**:  
-The constructor method initializes the `StatisticalFeatures` object by accepting a 3D magnetic resonance image in the
-form of a NumPy array. Once initialized, the class provides several methods to compute various statistical features from
-the MRI. Notice that, given the background of MRI images usually is equal to 0, those values should be removed to not
-interfere with the computations.
+### `__init__`
 
-**Parameters**:
+Constructs all the necessary attributes for the StatisticalFeatures object.
 
-- `sequence` (`np.ndarray`): A 3D MRI in form of NumPy array from which statistical features will be calculated.
+**Parameters**  
 
-----------------------------  
+- **sequence** (`np.ndarray`): A 3D NumPy array representing the MRI sequence from which statistical features are to be computed.
 
-#### `get_max_intensity()`
+---
 
-Returns (`float`): The maximum intensity value in the MRI.
+### `get_max_intensity`
 
-----------------------------  
+Computes the maximum intensity value in the sequence.
 
-#### `get_min_intensity()`
+**Returns**  
 
-Returns (`float`): The minimum intensity value in the MRI.
+- `float`: The maximum intensity value in the sequence.
 
-----------------------------  
+---
 
-#### `get_mean_intensity()`
+### `get_min_intensity`
 
-Returns (`float`): The mean intensity value in the MRI.  
+Computes the minimum intensity value in the sequence.
 
-----------------------------  
+**Returns**  
 
-#### `get_median_intensity()`
+- `float`: The minimum intensity value in the sequence.
 
-Returns (`float`): The median intensity value in the MRI.
+---
 
-----------------------------  
+### `get_mean_intensity`
 
-#### `get_std_intensity()`
+Computes the mean intensity value in the sequence.
 
-Returns (`float`): The standard deviation of the of intensity values in the MRI.
+**Returns**  
 
-----------------------------  
+- `float`: The mean intensity value in the sequence.
 
-#### `get_range_intensity()`
+---
 
-Returns (`float`): the range of intensity values in the MRI (i.e., the difference between the maximum and minimum values).
+### `get_median_intensity`
 
-----------------------------  
+Computes the median intensity value in the sequence.
 
-#### `get_skewness()`
+**Returns**  
 
-Returns (`float`): The skewness of the intensity values in the MRI, a measure of asymmetry in the distribution.
+- `float`: The median intensity value in the sequence.
 
-----------------------------  
+---
 
-#### `extract_features()`
+### `get_percentile_n`
 
-Returns (`dict`): All statistical features. 
+Computes the n-th percentile of the intensity values in the sequence.
 
-  - `max_intensity`: Maximum intensity value in the MRI.
-  - `min_intensity`: Minimum intensity value in the MRI.
-  - `mean_intensity`: Mean intensity value in the MRI.
-  - `median_intensity`: Median intensity value in the MRI.
-  - `std_intensity`: Standard deviation of intensity values in the MRI.
-  - `range_intensity`: Range of intensity values in the MRI.
-  - `skewness`: Skewness of the intensity values in the MRI.
+**Parameters**  
 
-----------------------------  
+- **n** (`float`): The percentile value to compute (e.g., `10` or `90`).
 
+**Returns**  
 
+- `float`: The computed n-th percentile intensity.
+
+---
+
+### `get_std_intensity`
+
+Computes the standard deviation of intensity values in the sequence.
+
+**Returns**  
+
+- `float`: The standard deviation of intensity values.
+
+---
+
+### `get_range_intensity`
+
+Computes the range of intensity values in the sequence (max - min).
+
+**Returns**  
+
+- `float`: The range of intensity values in the sequence.
+
+---
+
+### `get_skewness`
+
+Computes the skewness of the intensity values in the sequence.
+
+**Returns**  
+
+- `float`: The skewness of the intensity distribution.
+
+---
+
+### `get_kurtosis`
+
+Computes the kurtosis of the intensity values in the sequence.
+
+**Returns**  
+
+- `float`: The kurtosis of the intensity distribution.
+
+---
+
+### `extract_features`
+
+Computes and returns all statistical metrics as a dictionary.
+
+**Returns**  
+
+A dictionary containing the following statistical metrics:
+
+  - `max_intensity`: Maximum intensity value in the MRI.  
+  - `min_intensity`: Minimum intensity value in the MRI.  
+  - `mean_intensity`: Mean intensity value in the MRI.  
+  - `median_intensity`: Median intensity value in the MRI.  
+  - `10th_percentile_intensity`: 10th percentile intensity.  
+  - `90th_percentile_intensity`: 90th percentile intensity.  
+  - `std_intensity`: Standard deviation of intensity values.  
+  - `range_intensity`: Range of intensity values.  
+  - `skewness`: Skewness of the intensity values.  
+  - `kurtosis`: Kurtosis of the intensity values.
+
+---

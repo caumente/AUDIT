@@ -1,10 +1,9 @@
-[//]: # (::: src.features.texture.TextureFeatures)
-
-
 The `TextureFeatures` class provides an efficient mechanism for calculating second-order texture features from a given
 3D magnetic resonance image (MRI).
 
-### Overview
+---
+
+## __Overview__
 
 This class utilizes **skimage** for calculating the gray level co-occurrence matrix (GLCM) and its corresponding texture 
 features such as contrast, homogeneity, and energy. The texture features extracted from each 2D plane of a 3D MRI 
@@ -22,45 +21,46 @@ The following texture features are available:
 - **Energy**: The square root of ASM, indicating the texture’s level of orderliness.
 - **Correlation**: A measure of how correlated a pixel is to its neighbor across the whole image.
 
-### Methods
+---
 
-#### `__init__()`
+## __Methods__
 
-**Description**:
+### `__init__`
 
-The constructor initializes a `TextureFeatures` object by accepting a 3D MRI sequence and an optional parameter to 
-remove empty planes. The class will compute texture features across 2D planes, making use of GLCM-based calculations.
+Constructs all the necessary attributes for the TextureFeatures object.
 
-**Parameters**:
+**Parameters**  
 
-- sequence (np.ndarray): A 3D MRI image in the form of a NumPy array from which texture features will be calculated.
-- remove_empty_planes (bool): A flag to indicate whether empty planes (e.g., non-brain areas) should be removed from the MRI sequence. Defaults to False. 
+- **sequence** (`np.ndarray`): A 3D NumPy array representing the MRI image.  
+- **remove_empty_planes** (`bool`, default: `False`): Whether to remove empty (non-brain) planes before processing.
 
-----------------------------  
+---
 
-#### `compute_texture_values()`
+### `compute_texture_values`
 
-**Description**:
-Computes the specified texture feature for each 2D plane in the 3D image. The GLCM is calculated for each 2D slice, and the texture feature is extracted using graycoprops from the skimage.feature module.
+Computes texture values for each 2D plane in the 3D image array.
 
-**Parameters**:
+**Parameters**  
 
-- `texture` (`str`): The texture feature to compute (e.g., "contrast", "homogeneity"). Defaults to "contrast".
+- **texture** (`str`): The texture feature to compute (default is `"contrast"`).
 
-Returns (`np.ndarray`): An array of texture values for each 2D plane in the 3D MRI sequence.
+**Returns**  
 
-----------------------------  
+- `np.ndarray`: An array of texture values for each 2D plane in the image.
 
-#### `extract_features()`
-Description:
+---
 
-Extracts all specified texture features from the MRI image. This method iterates through the given list of texture features, computing the mean and standard deviation for each one across all 2D planes in the MRI sequence.
+### `extract_features`
 
-**Parameters**:
+Extracts texture features from the MRI image by calculating statistical summaries for multiple texture metrics.
 
-- `textures` (`list[str]): A list of texture features to compute (e.g., 'contrast', 'energy'). If not provided, the 
-    default set includes: 'contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation'
+**Parameters**  
 
-Returns (`dict`): A dictionary where the keys represent the texture feature names, and the values represent the mean 
-and standard deviation for each feature.
+- **textures** (`list[str]`, optional): A list of texture features to compute (e.g., `'contrast'`, `'energy'`).  
+  Defaults to `['contrast', 'dissimilarity', 'homogeneity', 'ASM', 'energy', 'correlation']`.
 
+**Returns**  
+
+A dictionary where keys represent texture feature names, and values represent the mean and standard deviation for each feature.
+
+---

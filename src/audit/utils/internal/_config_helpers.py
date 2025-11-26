@@ -1,6 +1,198 @@
 import sys
 import os
+import re
+import sys
+from pathlib import Path
+
+import yaml
 from loguru import logger
+
+
+def load_config_file(path: str) -> dict:
+    """
+    Loads a configuration file in YAML format and returns its contents as a dictionary.
+
+    Args:
+        path: The relative file root_dir to the YAML configuration file.
+
+    Returns:
+        dict: The contents of the YAML file as a dictionary.
+    """
+
+    def replace_variables(config, variables):
+        def replace(match):
+            return variables.get(match.group(1), match.group(0))
+
+        for key, value in config.items():
+            if isinstance(value, str):
+                config[key] = re.sub(r"\$\{(\w+)\}", replace, value)
+            elif isinstance(value, dict):
+                replace_variables(value, variables)
+
+    # Resolve the absolute root_dir based on the current file's path
+    base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust the depth according to your project
+    absolute_path = base_dir / path
+
+    # Validate if the file exists
+    if not absolute_path.exists():
+        raise FileNotFoundError(f"Config file not found: {absolute_path}")
+
+    # Load the YAML file
+    with open(absolute_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    # Replace variables in the YAML configuration
+    variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
+    replace_variables(config, variables)
+
+    return config
+
+
+def init_app_yaml(dest: Path):
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    yaml_content = """\
+# Sequences available. First of them will be used to compute properties like spacing
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
+
+# Mapping of labels to their numeric values
+labels:
+  BKG: 0
+  EDE: 3
+  ENH: 1
+  NEC: 2
+
+# Root paths
+datasets_path: './datasets'
+features_path: './outputs/features'
+metrics_path: './outputs/metrics'
+
+# Paths for raw datasets
+raw_datasets:
+  dataset_1: "${datasets_path}/dataset_1/images"
+  dataset_2: "${datasets_path}/dataset_2/images"
+
+# Paths for feature extraction CSV files
+features:
+  dataset_1: "${features_path}/dataset_1.csv"
+  dataset_2: "${features_path}/dataset_2.csv"
+
+# Paths for metric extraction CSV files
+metrics:
+  dataset_1: "${metrics_path}/dataset_1.csv"
+  dataset_2: "${metrics_path}/dataset_2.csv"
+
+# Paths for model predictions
+predictions:
+  dataset_1:
+    modelA: "${datasets_path}/dataset_1/seg/modelA"
+    modelB: "${datasets_path}/dataset_1/seg/modelB"
+  dataset_2:
+    modelA: "${datasets_path}/dataset_2/seg/modelA"
+    modelB: "${datasets_path}/dataset_2/seg/modelB"
+"""
+    with open(dest, "w") as f:
+        f.write(yaml_content)
+
+
+def init_feature_extraction_yaml(dest: Path):
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    yaml_content = """\
+# Paths to all the datasets
+data_paths:
+  dataset_1: '/path/to/dataset_1/images'
+  dataset_2: '/path/to/dataset_2/images'
+
+# Sequences available
+sequences:
+  - '_t1'
+  - '_t2'
+  - '_t1ce'
+  - '_flair'
+
+# Mapping of labels to their numeric values
+labels:
+  BKG: 0
+  EDE: 3
+  ENH: 1
+  NEC: 2
+
+# List of features to extract
+features:
+  statistical: true
+  texture: true
+  spatial: true
+  tumor: true
+
+# Longitudinal study settings
+longitudinal:
+  dataset_2:
+    pattern: "_"
+    longitudinal_id: 1
+    time_point: 2
+
+# Path where extracted features will be saved
+output_path: './outputs/features'
+logs_path: './logs/features'
+
+# Other settings
+cpu_cores: 8
+"""
+    with open(dest, "w") as f:
+        f.write(yaml_content)
+
+
+def init_metric_extraction_yaml(dest: Path):
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    yaml_content = """\
+# Path to the raw dataset
+data_path: '/path/to/dataset_2/images'
+
+# Paths to model predictions
+model_predictions_paths:
+  modelA: '/path/to/dataset_2/seg/modelA'
+  modelB: '/path/to/dataset_2/seg/modelB'
+
+# Mapping of labels to their numeric values
+labels:
+  BKG: 0
+  EDE: 3
+  ENH: 1
+  NEC: 2
+
+# List of metrics to compute
+metrics:
+  dice: true
+  jacc: true
+  accu: true
+  prec: true
+  sens: true
+  spec: true
+  haus: true
+  size: true
+
+# Library used for computing all the metrics
+package: audit
+
+# Path where output metrics will be saved
+output_path: './outputs/metrics'
+filename: 'dataset_2'
+logs_path: './logs/metric'
+
+# Other settings
+cpu_cores: 12
+"""
+    with open(dest, "w") as f:
+        f.write(yaml_content)
 
 
 def check_path_access(path: str, name: str) -> None:
@@ -136,7 +328,7 @@ def check_app_config(config: dict) -> None:
 
     predictions = config.get("predictions")
     if predictions is not None:
-        for dataset_name  in predictions.keys():
+        for dataset_name in predictions.keys():
             if predictions[dataset_name] is None:
                 logger.error(f"Not set predictions: {dataset_name}: None in the app.yml file")
                 sys.exit(1)
@@ -154,3 +346,7 @@ def check_app_config(config: dict) -> None:
     if not config.get("sequences"):
         logger.error("Missing sequences key in the feature_extraction.yml file")
         sys.exit(1)
+
+
+def configure_logging(log_filename: str):
+    logger.add(log_filename, retention="90 days", level="INFO")

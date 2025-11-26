@@ -1,206 +1,416 @@
 import os
 import re
 import shutil
-from typing import Any
 from pathlib import Path
+from audit.utils.internal._config_helpers import init_app_yaml
+from audit.utils.internal._config_helpers import init_feature_extraction_yaml
+from audit.utils.internal._config_helpers import init_metric_extraction_yaml
 
-import pandas as pd
-import yaml
+from typing import Dict
+from typing import Optional
+from typing import Union, List
 
 
-def list_dirs(path: str) -> list:
+def create_project_structure(base_path: str = "./"):
     """
-    Lists all directories within a given root_dir and returns their names in sorted order.
+    Creates the project directory structure.
 
-    Args:
-        path: The path root_dir where to look for subdirectories.
+    Creates the following structure:
+        your_project/
+        ├── datasets/
+        ├── configs/
+        ├── outputs/
+        └── logs/
 
-    Returns:
-        list: A sorted list of path names found within the specified root_dir.
+    Parameters
+    ----------
+    base_path : str, default "./"
+        Root directory name where the project structure will be created.
+
+    Raises
+    ------
+    NotADirectoryError
+        If the path exists but is not a directory.
+    PermissionError
+        If there is no write permission to create folders.
     """
+    base = Path(base_path)
+
+    if base.exists() and not base.is_dir():
+        raise NotADirectoryError(f"The path '{base}' exists but is not a directory")
+
+    if base.exists() and not base.is_dir() and not base.exists():
+        raise PermissionError(f"No write permission to create folders in '{base}'")
+
+    subfolders = ["datasets", "configs", "outputs", "logs"]
+    base_path = Path(base_path)
+
+    # Create project folders
+    for folder in subfolders:
+        path = base_path / folder
+        try:
+            os.makedirs(path, exist_ok=True)
+        except PermissionError:
+            print(f"Permission denied: cannot create folder {path}")
+        except FileExistsError:
+            print(f"A file with the same name already exists: {path}")
+        except OSError as e:
+            print(f"OS error while creating {path}: {e}")
+        else:
+            print(f"Folder created or already exists: {path}")
+
+    configs_path = base_path / "configs"
     try:
-        return sorted([f.path.split("/")[-1] for f in os.scandir(path) if f.is_dir()])
-    except FileNotFoundError:
-        print(f"Error: The root_dir '{path}' does not exist.")
-        return []
-    except PermissionError:
-        print(f"Error: Permission denied to access '{path}'.")
-        return []
+        # Initialize YAML config files from scratch
+        app_file = configs_path / "app.yaml"
+        feature_file = configs_path / "feature_extraction.yaml"
+        metric_file = configs_path / "metric_extraction.yaml"
+
+        # Only create files if they don't exist (don't overwrite)
+        if not app_file.exists():
+            init_app_yaml(app_file)
+        if not feature_file.exists():
+            init_feature_extraction_yaml(feature_file)
+        if not metric_file.exists():
+            init_metric_extraction_yaml(metric_file)
+
+        print(f"Project structure created under '{base_path}' with default config templates.")
+
+    except Exception as e:
+        print(
+            f"Error while creating project structure: {e}\n"
+            "Check the official documentation to replicate the needed project structure:\n"
+            "https://caumente.github.io/AUDIT/getting_started/project_structure/"
+        )
 
 
-def list_files(path: str) -> list:
+def list_dirs(
+    path: Union[str, Path],
+    recursive: bool = False,
+    full_path: bool = False,
+    pattern: str = None
+) -> List[str]:
     """
-    Lists all files within a given root_dir and returns their names in sorted order.
+    List directories in a given path.
 
-    Args:
-        path: The path root_dir where to look for files.
+    Parameters
+    ----------
+    path : str or Path
+        The root directory where to look for subdirectories.
+    recursive : bool, default False
+        If True, search subdirectories recursively.
+    full_path : bool, default False
+        If True, return absolute paths instead of just directory names.
+    pattern : str, optional
+        Optional regex pattern to filter directory names.
 
-    Returns:
-        list: A sorted list of files names found within the specified root_dir.
+    Returns
+    -------
+    List[str]
+        A sorted list of directory names or paths.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified path does not exist.
+    NotADirectoryError
+        If the specified path is not a directory.
+    PermissionError
+        If there is no permission to access the directory.
     """
-    try:
-        return sorted([f.path.split("/")[-1] for f in os.scandir(path) if f.is_file()])
-    except FileNotFoundError:
-        print(f"Error: The root_dir '{path}' does not exist.")
-        return []
-    except PermissionError:
-        print(f"Error: Permission denied to access '{path}'.")
-        return []
+    root = Path(path)
+
+    if not root.exists():
+        raise FileNotFoundError(f"The specified path does not exist: '{root}'")
+    if not root.is_dir():
+        raise NotADirectoryError(f"The specified path is not a directory: '{root}'")
+    if not os.access(root, os.R_OK):
+        raise PermissionError(f"No permission to access directory: '{root}'")
+
+    # Get directories
+    dirs = root.rglob("*") if recursive else root.iterdir()
+    dirs = [d for d in dirs if d.is_dir()]
+
+    # Apply pattern filter if provided
+    if pattern:
+        regex = re.compile(pattern)
+        dirs = [d for d in dirs if regex.search(d.name)]
+
+    # Format output
+    result = [str(d.resolve()) if full_path else d.name for d in dirs]
+
+    return sorted(result)
 
 
-def load_config_file(path: str) -> dict:
+def list_files(
+    path: Union[str, Path],
+    recursive: bool = False,
+    full_path: bool = False,
+    pattern: str = None,
+    extensions: list[str] | None = None
+) -> List[str]:
     """
-    Loads a configuration file in YAML format and returns its contents as a dictionary.
+    List files in a given directory.
 
-    Args:
-        path: The relative file root_dir to the YAML configuration file.
+    Parameters
+    ----------
+    path : str or Path
+        Root directory to search.
+    recursive : bool, default False
+        If True, search subdirectories recursively.
+    full_path : bool, default False
+        If True, return absolute paths instead of just filenames.
+    pattern : str, optional
+        Regex pattern to filter file names.
+    extensions : list[str] or None, optional
+        List of file extensions to filter by (e.g., ['.csv', '.yml']).
 
-    Returns:
-        dict: The contents of the YAML file as a dictionary.
+    Returns
+    -------
+    List[str]
+        A sorted list of file names or paths.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified path does not exist.
+    NotADirectoryError
+        If the specified path is not a directory.
+    PermissionError
+        If there is no permission to access the directory.
     """
+    root = Path(path)
 
-    def replace_variables(config, variables):
-        def replace(match):
-            return variables.get(match.group(1), match.group(0))
+    if not root.exists():
+        raise FileNotFoundError(f"The specified path does not exist: '{root}'")
+    if not root.is_dir():
+        raise NotADirectoryError(f"The specified path is not a directory: '{root}'")
+    if not os.access(root, os.R_OK):
+        raise PermissionError(f"No permission to access directory: '{root}'")
 
-        for key, value in config.items():
-            if isinstance(value, str):
-                config[key] = re.sub(r"\$\{(\w+)\}", replace, value)
-            elif isinstance(value, dict):
-                replace_variables(value, variables)
+    # Get files
+    files = root.rglob("*") if recursive else root.iterdir()
+    files = [f for f in files if f.is_file()]
 
-    # Resolve the absolute root_dir based on the current file's path
-    base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust the depth according to your project
-    absolute_path = base_dir / path
+    # Filter by regex pattern
+    if pattern:
+        regex = re.compile(pattern)
+        files = [f for f in files if regex.search(f.name)]
 
-    # Validate if the file exists
-    if not absolute_path.exists():
-        raise FileNotFoundError(f"Config file not found: {absolute_path}")
+    # Filter by extensions
+    if extensions:
+        extensions = [ext.lower() for ext in extensions]
+        files = [f for f in files if f.suffix.lower() in extensions]
 
-    # Load the YAML file
-    with open(absolute_path, "r") as file:
-        config = yaml.safe_load(file)
+    # Format output
+    result = [str(f.resolve()) if full_path else f.name for f in files]
 
-    # Replace variables in the YAML configuration
-    variables = {key: value for key, value in config.items() if not isinstance(value, dict)}
-    replace_variables(config, variables)
-
-    return config
+    return sorted(result)
 
 
-def rename_directories(root_dir: str, old_name: str, new_name: str, verbose: bool = False, safe_mode: bool = True):
+def rename_dirs(
+    root_dir: Union[str, Path],
+    old_name: str,
+    new_name: str,
+    verbose: bool = False,
+    safe_mode: bool = True
+) -> None:
     """
-    Renames all directories and subdirectories within a path,
-    replacing string_1 with string_2 in their names.
+    Rename directories recursively by replacing a substring in their names.
 
-    Args:
-        root_dir (str): Path to the path where renaming will be performed.
-        old_name (str): The string to be replaced in the path names.
-        new_name (str): The new string that will replace string_1.
-        verbose (bool): Whether to print verbose output for each rename operation.
-        safe_mode (bool): If True, only simulates renaming without making changes.
+    Parameters
+    ----------
+    root_dir : str or Path
+        Path to the directory where renaming will be performed.
+    old_name : str
+        The string to be replaced in the directory names.
+    new_name : str
+        The new string that will replace old_name.
+    verbose : bool, default False
+        If True, print information about each rename operation.
+    safe_mode : bool, default True
+        If True, only simulate renaming without making changes.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified root_dir does not exist.
+    NotADirectoryError
+        If the specified root_dir is not a directory.
+    PermissionError
+        If a directory cannot be renamed due to permissions.
+    OSError
+        For other OS-level errors during rename.
     """
+    root_dir = Path(root_dir)
 
-    if not os.path.exists(root_dir):
-        raise ValueError(f"The specified root_dir {root_dir} does not exist.")
+    if not root_dir.exists():
+        raise FileNotFoundError(f"The specified root_dir does not exist: '{root_dir}'")
+    if not root_dir.is_dir():
+        raise NotADirectoryError(f"The specified root_dir is not a directory: '{root_dir}'")
 
-    # Traverse the path tree, renaming directories from the bottom up
-    for root, dirs, files in os.walk(root_dir, topdown=False):
+    # Force verbose if safe_mode is True
+    if safe_mode:
+        verbose = True
+
+    # Traverse directories from bottom up
+    for current_dir, dirs, _ in os.walk(root_dir, topdown=False):
+        current_path = Path(current_dir)
         for dir_name in dirs:
             if old_name in dir_name:
+                old_dir_path = current_path / dir_name
                 new_dir_name = dir_name.replace(old_name, new_name)
-                old_dir_path = os.path.join(root, dir_name)
-                new_dir_path = os.path.join(root, new_dir_name)
+                new_dir_path = current_path / new_dir_name
 
                 if safe_mode:
-                    print(f"Would rename: {old_dir_path} -> {new_dir_path}")
+                    print(f"[SAFE MODE] Would rename: {old_dir_path} -> {new_dir_path}")
                 else:
                     try:
-                        os.rename(old_dir_path, new_dir_path)
+                        old_dir_path.rename(new_dir_path)
                         if verbose:
-                            print(f"Directory renamed: {old_dir_path} -> {new_dir_path}")
-                    except Exception as e:
-                        print(f"Failed to rename {old_dir_path}: {e}")
+                            print(f"Renamed: {old_dir_path} -> {new_dir_path}")
+                    except PermissionError as e:
+                        raise PermissionError(f"Permission denied: cannot rename '{old_dir_path}'") from e
+                    except OSError as e:
+                        raise OSError(f"Failed to rename '{old_dir_path}'") from e
 
+
+def add_string_dirs(
+    root_dir: Union[str, Path],
+    prefix: str = "",
+    suffix: str = "",
+    verbose: bool = False,
+    safe_mode: bool = True
+) -> None:
+    """
+    Add a prefix and/or suffix to all directories and subdirectories.
+
+    Parameters
+    ----------
+    root_dir : str or Path
+        Root directory to start renaming.
+    prefix : str, default ""
+        Prefix to add to directory names.
+    suffix : str, default ""
+        Suffix to add to directory names.
+    verbose : bool, default False
+        If True, print information about renamed directories (only when safe_mode=False).
+    safe_mode : bool, default True
+        If True, simulate renaming without changing directories.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the root directory does not exist.
+    NotADirectoryError
+        If the root path is not a directory.
+    PermissionError
+        If a directory cannot be renamed due to permissions.
+    OSError
+        For other OS-level errors during rename.
+    """
+    root_dir = Path(root_dir)
+
+    if not root_dir.exists():
+        raise FileNotFoundError(f"The specified root_dir does not exist: '{root_dir}'")
+    if not root_dir.is_dir():
+        raise NotADirectoryError(f"The specified root_dir is not a directory: '{root_dir}'")
+
+    # Force verbose if safe_mode
     if safe_mode:
-        print(f"Set safe_mode parameter to False to rename the directories")
+        verbose = True
 
-
-def add_string_directories(root_dir: str, prefix: str = "", suffix: str = "", verbose: bool = False, safe_mode: bool = True):
-    """
-    Adds a prefix and/or suffix to all directories and subdirectories within a path.
-
-    Args:
-        root_dir (str): Path to the path where renaming will be performed.
-        prefix (str): The prefix to be added to the path names.
-        suffix (str): The suffix to be added to the path names.
-        verbose (bool): Whether to print verbose output for each rename operation.
-        safe_mode (bool): If True, only simulates renaming without making changes.
-    """
-    # Traverse the path tree, renaming directories from the bottom up
-    for root, dirs, files in os.walk(root_dir, topdown=False):
+    # Bottom-up traversal
+    for current_dir, dirs, _ in os.walk(root_dir, topdown=False):
+        current_path = Path(current_dir)
         for dir_name in dirs:
+            old_dir_path = current_path / dir_name
             new_dir_name = f"{prefix}{dir_name}{suffix}"
-            old_dir_path = os.path.join(root, dir_name)
-            new_dir_path = os.path.join(root, new_dir_name)
+            new_dir_path = current_path / new_dir_name
 
-            if new_dir_name != dir_name:  # Avoid renaming if no changes
+            if old_dir_path != new_dir_path:
                 if safe_mode:
-                    print(f"Would rename: {old_dir_path} -> {new_dir_path}")
+                    print(f"[SAFE MODE] Would rename: {old_dir_path} -> {new_dir_path}")
                 else:
                     try:
-                        os.rename(old_dir_path, new_dir_path)
+                        old_dir_path.rename(new_dir_path)
                         if verbose:
-                            print(f"Directory renamed: {old_dir_path} -> {new_dir_path}")
-                    except Exception as e:
-                        print(f"Error renaming {old_dir_path} to {new_dir_path}: {e}")
+                            print(f"Renamed: {old_dir_path} -> {new_dir_path}")
+                    except PermissionError as e:
+                        raise PermissionError(f"Permission denied: cannot rename '{old_dir_path}'") from e
+                    except OSError as e:
+                        raise OSError(f"Failed to rename '{old_dir_path}'") from e
 
+
+def rename_files(
+    root_dir: Union[str, Path],
+    old_name: str = "",
+    new_name: str = "",
+    verbose: bool = False,
+    safe_mode: bool = True
+) -> None:
+    """
+    Recursively rename files by replacing a substring in their filenames.
+
+    Parameters
+    ----------
+    root_dir : str or Path
+        Root directory to start renaming files.
+    old_name : str, default ""
+        Substring in filenames to replace.
+    new_name : str, default ""
+        Substring to replace old_name with.
+    verbose : bool, default False
+        If True, print information about renamed files (only when safe_mode=False).
+    safe_mode : bool, default True
+        If True, simulate renaming without changing files.
+
+    Raises
+    ------
+    ValueError
+        If old_name or new_name are empty strings.
+    FileNotFoundError
+        If the specified root_dir does not exist.
+    NotADirectoryError
+        If the specified root_dir is not a directory.
+    PermissionError
+        If a file cannot be renamed due to permissions.
+    OSError
+        For other OS-level errors during rename.
+    """
+    if not old_name or not new_name:
+        raise ValueError("Both 'old_name' and 'new_name' must be non-empty strings")
+
+    root_dir = Path(root_dir)
+    if not root_dir.exists():
+        raise FileNotFoundError(f"The specified root_dir does not exist: '{root_dir}'")
+    if not root_dir.is_dir():
+        raise NotADirectoryError(f"The specified root_dir is not a directory: '{root_dir}'")
+
+    # Force verbose if safe_mode
     if safe_mode:
-        print(f"Set safe_mode parameter to False to rename the directories")
+        verbose = True
 
-
-def rename_files(root_dir: str, old_name: str = "_t1ce", new_name: str = "_t1c", verbose: bool = False, safe_mode: bool = True):
-    """
-    Renames files in a path and its subdirectories by replacing a specific substring in the filenames.
-
-    This function recursively walks through all files in a specified root_dir path and its subdirectories,
-    identifies files containing a specified old extension substring, and renames them by replacing
-    the old extension with a new one.
-
-    Args:
-        root_dir: The root_dir path containing the files to be renamed.
-        old_name: The substring in filenames that needs to be replaced. Defaults to "_t1ce".
-        new_name: The substring that will replace the old extension. Defaults to "_t1c".
-        verbose: Whether print the log
-        safe_mode: If True, the function will only simulate renaming without making any actual changes.
-    """
-    if old_name is None:
-        old_name = ""
-
-    if new_name is None:
-        new_name = ""
-
-    for subdir, _, files in os.walk(root_dir):
-        for file in files:
-            # Check if the file contains the old_name
-            if old_name in file:
-                old_file_path = os.path.join(subdir, file)
-                new_file_path = os.path.join(subdir, file.replace(old_name, new_name))
+    # Walk through all files
+    for current_dir, _, files in os.walk(root_dir):
+        current_path = Path(current_dir)
+        for file_name in files:
+            if old_name in file_name:
+                old_file_path = current_path / file_name
+                new_file_name = file_name.replace(old_name, new_name)
+                new_file_path = current_path / new_file_name
 
                 if safe_mode:
-                    # In safe mode, just print the potential renaming
                     print(f"[SAFE MODE] Would rename: {old_file_path} -> {new_file_path}")
                 else:
                     try:
-                        os.rename(old_file_path, new_file_path)
-
+                        old_file_path.rename(new_file_path)
                         if verbose:
                             print(f"Renamed: {old_file_path} -> {new_file_path}")
-                    except Exception as e:
-                        print(f"Error renaming {old_file_path}: {e}")
-
-    if safe_mode:
-        print(f"Set safe_mode parameter to False to rename the files")
+                    except PermissionError as e:
+                        raise PermissionError(f"Permission denied: cannot rename '{old_file_path}'") from e
+                    except OSError as e:
+                        raise OSError(f"Failed to rename '{old_file_path}'") from e
 
 
 def copy_files_by_extension(
@@ -212,22 +422,32 @@ def copy_files_by_extension(
         verbose: bool = False
 ):
     """
-    Copies all files with a specific extension from one path to another.
+    Copy all files with a specific extension from one directory to another.
 
-    Args:
-        src_dir (str): The source path from which to copy files.
-        dst_dir (str): The destination path where files will be copied.
-        ext (str): The file extension to search for and copy (e.g., ".txt", ".yaml").
-        safe_mode (bool): If True, simulates the operation without making changes.
-        overwrite (bool): If True, allows overwriting existing files in the destination path.
-        verbose (bool): If True, prints detailed logs for each file operation.
+    Parameters
+    ----------
+    src_dir : str
+        The source directory from which to copy files.
+    dst_dir : str
+        The destination directory where files will be copied.
+    ext : str
+        The file extension to search for and copy (e.g., ".txt", ".yaml").
+    safe_mode : bool, default True
+        If True, simulate the operation without making changes.
+    overwrite : bool, default False
+        If True, allow overwriting existing files in the destination directory.
+    verbose : bool, default False
+        If True, print detailed logs for each file operation.
+
+    Raises
+    ------
+    ValueError
+        If the source directory does not exist.
     """
-
     if not os.path.exists(src_dir):
-        raise ValueError(f"Source path '{src_dir}' does not exist.")
+        raise ValueError(f"Source directory '{src_dir}' does not exist.")
 
-    if not os.path.exists(dst_dir):
-        os.makedirs(dst_dir, exist_ok=True)  # Ensure destination path exists
+    os.makedirs(dst_dir, exist_ok=True)  # Ensure destination directory exists
 
     copied_files = 0  # To keep track of how many files have been copied
     for subdir, _, files in os.walk(src_dir):
@@ -236,7 +456,7 @@ def copy_files_by_extension(
                 src_file_path = os.path.join(subdir, file)
                 dst_file_path = os.path.join(dst_dir, file)
 
-                # Check if the file already exists in the destination path
+                # Check if the file already exists in the destination directory
                 if not overwrite and os.path.exists(dst_file_path):
                     if verbose:
                         print(f"Skipped (exists): {src_file_path} -> {dst_file_path}")
@@ -246,142 +466,200 @@ def copy_files_by_extension(
                     print(f"[SAFE MODE] Would copy: {src_file_path} -> {dst_file_path}")
                 else:
                     try:
-                        shutil.copy2(src_file_path, dst_file_path)  # Use copy2 to preserve metadata
+                        shutil.copy2(src_file_path, dst_file_path)
                         copied_files += 1
-
                         if verbose:
                             print(f"Copied: {src_file_path} -> {dst_file_path}")
                     except Exception as e:
                         print(f"Error copying {src_file_path} to {dst_file_path}: {e}")
 
-            # After all operations, report if any files were copied
-            if copied_files == 0 and verbose:
-                print(f"No files with the extension '{ext}' were found to copy.")
-            elif verbose:
-                print(f"Total files copied: {copied_files}")
-                shutil.copy2(src_file_path, dst_file_path)
-                print(f"Copied: {src_file_path} -> {dst_file_path}")
+    # Summary after processing all files
+    if copied_files == 0 and verbose:
+        print(f"No files with the extension '{ext}' were found to copy.")
+    elif verbose:
+        print(f"Total files copied: {copied_files}")
 
 
-def delete_files_by_extension(root_dir: str, ext: str, verbose=False, safe_mode: bool = True):
+def delete_files_by_extension(root_dir: str, ext: str, verbose: bool = False, safe_mode: bool = True):
     """
     Deletes all files with a specific extension in a path and its subdirectories.
 
-    Args:
-        root_dir (str): The root_dir path where the search will start.
-        ext (str): The file extension of the files to be deleted.
-        safe_mode (bool): If True, simulates the deletion without actually removing the files.
-        verbose (bool): If True, prints detailed logs for each file deletion operation.
+    Parameters
+    ----------
+    root_dir : str
+        The root directory where the search will start.
+    ext : str
+        The file extension of the files to be deleted (e.g., '.nii.gz').
+    verbose : bool, default False
+        If True, print detailed logs for each file deletion operation.
+    safe_mode : bool, default True
+        If True, simulate the deletion without actually removing the files.
+
+    Raises
+    ------
+    ValueError
+        If the root_dir does not exist.
     """
-    if not os.path.exists(root_dir):
-        raise ValueError(f"Root path '{root_dir}' does not exist.")
+    root_path = Path(root_dir)
+    if not root_path.exists():
+        raise ValueError(f"Root directory '{root_dir}' does not exist.")
 
-    deleted_files = 0  # To keep track of how many files have been deleted
+    deleted_count = 0
 
-    # Walk through the path tree
-    for subdir, dirs, files in os.walk(root_dir):
-        dirs.sort()
-        files.sort()
-
-        for file in files:
+    # Walk through the directory tree
+    for subdir, _, files in os.walk(root_path):
+        for file in sorted(files):
             if file.endswith(ext):
-                file_path = os.path.join(subdir, file)
+                file_path = Path(subdir) / file
 
                 if safe_mode:
-                    # In safe mode, only print what would happen
                     print(f"[SAFE MODE] Would delete: {file_path}")
                 else:
                     try:
-                        os.remove(file_path)  # Delete the file
-                        deleted_files += 1
-
+                        file_path.unlink()  # Delete the file
+                        deleted_count += 1
                         if verbose:
                             print(f"Deleted file: {file_path}")
                     except Exception as e:
                         print(f"Error deleting {file_path}: {e}")
 
-    # After all operations, report how many files were deleted
-    if deleted_files == 0 and verbose:
+    # Summary
+    if deleted_count == 0 and verbose:
         print(f"No files with the extension '{ext}' were found to delete.")
     elif verbose:
-        print(f"Total files deleted: {deleted_files}")
+        print(f"Total files deleted: {deleted_count}")
 
 
-def delete_folders_by_pattern(root_dir: str, pattern: str, verbose=False, safe_mode: bool = True):
+def delete_dirs_by_pattern(
+        root_dir: str,
+        pattern: str,
+        match_type: str = 'contains',
+        verbose: bool = False,
+        safe_mode: bool = True
+):
     """
-    Deletes all folders that match a given pattern in a path and its subdirectories.
+    Deletes folders matching a pattern in a path and its subdirectories.
 
-    Args:
-        root_dir (str): The root_dir path where the search will start.
-        pattern (str): The pattern to match folder names (supports regular expressions).
-        safe_mode (bool): If True, simulates the deletion without actually removing the folders.
-        verbose (bool): If True, prints detailed logs for each folder deletion operation.
+    Parameters
+    ----------
+    root_dir : str
+        Directory where the search will start.
+    pattern : str
+        Pattern to match folder names.
+    match_type : str, default 'contains'
+        Type of matching: 'contains', 'starts', 'ends', or 'exact'.
+    verbose : bool, default False
+        If True, print detailed logs for each folder deletion operation.
+    safe_mode : bool, default True
+        If True, simulate deletion without actually removing folders.
+
+    Raises
+    ------
+    ValueError
+        If root_dir does not exist or match_type is invalid.
     """
-    if not os.path.exists(root_dir):
-        raise ValueError(f"Root path '{root_dir}' does not exist.")
+    root_path = Path(root_dir)
+    if not root_path.exists():
+        raise ValueError(f"Root directory '{root_dir}' does not exist.")
 
-    deleted_folders = 0  # To keep track of how many folders have been deleted
-    regex_pattern = re.compile(pattern)  # Compile the provided pattern for use in matching folder names
+    allowed_match_types = ['contains', 'starts', 'ends', 'exact']
+    if match_type not in allowed_match_types:
+        raise ValueError(f"match_type must be one of {allowed_match_types}, got '{match_type}'")
 
-    # Walk through the path tree
-    for subdir, dirs, _ in os.walk(root_dir, topdown=False):  # topdown=False ensures subdirectories are checked first
+    deleted_count = 0
+    found_folders = []
 
-        for dir_name in dirs:
-            if regex_pattern.match(dir_name):  # Match folder name with the regex pattern
-                folder_path = os.path.join(subdir, dir_name)
+    # Walk the directory tree from bottom up
+    for subdir, dirs, _ in os.walk(root_path, topdown=False):
+        for dir_name in sorted(dirs):
+            match = False
+            if match_type == 'contains' and pattern in dir_name:
+                match = True
+            elif match_type == 'starts' and dir_name.startswith(pattern):
+                match = True
+            elif match_type == 'ends' and dir_name.endswith(pattern):
+                match = True
+            elif match_type == 'exact' and dir_name == pattern:
+                match = True
+
+            if match:
+                folder_path = Path(subdir) / dir_name
+                found_folders.append(folder_path)
 
                 if safe_mode:
-                    # In safe mode, only print what would happen
-                    print(f"[SAFE MODE] Would delete: {folder_path}")
+                    if verbose:
+                        print(f"[SAFE MODE] Would delete: {folder_path}")
                 else:
                     try:
-                        shutil.rmtree(folder_path)  # Delete the folder and its contents
-                        deleted_folders += 1
-
+                        shutil.rmtree(folder_path)
+                        deleted_count += 1
                         if verbose:
                             print(f"Deleted folder: {folder_path}")
                     except Exception as e:
                         print(f"Error deleting {folder_path}: {e}")
 
-    # After all operations, report how many folders were deleted
-    if deleted_folders == 0 and verbose:
-        print(f"No folders matching the pattern '{pattern}' were found to delete.")
-    elif verbose:
-        print(f"Total folders deleted: {deleted_folders}")
+    # Summary
+    if safe_mode and verbose:
+        print(f"[SAFE MODE] {len(found_folders)} folders would be deleted.")
+    elif not safe_mode:
+        if deleted_count == 0 and verbose:
+            print(f"No folders matching the pattern '{pattern}' were found to delete.")
+        elif verbose:
+            print(f"Total folders deleted: {deleted_count}")
 
 
-def move_files_to_parent(root_dir: str, levels_up: int = 1, ext: str = None, verbose: bool = False, safe_mode: bool = True):
+def move_files_to_parent(
+    root_dir: str,
+    levels_up: int = 1,
+    ext: str | None = None,
+    verbose: bool = False,
+    safe_mode: bool = True
+) -> None:
     """
-    Move all files or files with a specific extension from subdirectories to a specified parent level path.
+    Move files (optionally filtered by extension) from subdirectories
+    to a specified parent level above their current location.
 
-    Args:
-        root_dir (str): The root_dir path where the search will start.
-        levels_up (int): Number of parent levels up to move the files.
-        ext (str): Specific file extension to move (e.g., ".txt"). If None, moves all files.
-        verbose (bool): If True, prints detailed logs for each file move operation.
-        safe_mode (bool): If True, simulates the move without actually moving the files.
+    Parameters
+    ----------
+    root_dir : str
+        Root directory where the search will start.
+    levels_up : int, default 1
+        Number of parent levels up to move the files.
+    ext : str or None, optional
+        File extension to filter by (e.g., ".txt"). If None, all files are moved.
+    verbose : bool, default False
+        If True, print detailed logs for each file move operation.
+    safe_mode : bool, default True
+        If True, simulate the move without actually moving the files.
+
+    Raises
+    ------
+    FileNotFoundError
+        If root_dir does not exist.
+    ValueError
+        If levels_up is less than 1.
     """
     if not os.path.exists(root_dir):
-        raise ValueError(f"Root path '{root_dir}' does not exist.")
+        raise FileNotFoundError(f"Root directory '{root_dir}' does not exist.")
 
     if levels_up < 1:
         raise ValueError("'levels_up' must be at least 1.")
 
-    moved_files = 0  # To keep track of how many files have been moved
+    moved_files = 0
 
-    # Walk through the path tree
+    # Walk through the directory tree
     for subdir, dirs, files in os.walk(root_dir):
         dirs.sort()
         files.sort()
 
-        # Determine the target parent path
+        # Compute the target directory
         target_dir = subdir
         for _ in range(levels_up):
             target_dir = os.path.dirname(target_dir)
 
         if not target_dir or not os.path.exists(target_dir):
             if verbose:
-                print(f"Skipping {subdir} as target path does not exist or is invalid.")
+                print(f"Skipping {subdir}: invalid or non-existing target directory.")
             continue
 
         for file_name in files:
@@ -390,190 +668,231 @@ def move_files_to_parent(root_dir: str, levels_up: int = 1, ext: str = None, ver
                 destination = os.path.join(target_dir, file_name)
 
                 if safe_mode:
-                    # In safe mode, only print what would happen
-                    if verbose:
-                        print(f"[SAFE MODE] Would move: {source} to {destination}")
+                    print(f"[SAFE MODE] Would move: {source} -> {destination}")
                 else:
                     try:
-                        shutil.move(source, destination)  # Move the file
+                        shutil.move(source, destination)
                         moved_files += 1
-
                         if verbose:
-                            print(f"Moved file: {source} to {destination}")
+                            print(f"Moved: {source} -> {destination}")
                     except Exception as e:
-                        print(f"Error moving {source} to {destination}: {e}")
+                        print(f"Error moving {source} -> {destination}: {e}")
 
-    # After all operations, report how many files were moved
-    if moved_files == 0 and verbose:
-        print("No files were moved.")
+    if safe_mode:
+        print("Safe mode enabled: No files were moved.")
     elif verbose:
-        print(f"Total files moved: {moved_files}")
+        if moved_files == 0:
+            print("No files were moved.")
+        else:
+            print(f"Total files moved: {moved_files}")
 
 
-def organize_files_into_folders(root_dir, extension='.nii.gz', verbose=False, safe_mode: bool = True):
+def organize_files_into_dirs(root_dir, extension='.nii.gz', verbose=False, safe_mode: bool = True):
     """
     Organizes files into folders based on their filenames. Each file will be moved into a folder named
     after the file (excluding the extension).
 
-    Args:
-        root_dir (str): Path to the folder containing the files.
-        extension (str): The file extension to look for (default is '.nii.gz').
-        safe_mode (bool): If True, simulates the file organization without moving the files.
-        verbose (bool): If True, prints detailed logs about each file being organized.
-    """
+    Parameters
+    ----------
+    root_dir : str
+        Directory containing the files to organize.
+    extension : str, default '.nii.gz'
+        The file extension to look for.
+    verbose : bool, default False
+        If True, print detailed logs about each file being organized.
+    safe_mode : bool, default True
+        If True, simulate the file organization without moving the files.
 
+    Raises
+    ------
+    ValueError
+        If the root_dir does not exist.
+
+    Examples
+    --------
+    Suppose 'root_dir' contains:
+        subj1.nii.gz
+        subj2.nii.gz
+
+    After running:
+        organize_files_into_dirs(root_dir, extension='.nii.gz', safe_mode=False)
+
+    The folder structure will become:
+        root_dir/
+        ├── subj1/
+        │   └── subj1.nii.gz
+        └── subj2/
+            └── subj2.nii.gz
+    """
     if not os.path.exists(root_dir):
-        raise ValueError(f"The path '{root_dir}' does not exist.")
+        raise ValueError(f"The directory '{root_dir}' does not exist.")
 
     # List all files in the given folder
     files = [f for f in os.listdir(root_dir) if os.path.isfile(os.path.join(root_dir, f))]
 
-    organized_files = 0  # Counter to keep track of how many files were organized
+    organized_files = 0
 
     for file in files:
-        # Extract the file name without extension
-        file_name = file.split(extension)[0]
+        if not file.endswith(extension):
+            continue  # Skip files that don't match the extension
 
-        # Create a new folder for the file
+        # Extract file name without extension
+        file_name = file[:-len(extension)] if extension else os.path.splitext(file)[0]
+
         folder_name = os.path.join(root_dir, file_name)
 
         if not os.path.exists(folder_name):
             if not safe_mode:
-                os.makedirs(folder_name)  # Create the folder if not in safe_mode
+                os.makedirs(folder_name)
             if verbose:
                 print(f"Created folder: {folder_name}")
 
-        # Construct file paths
         src_path = os.path.join(root_dir, file)
         dst_path = os.path.join(folder_name, file)
 
         if safe_mode:
-            # In safe mode, only print what would happen
             print(f"[SAFE MODE] Would move: {src_path} -> {dst_path}")
         else:
             try:
-                shutil.move(src_path, dst_path)  # Move the file into the new folder
+                shutil.move(src_path, dst_path)
                 organized_files += 1
-
                 if verbose:
                     print(f"Moved: {src_path} -> {dst_path}")
             except Exception as e:
                 print(f"Error organizing {file}: {e}")
 
-    # After all operations, report how many files were organized
     if organized_files == 0 and verbose:
         print(f"No files with the extension '{extension}' were found to organize.")
     elif verbose:
         print(f"Total files organized: {organized_files}")
 
 
-def organize_subfolders_into_named_folders(root_dir, join_char="-", verbose=False, safe_mode: bool = True):
+def organize_subdirs_into_named_dirs(
+        root_dir: str,
+        join_char: str = "-",
+        verbose: bool = False,
+        safe_mode: bool = True
+) -> Dict[str, List[str]]:
     """
     Organizes subfolders into combined named folders.
-    Dynamically combines parent folder names and their subfolder names into a single folder per subfolder.
-    Useful for longitudinal data:
+    Combines parent folder names and their subfolder names into a single folder per subfolder.
+
+    Parameters
+    ----------
+    root_dir : str
+        Directory containing the parent folders.
+    join_char : str, default "-"
+        Character to join parent and subfolder names.
+    verbose : bool, default False
+        If True, print detailed logs about each operation.
+    safe_mode : bool, default True
+        If True, simulate the folder organization without making changes.
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        Summary of operations performed or simulated.
+        Keys: "created_folders", "moved_items", "removed_folders"
+
+    Raises
+    ------
+    ValueError
+        If the root_dir does not exist.
+
+    Examples
+    --------
     Input:
         DATASET_images/
         └── Patient-002/
             ├── timepoint-000/
-            │   ├── t1.nii.gz
-            │   ├── ..
             ├── timepoint-001/
-            │   ├── t1.nii.gz
-            │   ├── ..
-            ├── timepoint-002/
-            │   ├── t1.nii.gz
 
     Output:
         DATASET_images/
         ├── Patient-002-timepoint-000/
-        │   ├── t1.nii.gz
-        │   ├── ..
         ├── Patient-002-timepoint-001/
-        │   ├── t1.nii.gz
-        │   ├── ..
-        ├── Patient-002-timepoint-002/
-        │   ├── t1.nii.gz
-
-        Args:
-        root_dir (str): Path to the folder containing the parent folders.
-        join_char (str): The character to use when joining the parent folder and subfolder names (default is "-").
-        verbose (bool): If True, prints detailed logs about each folder being organized.
-        safe_mode (bool): If True, simulates the folder organization without making changes.
     """
-    if not os.path.exists(root_dir):
-        raise ValueError(f"The path '{root_dir}' does not exist.")
+    root_path = Path(root_dir)
+    if not root_path.exists():
+        raise ValueError(f"The directory '{root_dir}' does not exist.")
 
-    # List all subdirectories in the main folder
-    parent_directories = [d for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
+    summary = {"created_folders": [], "moved_items": [], "removed_folders": []}
 
-    for parent_dir in sorted(parent_directories):
-        parent_dir_path = os.path.join(root_dir, parent_dir)
+    parent_dirs = [d for d in sorted(root_path.iterdir()) if d.is_dir()]
 
-        # List all subdirectories under the parent path
-        subdirectories = [d for d in os.listdir(parent_dir_path) if os.path.isdir(os.path.join(parent_dir_path, d))]
+    for parent_dir in parent_dirs:
+        subdirs = [d for d in sorted(parent_dir.iterdir()) if d.is_dir()]
 
-        for subdir in subdirectories:
-            subdir_path = os.path.join(parent_dir_path, subdir)
+        for subdir in subdirs:
+            new_folder_name = f"{parent_dir.name}{join_char}{subdir.name}"
+            new_folder_path = root_path / new_folder_name
 
-            # Create the new folder name using the specified join character
-            new_folder_name = f"{parent_dir}{join_char}{subdir}"
-            new_folder_path = os.path.join(root_dir, new_folder_name)
-
-            if not os.path.exists(new_folder_path):
+            if not new_folder_path.exists():
                 if not safe_mode:
-                    os.makedirs(new_folder_path)  # Create the folder if not in safe_mode
+                    new_folder_path.mkdir()
+                summary["created_folders"].append(str(new_folder_path))
                 if verbose:
                     print(f"Created folder: {new_folder_path}")
 
-            # Move all contents from the subfolder to the new folder
-            for item in os.listdir(subdir_path):
-                item_path = os.path.join(subdir_path, item)
-                new_item_path = os.path.join(new_folder_path, item)
-
+            for item in subdir.iterdir():
+                dest = new_folder_path / item.name
                 if safe_mode:
-                    print(f"[SAFE MODE] Would move: {item_path} -> {new_item_path}")
+                    if verbose:
+                        print(f"[SAFE MODE] Would move: {item} -> {dest}")
                 else:
                     try:
-                        shutil.move(item_path, new_item_path)
+                        shutil.move(str(item), str(dest))
+                        summary["moved_items"].append(f"{item} -> {dest}")
                         if verbose:
-                            print(f"Moved: {item_path} -> {new_item_path}")
+                            print(f"Moved: {item} -> {dest}")
                     except Exception as e:
-                        print(f"Error moving {item_path}: {e}")
+                        print(f"Error moving {item} -> {dest}: {e}")
 
-            # Remove the now-empty subfolder if not in safe_mode
             if not safe_mode:
                 try:
-                    os.rmdir(subdir_path)
+                    subdir.rmdir()
+                    summary["removed_folders"].append(str(subdir))
                     if verbose:
-                        print(f"Removed empty folder: {subdir_path}")
+                        print(f"Removed empty folder: {subdir}")
                 except Exception as e:
-                    print(f"Error removing folder {subdir_path}: {e}")
+                    print(f"Error removing folder {subdir}: {e}")
 
-        # After processing all subfolders, remove the now-empty parent path
-        if not safe_mode:
+        if not safe_mode and not any(parent_dir.iterdir()):
             try:
-                if not os.listdir(parent_dir_path):  # Check if the folder is empty
-                    os.rmdir(parent_dir_path)
-                    if verbose:
-                        print(f"Removed empty parent folder: {parent_dir_path}")
+                parent_dir.rmdir()
+                summary["removed_folders"].append(str(parent_dir))
+                if verbose:
+                    print(f"Removed empty parent folder: {parent_dir}")
             except Exception as e:
-                print(f"Error removing parent folder {parent_dir_path}: {e}")
+                print(f"Error removing parent folder {parent_dir}: {e}")
+
+    return summary
 
 
 def add_suffix_to_files(root_dir, suffix='_pred', ext='.nii.gz', verbose=False, safe_mode: bool = True):
     """
     Adds a suffix to all files with a specific extension in a folder and its subdirectories.
 
-    Args:
-        root_dir (str): The folder where the files are located.
-        suffix (str): The suffix to add to the filenames before the extension.
-        ext (str): The file extension to search for and rename (default is '.nii.gz').
-        safe_mode (bool): If True, simulates the renaming operation without changing any files.
-        verbose (bool): If True, prints detailed information about each file being renamed.
+    Parameters
+    ----------
+    root_dir : str
+        The folder where the files are located.
+    suffix : str, default '_pred'
+        The suffix to add to the filenames before the extension.
+    ext : str, default '.nii.gz'
+        The file extension to search for and rename.
+    verbose : bool, default False
+        If True, print detailed information about each file being renamed.
+    safe_mode : bool, default True
+        If True, simulate the renaming operation without changing any files.
+
+    Raises
+    ------
+    ValueError
+        If the root_dir does not exist.
     """
     if not os.path.exists(root_dir):
-        raise ValueError(f"The path '{root_dir}' does not exist.")
+        raise ValueError(f"The directory '{root_dir}' does not exist.")
 
     renamed_files = 0  # To keep track of how many files were renamed successfully
 
@@ -608,89 +927,90 @@ def add_suffix_to_files(root_dir, suffix='_pred', ext='.nii.gz', verbose=False, 
         print(f"Total files renamed: {renamed_files}")
 
 
-def add_string_filenames(root_dir, prefix="", suffix="", ext=None, verbose=False, safe_mode=True):
+def add_string_files(
+    root_dir: Union[str, Path],
+    prefix: str = "",
+    suffix: str = "",
+    ext: Optional[str] = None,
+    verbose: bool = False,
+    safe_mode: bool = True
+) -> None:
     """
-    Adds a prefix and/or suffix to all files in the specified folder and its subfolders.
+    Add a prefix and/or suffix to all files in a folder and its subfolders.
 
-    Args:
-        root_dir (str): Path to the root_dir folder containing files to rename.
-        prefix (str): The prefix to be added to the file names.
-        suffix (str): The suffix to be added to the file names (before the extension).
-        ext (str): File extension to filter by (e.g., '.nii.gz'). If None, all files are processed.
-        verbose (bool): Whether to print verbose output for each rename operation.
-        safe_mode (bool): If True, simulates the renaming without applying changes.
+    Parameters
+    ----------
+    root_dir : str or Path
+        Directory containing files to rename.
+    prefix : str, default ""
+        Prefix to add to the file name (before the stem).
+    suffix : str, default ""
+        Suffix to add to the file name (after the stem, before extension).
+    ext : str or None, optional
+        If provided, treat this exact string as the file extension (supports multi-part
+        extensions like '.nii.gz'). The extension match is done using `str.endswith(ext)`.
+        If None, all files are processed and `os.path.splitext` is used to separate stem/ext.
+        If used, should include the leading dot(s), e.g. '.nii.gz' or '.txt'.
+    verbose : bool, default False
+        If True, print information about actual renames (only when safe_mode=False).
+    safe_mode : bool, default True
+        If True, simulate renames and print planned operations (no filesystem changes).
+
+    Raises
+    ------
+    FileNotFoundError
+        If root_dir does not exist.
+    NotADirectoryError
+        If root_dir exists but is not a directory.
+    PermissionError
+        If a rename fails due to permissions.
+    FileExistsError
+        If the target file already exists.
+    OSError
+        For other OS-level errors during rename.
     """
-    # Walk through all subfolders and files in the given folder
-    for root, dirs, files in os.walk(root_dir):
+    root = Path(root_dir)
+
+    if not root.exists():
+        raise FileNotFoundError(f"The specified root_dir does not exist: '{root}'")
+    if not root.is_dir():
+        raise NotADirectoryError(f"The specified root_dir is not a directory: '{root}'")
+
+    # Force verbose when simulating so the user sees the planned actions
+    if safe_mode:
+        verbose = True
+
+    for current_dir, _, files in os.walk(root):
+        current_path = Path(current_dir)
         for file in files:
-            # Check if the file has the specified extension (if provided)
+            # Filter by extension (if provided)
             if ext is None or file.endswith(ext):
-                # Construct the old file root_dir
-                old_file_path = os.path.join(root, file)
+                old_file_path = current_path / file
 
-                # Properly split the filename and extension
+                # Respect multi-part ext if provided, otherwise use splitext
                 if ext and file.endswith(ext):
-                    name = file[: -len(ext)]  # Extract the name without the custom extension
+                    name = file[:-len(ext)]
                     file_ext = ext
                 else:
-                    name, file_ext = os.path.splitext(file)  # Use regular splitting for standard extensions
+                    name, file_ext = os.path.splitext(file)
 
-                # Apply the prefix and/or suffix
                 new_file_name = f"{prefix}{name}{suffix}{file_ext}"
+                new_file_path = current_path / new_file_name
 
-                # Construct the new file root_dir
-                new_file_path = os.path.join(root, new_file_name)
+                # Skip if no-op
+                if old_file_path == new_file_path:
+                    continue
 
                 if safe_mode:
                     print(f"[SAFE MODE] Would rename: {old_file_path} -> {new_file_path}")
                 else:
-                    # Perform the actual renaming
+                    if new_file_path.exists():
+                        raise FileExistsError(f"Target already exists: '{new_file_path}'")
                     try:
-                        os.rename(old_file_path, new_file_path)
+                        old_file_path.rename(new_file_path)
                         if verbose:
                             print(f"Renamed: {old_file_path} -> {new_file_path}")
-                    except Exception as e:
-                        print(f"Error renaming {old_file_path}: {e}")
-
-    if safe_mode:
-        print("Safe mode enabled: No files were renamed.")
-    else:
-        print("Renaming completed.")
-
-
-def concatenate_csv_files(path: str, output_file: str):
-    """
-    Concatenates all CSV files in a specified directory into a single CSV file.
-
-    Args:
-        path: The directory containing the CSV files to concatenate.
-        output_file: The root_dir where the concatenated CSV file will be saved.
-    """
-    csv_files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".csv")]
-    df_list = [pd.read_csv(csv_file) for csv_file in csv_files]
-    concatenated_df = pd.concat(df_list, ignore_index=True)
-    concatenated_df.to_csv(output_file, index=False)
-    print(f"Concatenated CSV files saved to: {output_file}")
-
-
-def read_datasets_from_dict(name_path_dict: dict, col_name: str = "set") -> pd.DataFrame:
-    """
-    Reads multiple datasets from a dictionary of name-root_dir pairs and concatenates them into a single DataFrame.
-
-    Args:
-        name_path_dict: A dictionary where keys are dataset names and values are file paths to CSV files.
-        col_name: The name of the column to add that will contain the dataset name. Defaults to "set".
-
-    Returns:
-        pd.DataFrame: A concatenated DataFrame containing all the datasets, with an additional column specifying
-                      the dataset name.
-    """
-
-    out = []
-    for name, path in name_path_dict.items():
-        data = pd.read_csv(path)
-        data[col_name] = name
-        out.append(data)
-    out = pd.concat(out)
-
-    return out
+                    except PermissionError as e:
+                        raise PermissionError(f"Permission denied: cannot rename '{old_file_path}'") from e
+                    except OSError as e:
+                        raise OSError(f"Failed to rename '{old_file_path}' to '{new_file_path}': {e}") from e

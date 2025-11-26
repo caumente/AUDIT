@@ -1,7 +1,7 @@
-from audit.app.util.commons.sidebars import setup_sidebar_plot_customization
-from audit.app.util.commons.sidebars import setup_sidebar_matrix_customization
-from audit.app.util.commons.sidebars import setup_sidebar_multimodel_plot
-from audit.app.util.commons.sidebars import setup_sidebar_longitudinal_plot
+from audit.app.util.constants.sidebars import setup_sidebar_plot_customization
+from audit.app.util.constants.sidebars import setup_sidebar_matrix_customization
+from audit.app.util.constants.sidebars import setup_sidebar_multimodel_plot
+from audit.app.util.constants.sidebars import setup_sidebar_longitudinal_plot
 
 
 def update_plot_customization(fig, key=None):

@@ -5,6 +5,7 @@ class Features:
         self.lesion_regions = list(config.get('labels').keys())
         self.planes = ['Axial', 'Coronal', 'Sagittal']
         self.categories = ['Statistical', 'Texture', 'Spatial', 'Tumor']
+        self.metadata_cols = config.get("metadata_cols", [])
 
         self.common = {
             'subject ID': 'ID'
@@ -19,6 +20,9 @@ class Features:
         self.spatial = self._generate_spatial_features()
         self.tumor = self._generate_tumor_features()
         self.texture = self._generate_texture_features()
+        self.metadata = self._generate_metadata_features()
+        if self.metadata:
+            self.categories.append("Metadata")
 
     def _generate_statistical_features(self):
         """
@@ -109,6 +113,14 @@ class Features:
 
         return tumor_features
 
+    def _generate_metadata_features(self):
+        """
+        Load explicitly defined metadata columns from the config file.
+        """
+        if not self.metadata_cols:
+            return {}
+        return {col: col for col in self.metadata_cols}
+
     def get_features(self, category):
         if category == "Statistical":
             return self.statistical
@@ -120,6 +132,9 @@ class Features:
             return self.tumor
         elif category == "common":
             return self.common
+        elif category == "Metadata":
+            return self.metadata
+        return None
 
     def get_multiple_features(self, categories):
         features = {}
@@ -134,7 +149,9 @@ class Features:
         Given an 'ugly' feature name, returns its 'pretty' counterpart by searching through all feature dictionaries.
         """
         # Traverse all feature dictionaries to find the matching value
-        for feature_dict in [self.common, self.longitudinal, self.statistical, self.spatial, self.tumor, self.texture]:
+        for feature_dict in [
+            self.common, self.longitudinal, self.statistical, self.spatial, self.tumor, self.texture, self.metadata
+        ]:
             for pretty, ugly in feature_dict.items():
                 if ugly == feature:
                     return pretty

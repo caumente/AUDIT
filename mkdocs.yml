@@ -70,10 +70,11 @@ nav:
     - Multi-model performance: analysis_modes/multi_model.md
     - Longitudinal: analysis_modes/longitudinal.md
     - Subjects' exploration: analysis_modes/subjects_exploration.md
-
   - Tutorials:
-      - Preprocessing dataset: tutorials/preprocessing.md
-      - Postprocessing segmentations: tutorials/postprocessing_segmentations.md
+      - BraTS 2025: tutorials/BraTS_2025.md
+      - BraTS 2024 - Site analysis: tutorials/BraTS_2024.md
+      - LUMIERE preprocessing: tutorials/Lumiere_preprocessing.md
+      - LUMIERE postprocessing: tutorials/Lumiere_postprocessing.md
   - About:
     - License: about/LICENSE.md
     - Release notes: about/release-notes.md
@@ -133,6 +134,9 @@ extra:
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - toc

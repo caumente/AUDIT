@@ -22,3 +22,13 @@ def models_sanity_check(baseline_model, benchmark_model):
         return False
     else:
         return True
+
+def none_check(**kwargs):
+    """
+    Check if any provided variables are None.
+    Returns (bool, message).
+    """
+    for name, value in kwargs.items():
+        if value is None:
+            return False, f"Configuration error: '{name}' has not been defined."
+    return True, ""

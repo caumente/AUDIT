@@ -4,11 +4,11 @@ AUDIT provides an interactive web app for data exploration and visualization. We
 
 ---
 
-## ▶️ Run from Repository (Recommended)
+## Run from Repository (Recommended)
 
 Start the app using:
 
-```bash
+```python
 python src/audit/app/launcher.py --config path/to/your/app.yaml
 ```
 
@@ -17,24 +17,24 @@ python src/audit/app/launcher.py --config path/to/your/app.yaml
 
 ---
 
-## ▶️ Run from PyPI Installation
+## Run from PyPI Installation
 
 If installed via PyPI, use:
 
-```bash
+```python
 auditapp run-app --config path/to/your/app.yaml
 ```
 
 ---
 
-## 🌐 Accessing the App
+## Accessing the App
 
 - The app will open in your default web browser at [http://localhost:8501/](http://localhost:8501/).
 - Use the dashboards to explore data distributions, compare model performance, and analyze trends.
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 - Example configuration files are available in the repository.
 - For more details, see the configuration and project structure guides.

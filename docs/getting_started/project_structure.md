@@ -4,7 +4,7 @@ AUDIT supports flexible project organization, but we recommend following the def
 
 ---
 
-## 📁 Recommended Directory Layout
+## Recommended project structure
 
 ```
 your_project/
@@ -76,7 +76,7 @@ logs/
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 - The recommended structure is automatically created when you run AUDIT for the first time.
 - Example datasets and configuration files are available in the repository.

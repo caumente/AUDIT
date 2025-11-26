@@ -5,13 +5,9 @@ from streamlit_theme import st_theme
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_highlight_subject
-from audit.app.util.commons.sidebars import setup_sidebar_color
-from audit.app.util.commons.sidebars import setup_sidebar_features
-from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import MultivariatePage
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.scatter_plots import multivariate_features_highlighter
 from audit.visualization.commons import update_plot_customization
@@ -36,32 +32,29 @@ class MultivariateFeature(BasePage):
 
         df = read_datasets_from_dict(features_information)
 
-        sidebar_info = self.setup_sidebar(df, features_information)
-        proceed = health_checks(sidebar_info.values())
+        selected_sets, selected_feature = self.setup_sidebar(df, features_information)
+        proceed = health_checks(selected_sets, selected_feature)
+
         if proceed[0]:
-            df = processing_data(df, sets=sidebar_info["selected_sets"])
+            df = processing_data(df, sets=selected_sets)
             df.reset_index(drop=True, inplace=True)
 
             self.handle_selection(
-                df, datasets_root_path,
-                sidebar_info["x_axis"], sidebar_info["y_axis"],
-                sidebar_info["color_axis"], labels
+                df, datasets_root_path, selected_feature[0], selected_feature[1], selected_feature[2], labels
             )
-
             st.markdown(self.descriptions.description)
         else:
             st.error(proceed[-1], icon='🚨')
 
-    @staticmethod
-    def setup_sidebar(data, data_paths):
+    def setup_sidebar(self, data, data_paths):
         with st.sidebar:
             st.header("Configuration")
-            return {
-                "selected_sets": setup_sidebar_multi_datasets(data_paths),
-                "x_axis": setup_sidebar_features(data, name="Features (X axis)", key="feat_x"),
-                "y_axis": setup_sidebar_features(data, name="Features (Y axis)", key="feat_y", f_index=1),
-                "color_axis": setup_sidebar_color(data, name="Color feature", key="feat_col"),
-            }
+            selected_sets = self.sidebar.setup_sidebar_multi_datasets(data_paths)
+            x_axis = self.sidebar.setup_sidebar_features(data, name="Features (X axis)", key="feat_x")
+            y_axis = self.sidebar.setup_sidebar_features(data, name="Features (Y axis)", key="feat_y", f_index=1)
+            color_axis= self.sidebar.setup_sidebar_color(data, name="Color feature", key="feat_col")
+
+        return selected_sets, [x_axis, y_axis, color_axis]
 
     def scatter_plot_logic(self, data, x_axis, y_axis, color_axis, customization):
         if customization == 'Standard visualization':
@@ -72,7 +65,7 @@ class MultivariateFeature(BasePage):
         return selected_points, highlight_subject
 
     def render_scatter_plot(self, data, x_axis, y_axis, color_axis):
-        highlight_subject = setup_highlight_subject(data)
+        highlight_subject = self.sidebar.setup_highlight_subject(data)
 
         fig = multivariate_features_highlighter(
             data=data,
@@ -92,7 +85,7 @@ class MultivariateFeature(BasePage):
         return selected_points, highlight_subject
 
     def render_scatter_plot_with_customization(self, data, x_axis, y_axis, color_axis):
-        highlight_subject = setup_highlight_subject(data)
+        highlight_subject = self.sidebar.setup_highlight_subject(data)
 
         # Create a layout with two columns: one for the plot and another for the customization panel
         col1, col2 = st.columns([4, 1], gap="small")  # Column 1 is larger for the plot, column 2 is smaller for the customization panel

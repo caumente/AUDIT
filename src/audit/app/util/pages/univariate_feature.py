@@ -6,14 +6,9 @@ from streamlit_theme import st_theme
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import health_checks
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_filtering_options
-from audit.app.util.commons.sidebars import setup_highlight_subject
-from audit.app.util.commons.sidebars import setup_histogram_options
-from audit.app.util.commons.sidebars import setup_sidebar_features
-from audit.app.util.commons.sidebars import setup_sidebar_multi_datasets
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import UnivariatePage
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.utils.external_tools.itk_snap import run_itk_snap
 from audit.visualization.boxplot import boxplot_highlighter
 from audit.visualization.histograms import custom_distplot
@@ -45,7 +40,7 @@ class UnivariateFeature(BasePage):
 
         # Set up sidebar and plot options
         selected_sets, selected_feature = self.setup_sidebar(df, features_paths)
-        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = setup_filtering_options(df, selected_feature)
+        filtering_method, r_low, r_up, c_low, c_up, num_std_devs = self.sidebar.setup_filtering_options(df, selected_feature)
 
         proceed = health_checks(selected_sets, [selected_feature])
         if proceed[0]:
@@ -62,18 +57,20 @@ class UnivariateFeature(BasePage):
                 clip_up=c_up,
                 num_std_devs=num_std_devs
             )
-
-            self.main(df, datasets_paths, selected_feature, labels)
+            try:
+                self.main(df, datasets_paths, selected_feature, labels)
+            except TypeError:
+                st.error("Ups, something went wrong when searching for outliers. Please, make sure that all your metadata "
+                    "columns are numeric, otherwise it is not possible to run the algorithm", icon="🚨")
         else:
             st.error(proceed[-1], icon='🚨')
 
-    @staticmethod
-    def setup_sidebar(data, data_paths):
+    def setup_sidebar(self, data, data_paths):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_sets = setup_sidebar_multi_datasets(data_paths)
-            select_feature = setup_sidebar_features(data, name="Features", key="features")
+            selected_sets = self.sidebar.setup_sidebar_multi_datasets(data_paths)
+            select_feature = self.sidebar.setup_sidebar_features(data, name="Features", key="features")
 
         return selected_sets, select_feature
 
@@ -275,7 +272,7 @@ class UnivariateFeature(BasePage):
 
     def main(self, data, datasets_paths, select_feature_name, labels):
 
-        highlight_subject = setup_highlight_subject(data)
+        highlight_subject = self.sidebar.setup_highlight_subject(data)
 
         # Visualize boxplot
         data.reset_index(drop=True, inplace=True)
@@ -296,5 +293,5 @@ class UnivariateFeature(BasePage):
             plot_type = st.selectbox(label="Type of plot to visualize", options=["Histogram", "Probability"], index=1)
         with col2:
             customization_histogram = st.selectbox(label="Customize visualization", options=["Standard visualization", "Custom visualization"], index=0, key="histogram")
-        n_bins, bins_size = setup_histogram_options(plot_type)
+        n_bins, bins_size = self.sidebar.setup_histogram_options(plot_type)
         self.histogram_logic(data, plot_type, select_feature_name, n_bins, bins_size, customization_histogram)

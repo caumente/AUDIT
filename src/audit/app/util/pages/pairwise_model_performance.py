@@ -5,15 +5,6 @@ import streamlit as st
 from audit.app.util.pages.base_page import BasePage
 from audit.app.util.commons.checks import models_sanity_check
 from audit.app.util.commons.data_preprocessing import processing_data
-from audit.app.util.commons.sidebars import setup_aggregation_button
-from audit.app.util.commons.sidebars import setup_button_data_download
-from audit.app.util.commons.sidebars import setup_clip_sidebar
-from audit.app.util.commons.sidebars import setup_improvement_button
-from audit.app.util.commons.sidebars import setup_metrics_customization
-from audit.app.util.commons.sidebars import setup_sidebar_pairwise_models
-from audit.app.util.commons.sidebars import setup_sidebar_single_dataset
-from audit.app.util.commons.sidebars import setup_sidebar_single_metric
-from audit.app.util.commons.sidebars import setup_statistical_test
 from audit.app.util.commons.utils import download_plot
 from audit.app.util.constants.descriptions import PairwiseModelPerformanceComparisonPage
 from audit.app.util.constants.metrics import Metrics
@@ -22,11 +13,12 @@ from audit.metrics.statistical_tests import normality_test
 from audit.metrics.statistical_tests import homoscedasticity_test
 from audit.metrics.statistical_tests import paired_ttest
 from audit.metrics.statistical_tests import wilcoxon_test
-from audit.utils.commons.file_manager import read_datasets_from_dict
+from audit.utils.internal._csv_helpers import read_datasets_from_dict
 from audit.visualization.barplots import aggregated_pairwise_model_performance
 from audit.visualization.barplots import individual_pairwise_model_performance
 from audit.visualization.histograms import plot_histogram
 from streamlit_theme import st_theme
+from audit.app.util.commons.checks import none_check
 
 
 class PairwiseModelPerformance(BasePage):
@@ -55,58 +47,61 @@ class PairwiseModelPerformance(BasePage):
             st.latex(self.descriptions.ratio_formula)
 
         # type of improvement and aggregation
-        improvement_type = setup_improvement_button()
-        agg = setup_aggregation_button()
+        improvement_type = self.sidebar.setup_improvement_button()
+        agg = self.sidebar.setup_aggregation_button()
 
-        # Load datasets
-        raw_metrics = read_datasets_from_dict(metrics_paths)
-        raw_features = read_datasets_from_dict(features_paths)
-        df_stats = raw_metrics.drop(columns="region").groupby(["ID", "model", "set"]).mean().reset_index()
+        proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
+        if proceed[0]:
+            # Load datasets
+            raw_metrics = read_datasets_from_dict(metrics_paths)
+            raw_features = read_datasets_from_dict(features_paths)
+            df_stats = raw_metrics.drop(columns="region").groupby(["ID", "model", "set"]).mean().reset_index()
 
-        # Setup sidebar
-        selected_set, ba_model, be_model, selected_metric, num_subjects, selected_sorted, selected_order = self.setup_sidebar(
-            raw_metrics, agg)
+            # Setup sidebar
+            selected_set, ba_model, be_model, selected_metric, num_subjects, selected_sorted, selected_order = self.setup_sidebar(
+                raw_metrics, agg)
 
-        if not models_sanity_check(ba_model, be_model):
-            st.error("Models selected must be different to make a performance comparison", icon="🚨")
-        else:
-            df = processing_data(raw_metrics, selected_set,
-                                 features=['ID', 'region', self.metrics.get_metrics().get(selected_metric, None), 'model', 'set'])
-            df = self.process_metrics(
-                data=df.drop(columns='set'),
-                selected_metric=self.metrics.get_metrics().get(selected_metric, None),
-                baseline_model=ba_model,
-                benchmark_model=be_model,
-                aggregate=agg,
-                improvement_type=improvement_type
-            )
-
-            # Merge with features and average performance if not aggregated
-            if not agg:
-                df = df.merge(raw_features, on=["ID"])
-                self.run_individualized(df, ba_model, be_model, improvement_type, selected_sorted, selected_order,
-                                        num_subjects)
+            if not models_sanity_check(ba_model, be_model):
+                st.error("Models selected must be different to make a performance comparison", icon="🚨")
             else:
-                self.run_aggregated(df, improvement_type, selected_metric, selected_set)
+                df = processing_data(raw_metrics, selected_set,
+                                     features=['ID', 'region', self.metrics.get_metrics().get(selected_metric, None), 'model', 'set'])
+                df = self.process_metrics(
+                    data=df.drop(columns='set'),
+                    selected_metric=self.metrics.get_metrics().get(selected_metric, None),
+                    baseline_model=ba_model,
+                    benchmark_model=be_model,
+                    aggregate=agg,
+                    improvement_type=improvement_type
+                )
 
-                # Perform statistical test
-                if setup_statistical_test():
-                    sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
-                        self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
-                    )
-                    self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
+                # Merge with features and average performance if not aggregated
+                if not agg:
+                    df = df.merge(raw_features, on=["ID"])
+                    self.run_individualized(df, ba_model, be_model, improvement_type, selected_sorted, selected_order,
+                                            num_subjects)
+                else:
+                    self.run_aggregated(df, improvement_type, selected_metric, selected_set)
 
-                    setup_button_data_download(df_stats)
+                    # Perform statistical test
+                    if self.sidebar.setup_statistical_test():
+                        sample_bm, sample_nm, nt_baseline_model, nt_benchmark_model, homoscedasticity = (
+                            self.perform_parametric_assumptions_test(df_stats, selected_set, selected_metric, ba_model, be_model)
+                        )
+                        self.perform_statistical_test(nt_baseline_model, nt_benchmark_model, homoscedasticity, sample_bm, sample_nm)
 
-    @staticmethod
-    def setup_sidebar(data, aggregated=True):
+                        self.sidebar.setup_button_data_download(df_stats)
+        else:
+            st.error(proceed[-1], icon='🚨')
+
+    def setup_sidebar(self, data, aggregated=True):
         with st.sidebar:
             st.header("Configuration")
 
-            selected_set = setup_sidebar_single_dataset(data)
-            baseline_model, benchmark_model = setup_sidebar_pairwise_models(data, selected_set)
-            selected_metric = setup_sidebar_single_metric(data)
-            num_max_subjects, selected_sorted, selected_order = setup_metrics_customization(baseline_model, benchmark_model, aggregated)
+            selected_set = self.sidebar.setup_sidebar_single_dataset(data)
+            baseline_model, benchmark_model = self.sidebar.setup_sidebar_pairwise_models(data, selected_set)
+            selected_metric = self.sidebar.setup_sidebar_single_metric(data)
+            num_max_subjects, selected_sorted, selected_order = self.sidebar.setup_metrics_customization(baseline_model, benchmark_model, aggregated)
 
         return selected_set, baseline_model, benchmark_model, selected_metric, num_max_subjects, selected_sorted, selected_order
 
@@ -148,7 +143,7 @@ class PairwiseModelPerformance(BasePage):
             data = data[data.ID.isin(l[:num_max_subjects])]
 
         # Clip metric
-        clip_low, clip_up = setup_clip_sidebar(data, improvement_type)
+        clip_low, clip_up = self.sidebar.setup_clip_sidebar(data, improvement_type)
         if clip_low is not None and clip_up is not None:
             data[improvement_type] = data[improvement_type].clip(clip_low, clip_up)
 

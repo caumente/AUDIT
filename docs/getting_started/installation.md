@@ -8,7 +8,7 @@ This allows you to try AUDIT without any setup. When you're ready to analyze you
 
 ---
 
-## 🏆 Installation via Repository (Recommended)
+## Installation via Repository (Recommended)
 
 For full flexibility, access to the latest updates, and example files, we recommend installing AUDIT by cloning the official repository. This method is suitable for most users, including those who want to customize or contribute to the project.
 
@@ -18,21 +18,21 @@ Choose one of the following options:
 
 1. **Create an isolated environment** (recommended to avoid dependency conflicts):
     
-    ```bash
+    ```python
     conda create -n audit_env python=3.10
     conda activate audit_env
     ```
 
 2. **Clone the repository**:
     
-    ```bash
+    ```python
     git clone https://github.com/caumente/AUDIT.git
     cd AUDIT
     ```
 
 3. **Install dependencies**:
     
-    ```bash
+    ```python
     pip install -r requirements.txt
     ```
 
@@ -48,30 +48,36 @@ Poetry is a modern dependency manager that simplifies library management and env
 
 2. **Clone the repository**:
     
-    ```bash
+    ```python
     git clone https://github.com/caumente/AUDIT.git
     cd AUDIT
     ```
 
 3. **Install dependencies**:
     
-    ```bash
+    ```python
     poetry install
     ```
 
 4. **Activate the virtual environment**:
     
-    ```bash
+    ```python
     poetry shell
     ```
 
 ---
 
-## 📦 Installation via PyPI
+## Installation via PyPI
 
-If you want a quick way to use AUDIT for data analysis and evaluation, you can install the latest stable version from PyPI:
+If you want a quick way to use AUDIT for data analysis and evaluation, you can install the latest stable version from PyPI. AUDIT (`auditapp`) requires **Python 3.10 or higher**.  
+If you try to install it with an older Python version, you will see an error like:
 
-```bash
+!!! failure
+    ERROR: Could not find a version that satisfies the requirement auditapp (from versions: none)
+    ERROR: No matching distribution found for auditapp
+
+
+```python
 pip install auditapp
 ```
 
@@ -80,9 +86,10 @@ This method is ideal for users who do not need to modify the source code. You wi
 !!! tip
     If you encounter issues with permissions, try running `pip install --user auditapp`.
 
+
 ---
 
-## ✅ What’s Next?
+## What’s Next?
 
 - The repository installation provides greater flexibility and access to example cases, project structure templates, and outputs.
 - Example configuration files and datasets are included in the repository to help you get started quickly.
@@ -93,7 +100,7 @@ This method is ideal for users who do not need to modify the source code. You wi
 
 ---
 
-## 🧩 Troubleshooting & Tips
+## Troubleshooting & Tips
 
 - If you have issues with Python versions, ensure you are using Python 3.10 or higher.
 - For help with dependencies, check the requirements.txt or pyproject.toml files.

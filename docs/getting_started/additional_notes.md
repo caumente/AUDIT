@@ -7,7 +7,7 @@
 
 ---
 
-## 🏁 Next Steps
+## Next Steps
 
 You're all set to start using AUDIT! Dive into your MRI data, evaluate AI models, and gain deeper insights with AUDIT’s powerful tools.
 

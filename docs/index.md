@@ -37,10 +37,10 @@ sources, it allows for uncovering biases both intra and inter-dataset as well as
 
 This documentation is structured to help you get the most out of AUDIT:
 
-- **[Getting Started](getting_started/getting_started.md)**: Learn how to install AUDIT and set up your first project.
+- **[Getting Started](getting_started/installation.md)**: Learn how to install AUDIT and set up your first project.
 - **[API Reference](API_reference/features/index.md)**: Detailed reference for all library classes and methods.
 - **[Analysis modes](analysis_modes/home_page.md)**: Explore the dashboard included in the web app.
-- **[Tutorials](tutorials/preprocessing.md)**: Hands-on examples demonstrating common use cases.
+- **[Tutorials](tutorials/Lumiere_preprocessing.md)**: Hands-on examples demonstrating common use cases.
 - **[About](about/LICENSE.md)**: Check latest AUDIT release and license terms.
 
 
@@ -57,13 +57,13 @@ medical image segmentation models. However, you could use AUDIT easily in your o
 
 Directly from PyPI:
 
-```bash
+```python
 pip install auditapp
 ```
 
 Alternatively, clone the repository and install it locally:
 
-```bash
+```python
 git clone https://github.com/caumente/AUDIT.git
 cd AUDIT
 pip install -r requirements.txt
@@ -75,18 +75,18 @@ pip install -r requirements.txt
 Start the interactive web app using our default configuration for data visualization and exploration
 
 Run the following command if you installed AUDIT directly from PyPI:
-```bash
+```python
 auditapp run-app
 ```
 
 Or alternatively, if you cloned the repository and install it locally, run:
 
-```bash
+```python
 python src/audit/app/launcher.py
 ```
 
 That's it! You're ready to explore our default data and evaluate AI segmentations models with AUDIT. Go to 
-[Getting Started](getting_started/getting_started.md) to learn more about how to use AUDIT with your own datasets and 
+[Getting Started](getting_started/installation.md) to learn more about how to use AUDIT with your own datasets and 
 configurations.
 
 

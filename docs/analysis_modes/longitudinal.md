@@ -37,7 +37,7 @@ Make sure that:
 - The same dataset version and preprocessing pipeline are used for all models being analyzed.
 
 It is important that the segmentation labels and the ground truth labels are aligned properly; otherwise, the 
-analysis mode will not work correctly. You can follow this [tutorial](tutorial) where it is explained how to modify the 
+analysis mode will not work correctly. You can follow this [tutorial](../tutorials/Lumiere_postprocessing.md) where it is explained how to modify the 
 dataset labels to ensure proper alignment.
 
 !!! warning

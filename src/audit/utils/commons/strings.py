@@ -2,7 +2,6 @@ import base64
 
 from colorama import Fore
 from colorama import Style
-from loguru import logger
 from tqdm import tqdm
 
 
@@ -95,21 +94,3 @@ def fancy_print(message, color=Fore.WHITE, symbol="•"):
     """
 
     print(f" {color}{symbol}{message}{Style.RESET_ALL}")
-
-
-def img_to_base64(image_path: str) -> str:
-    """
-     Converts an image to a base64-encoded string.
-
-     Args:
-         image_path: The file path of the image to be converted.
-
-     Returns:
-         str: A base64-encoded string representation of the image.
-     """
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-
-
-def configure_logging(log_filename: str):
-    logger.add(log_filename, retention="90 days", level="INFO")

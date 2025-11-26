@@ -126,8 +126,8 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     subjects_list = list_dirs(path_images)
     cpu_cores = check_multiprocessing(config_file)
 
+    data = pd.DataFrame()
     if cpu_cores == 1:
-        data = pd.DataFrame()
 
         with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
             for subject_id in subjects_list:
@@ -151,8 +151,6 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                 data = pd.concat([data, subject_info_df], ignore_index=True)
 
         data = extract_longitudinal_info(config_file, data, dataset_name)
-
-        return data.sort_values(by="ID")
 
     if cpu_cores > 1:
 
@@ -180,14 +178,15 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     result.wait()
                     pbar.update(1)
 
-        data = pd.DataFrame()
         for subject_id, subject_info_df in shared_data.items():
             data = pd.concat([data, subject_info_df], ignore_index=True)
 
         data = data.sort_values(by=data.columns[0]).reset_index(drop=True)
         data = extract_longitudinal_info(config_file, data, dataset_name)
 
-        return data.sort_values(by="ID")
+    data = load_and_merge_metadata(data, config_file, dataset_name)
+
+    return data.sort_values(by="ID")
 
 
 def store_subject_information(
@@ -270,3 +269,65 @@ def extract_longitudinal_info(config: dict, df: pd.DataFrame, dataset_name: str)
         df["time_point"] = 0
 
     return df
+
+
+def load_and_merge_metadata(data: pd.DataFrame, config_file: dict, dataset_name: str) -> pd.DataFrame:
+    """
+    Loads and merges metadata files associated with a given dataset, if available,
+    and merges them with the provided DataFrame.
+
+    Args:
+        data (pd.DataFrame): Main dataframe containing extracted features.
+        config_file (dict): Configuration dictionary, potentially containing a 'metadata' section.
+        dataset_name (str): Name of the dataset currently being processed.
+
+    Returns:
+        pd.DataFrame: DataFrame merged with all metadata files for the given dataset.
+    """
+    metadata_section = config_file.get("metadata", {})
+    if not metadata_section:
+        logger.info("No metadata section found in the config file. Skipping metadata merge.")
+        return data
+
+    dataset_metadata = metadata_section.get(dataset_name)
+    if not dataset_metadata:
+        logger.info(f"No metadata found for dataset '{dataset_name}'. Skipping metadata merge.")
+        return data
+
+    logger.info(f"Found {len(dataset_metadata)} metadata file(s) for dataset '{dataset_name}'.")
+
+    for meta_name, filepath in dataset_metadata.items():
+        # Handle undefined or empty paths gracefully
+        if not filepath or not isinstance(filepath, str) or filepath.strip() == "":
+            logger.warning(f"Metadata entry '{meta_name}' for dataset '{dataset_name}' has no valid file path, skipping.")
+            continue
+
+        if not os.path.exists(filepath):
+            logger.warning(f"Metadata file '{meta_name}' not found at: {filepath}")
+            continue
+
+        logger.info(f"Loading metadata '{meta_name}' from: {filepath}")
+
+        ext = os.path.splitext(filepath)[1].lower()
+
+        try:
+            if ext in [".csv", ".tsv"]:
+                sep = "," if ext == ".csv" else "\t"
+                meta_df = pd.read_csv(filepath, sep=sep)
+            elif ext in [".xlsx", ".xls"]:
+                meta_df = pd.read_excel(filepath)
+            else:
+                logger.warning(f"Unsupported metadata format for '{filepath}', skipping.")
+                continue
+        except Exception as e:
+            logger.error(f"Error reading metadata file '{filepath}': {e}")
+            continue
+
+        if "ID" not in meta_df.columns:
+            logger.warning(f"Metadata file '{meta_name}' does not contain an 'ID' column. Skipping merge.")
+            continue
+
+        data = pd.merge(data, meta_df, on="ID", how="left")
+        logger.info(f"Merged metadata '{meta_name}'.")
+
+    return data

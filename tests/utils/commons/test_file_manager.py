@@ -45,7 +45,7 @@ def sample_structure(tmp_path):
 
 def test_create_project_structure_basic(tmp_path):
     base = tmp_path / "my_project"
-    create_project_structure(base, copy_configs=False)
+    create_project_structure(base)
 
     expected_subfolders = ["datasets", "configs", "outputs", "logs"]
     for folder in expected_subfolders:
@@ -56,7 +56,7 @@ def test_create_project_structure_basic(tmp_path):
 def test_create_project_structure_existing_dir(tmp_path):
     base = tmp_path / "existing"
     base.mkdir()
-    create_project_structure(base, copy_configs=False)
+    create_project_structure(base)
 
     expected_subfolders = ["datasets", "configs", "outputs", "logs"]
     for folder in expected_subfolders:
@@ -69,76 +69,6 @@ def test_create_project_structure_base_is_file(tmp_path):
     base.write_text("I am a file")
     with pytest.raises(NotADirectoryError):
         create_project_structure(base)
-
-
-def test_create_project_structure_copy_configs_no_source(tmp_path, monkeypatch):
-    base = tmp_path / "project"
-
-    # Patch pkg_resources.files to simulate missing configs folder
-    monkeypatch.setattr(
-        "src.audit.utils.commons.file_manager.pkg_resources.files", lambda package: Path("/nonexistent/configs")
-    )
-
-    create_project_structure(base, copy_configs=True)
-    configs_folder = base / "configs"
-    assert configs_folder.exists() and configs_folder.is_dir()
-
-
-def test_create_project_structure_copy_configs_with_files(tmp_path):
-    base = tmp_path / "project"
-
-    # Create mock config files
-    mock_configs = tmp_path / "mock_configs"
-    mock_configs.mkdir()
-    config1 = mock_configs / "config1.yml"
-    config1.write_text("a:1")
-    config2 = mock_configs / "config2.yml"
-    config2.write_text("b:2")
-
-    # Patch pkg_resources.files to return our tmp_path so that / "configs" points to mock_configs
-    class DummyFiles:
-        def __truediv__(self, other):
-            # emulate pkg_resources.files(...) / "configs"
-            return mock_configs
-
-    with patch("src.audit.utils.commons.file_manager.pkg_resources.files", return_value=DummyFiles()):
-        create_project_structure(base, copy_configs=True)
-
-    # Verify folders created
-    for folder in ["datasets", "configs", "outputs", "logs"]:
-        assert (base / folder).exists() and (base / folder).is_dir()
-
-    # Verify config files copied
-    copied_files = list((base / "configs").glob("*.yml"))
-    copied_names = [f.name for f in copied_files]
-    assert "config1.yml" in copied_names
-    assert "config2.yml" in copied_names
-    assert len(copied_files) == 2
-
-
-def test_create_project_structure_copy_configs_false(tmp_path, monkeypatch):
-    base = tmp_path / "project"
-    configs_src = tmp_path / "mock_configs"
-    configs_src.mkdir()
-    (configs_src / "config.yml").write_text("test")
-
-    monkeypatch.setattr("src.audit.utils.commons.file_manager.pkg_resources.files", lambda package: configs_src)
-
-    create_project_structure(base, copy_configs=False)
-    # Config file should not be copied
-    assert not (base / "configs" / "config.yml").exists()
-
-
-def test_create_project_structure_permission_error(tmp_path, monkeypatch):
-    base = tmp_path / "project"
-
-    def raise_permission(*args, **kwargs):
-        raise PermissionError("No permission")
-
-    monkeypatch.setattr("src.audit.utils.commons.file_manager.pkg_resources.files", raise_permission)
-
-    with pytest.raises(PermissionError):
-        create_project_structure(base, copy_configs=True)
 
 
 def test_list_dirs_basic(tmp_path):

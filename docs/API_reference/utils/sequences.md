@@ -19,7 +19,7 @@ If an error occurs while reading, `None` is returned and a warning is logged.
 
 **Parameters**  
 
-- **path_folder** (`str`): Path to the NIfTI file on disk (e.g., `/path/to/scan.nii.gz`).  
+- **path** (`str`): Path to the NIfTI file on disk (e.g., `/path/to/scan.nii.gz`).  
 - **as_array** (`bool`, default: `False`): If True, return the image as a NumPy array; otherwise return a SimpleITK image.
 
 **Returns**  

@@ -95,8 +95,8 @@ def test_extract_features_valid_sequence(mock_sequence):
 
     # Assert that the expected texture features are present in the dictionary
     for texture in textures:
-        assert f"mean_{texture}" in result, f"Missing mean for texture {texture}."
-        assert f"std_{texture}" in result, f"Missing standard deviation for texture {texture}."
+        assert f"mean_{texture.lower()}" in result, f"Missing mean for texture {texture.lower()}."
+        assert f"std_{texture.lower()}" in result, f"Missing standard deviation for texture {texture.lower()}."
 
     # Check that the features contain numerical values (no NaNs or infinities)
     for key, value in result.items():
@@ -113,8 +113,8 @@ def test_extract_features_zero_sequence(mock_zero_sequence):
 
     # Assert that the results contain NaN for all features in a zero-sequence
     for texture in textures:
-        mean_key = f"mean_{texture}"
-        std_key = f"std_{texture}"
+        mean_key = f"mean_{texture.lower()}"
+        std_key = f"std_{texture.lower()}"
 
         # Check that the mean and std are NaN for each texture
         assert np.isnan(result[mean_key]), f"{mean_key} should be NaN for all-zero sequence."
@@ -131,8 +131,8 @@ def test_extract_features_with_empty_planes(mock_sequence_with_empty_planes):
 
     # Assert that the results contain numerical values (no NaNs or infinities) after removing empty planes
     for texture in textures:
-        mean_key = f"mean_{texture}"
-        std_key = f"std_{texture}"
+        mean_key = f"mean_{texture.lower()}"
+        std_key = f"std_{texture.lower()}"
 
         assert mean_key in result, f"Missing {mean_key} in the result."
         assert std_key in result, f"Missing {std_key} in the result."
@@ -153,8 +153,8 @@ def test_extract_features_with_default_textures(mock_sequence):
     # Assert that the expected default texture features are present in the dictionary
     default_textures = ["contrast", "dissimilarity", "homogeneity", "ASM", "energy", "correlation"]
     for texture in default_textures:
-        assert f"mean_{texture}" in result, f"Missing mean for texture {texture}."
-        assert f"std_{texture}" in result, f"Missing standard deviation for texture {texture}."
+        assert f"mean_{texture.lower()}" in result, f"Missing mean for texture {texture.lower()}."
+        assert f"std_{texture.lower()}" in result, f"Missing standard deviation for texture {texture.lower()}."
 
     # Check that the features contain numerical values (no NaNs or infinities)
     for key, value in result.items():

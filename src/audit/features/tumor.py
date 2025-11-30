@@ -182,13 +182,16 @@ class TumorFeatures:
 
     def calculate_tumor_pixel(self):
         if self.segmentation is None:
+            if not self.mapping_names:
+                return {}
             return {f"lesion_size_{k.lower()}": np.nan for k in self.mapping_names.values()}
 
         # calculating number of pixels per label. If some of them does not exist, will be defined to 0 by default
         number_pixels = self.count_tumor_pixels()
-        number_pixels.update(
-            {label.lower(): 0 for label in self.mapping_names.values() if label.lower() not in number_pixels}
-        )
+        if self.mapping_names:
+            number_pixels.update(
+                {label.lower(): 0 for label in self.mapping_names.values() if label.lower() not in number_pixels}
+            )
 
         # removing background from labels
         number_pixels.pop("bkg", None)

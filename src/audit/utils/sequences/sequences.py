@@ -13,7 +13,7 @@ from SimpleITK import ReadImage
 from SimpleITK import WriteImage
 
 
-def load_nii(path_folder: str, as_array: bool = False) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
+def load_nii(path: str, as_array: bool = False) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
     """
     Load a NIfTI image from disk.
 
@@ -23,7 +23,7 @@ def load_nii(path_folder: str, as_array: bool = False) -> Optional[Union[SimpleI
 
     Parameters
     ----------
-    path_folder : str
+    path : str
         Path to the NIfTI file on disk (e.g., ``/path/to/scan.nii.gz``).
     as_array : bool, default False
         If True, return the image as a NumPy array; otherwise return a SimpleITK image.
@@ -33,19 +33,19 @@ def load_nii(path_folder: str, as_array: bool = False) -> Optional[Union[SimpleI
     Optional[Union[SimpleITK.Image, np.ndarray]]
         The loaded image (``SimpleITK.Image`` or ``np.ndarray``) if successful; otherwise ``None``.
     """
-    if path_folder is None or not os.path.isfile(path_folder):
-        raise ValueError(f"The file at {path_folder} does not exist or is not a valid file.")
+    if path is None or not os.path.isfile(path):
+        raise ValueError(f"The file at {path} does not exist or is not a valid file.")
 
     try:
-        image = ReadImage(str(path_folder))
+        image = ReadImage(str(path))
         if as_array:
             return GetArrayFromImage(image)
         return image
     except RuntimeError as e:
-        logger.warning(f"Error loading NIfTI file {path_folder}: {e}")
+        logger.warning(f"Error loading NIfTI file {path}: {e}")
         return None
     except Exception as e:
-        logger.warning(f"Unexpected error while loading NIfTI file {path_folder}: {e}")
+        logger.warning(f"Unexpected error while loading NIfTI file {path}: {e}")
         return None
 
 

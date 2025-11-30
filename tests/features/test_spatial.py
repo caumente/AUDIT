@@ -29,47 +29,44 @@ def mock_non_isotropic_spacing():
     return np.array([2.0, 0.5, 2.0])
 
 
-def test_calculate_brain_center_mass(mock_sequence, mock_isotropic_spacing):
-    """Test the calculation of brain center of mass with isotropic spacing."""
-    print("Mock sequence sum:", np.sum(mock_sequence))
-    print("Mock sequence shape:", mock_sequence.shape)
-
+def test_calculate_center_mass(mock_sequence, mock_isotropic_spacing):
+    """Test the calculation of center of mass with isotropic spacing."""
     spatial_features = SpatialFeatures(mock_sequence, mock_isotropic_spacing)
     result = spatial_features.calculate_anatomical_center_mass()
 
     expected_result = {
-        "axial_brain_centre_mass": 2.0,
-        "coronal_brain_centre_mass": 2.0,
-        "sagittal_brain_centre_mass": 2.0,
+        "axial_plane_center_of_mass": 2.0,
+        "coronal_plane_center_of_mass": 2.0,
+        "sagittal_plane_center_of_mass": 2.0,
     }
     assert result == pytest.approx(expected_result), "Center of mass calculation is incorrect with isotropic spacing."
 
 
-def test_calculate_brain_center_mass_non_isotropic_spacing(mock_sequence, mock_non_isotropic_spacing):
-    """Test the calculation of brain center of mass with non-isotropic spacing."""
+def test_calculate_center_mass_non_isotropic_spacing(mock_sequence, mock_non_isotropic_spacing):
+    """Test the calculation of center of mass with non-isotropic spacing."""
     spatial_features = SpatialFeatures(mock_sequence, mock_non_isotropic_spacing)
     result = spatial_features.calculate_anatomical_center_mass()
 
     # Expected center of mass, scaled by non-isotropic spacing
     expected_result = {
-        "axial_brain_centre_mass": 2.0 * 2.0,  # Axial spacing is 2.0
-        "coronal_brain_centre_mass": 2.0 * 0.5,  # Coronal spacing is 0.5
-        "sagittal_brain_centre_mass": 2.0 * 2.0,  # Sagittal spacing is 2.0
+        "axial_plane_center_of_mass": 2.0 * 2.0,  # Axial spacing is 2.0
+        "coronal_plane_center_of_mass": 2.0 * 0.5,  # Coronal spacing is 0.5
+        "sagittal_plane_center_of_mass": 2.0 * 2.0,  # Sagittal spacing is 2.0
     }
     assert result == pytest.approx(
         expected_result
     ), "Center of mass calculation is incorrect with non-isotropic spacing."
 
 
-def test_calculate_brain_center_mass_no_sequence():
-    """Test the calculation of brain center of mass when sequence is None."""
+def test_calculate_center_mass_no_sequence():
+    """Test the calculation of center of mass when sequence is None."""
     spatial_features = SpatialFeatures(None)
     result = spatial_features.calculate_anatomical_center_mass()
 
     expected_result = {
-        "axial_brain_centre_mass": np.nan,
-        "coronal_brain_centre_mass": np.nan,
-        "sagittal_brain_centre_mass": np.nan,
+        "axial_plane_center_of_mass": np.nan,
+        "coronal_plane_center_of_mass": np.nan,
+        "sagittal_plane_center_of_mass": np.nan,
     }
     assert result == expected_result, "Center of mass calculation should return NaNs for None sequence."
 
@@ -80,9 +77,9 @@ def test_get_shape(mock_sequence):
     result = spatial_features.get_shape()
 
     expected_result = {
-        "axial_dim": 5,
-        "coronal_dim": 5,
-        "sagittal_dim": 5,
+        "axial_plane_resolution": 5,
+        "coronal_plane_resolution": 5,
+        "sagittal_plane_resolution": 5,
     }
     assert result == expected_result, "Shape calculation is incorrect."
 
@@ -93,9 +90,9 @@ def test_get_dimensions_no_sequence():
     result = spatial_features.get_shape()
 
     expected_result = {
-        "axial_dim": np.nan,
-        "coronal_dim": np.nan,
-        "sagittal_dim": np.nan,
+        "axial_plane_resolution": np.nan,
+        "coronal_plane_resolution": np.nan,
+        "sagittal_plane_resolution": np.nan,
     }
     assert result == expected_result, "Dimensions should return NaNs for None sequence."
 
@@ -106,12 +103,12 @@ def test_extract_features(mock_sequence, mock_isotropic_spacing):
     result = spatial_features.extract_features()
 
     expected_result = {
-        "axial_dim": 5,
-        "coronal_dim": 5,
-        "sagittal_dim": 5,
-        "axial_brain_centre_mass": 2.0,
-        "coronal_brain_centre_mass": 2.0,
-        "sagittal_brain_centre_mass": 2.0,
+        "axial_plane_resolution": 5,
+        "coronal_plane_resolution": 5,
+        "sagittal_plane_resolution": 5,
+        "axial_plane_center_of_mass": 2.0,
+        "coronal_plane_center_of_mass": 2.0,
+        "sagittal_plane_center_of_mass": 2.0,
     }
     assert result == pytest.approx(expected_result), "Extracted features are incorrect with isotropic spacing."
 
@@ -122,11 +119,11 @@ def test_extract_features_no_sequence():
     result = spatial_features.extract_features()
 
     expected_result = {
-        "axial_dim": np.nan,
-        "coronal_dim": np.nan,
-        "sagittal_dim": np.nan,
-        "axial_brain_centre_mass": np.nan,
-        "coronal_brain_centre_mass": np.nan,
-        "sagittal_brain_centre_mass": np.nan,
+        "axial_plane_resolution": np.nan,
+        "coronal_plane_resolution": np.nan,
+        "sagittal_plane_resolution": np.nan,
+        "axial_plane_center_of_mass": np.nan,
+        "coronal_plane_center_of_mass": np.nan,
+        "sagittal_plane_center_of_mass": np.nan,
     }
     assert result == expected_result, "Extracted features are incorrect without sequence"

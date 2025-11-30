@@ -425,6 +425,7 @@ def test_calculate_tumor_pixel(mock_segmentation_multiple_labels):
     """Test calculation of tumor pixels."""
     tumor_features = TumorFeatures(mock_segmentation_multiple_labels)
     result = tumor_features.calculate_tumor_pixel()
+    print(result)
 
     # Check that the result contains tumor pixel counts with proper prefixes
     assert "lesion_size_1" in result, "Tumor pixels for label '1' should be in the result."

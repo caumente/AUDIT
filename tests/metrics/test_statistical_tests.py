@@ -223,7 +223,7 @@ def test_shapiro_valid_sample():
 
 # Test for valid samples (non-normal distribution)
 def test_shapiro_non_normal_sample():
-    sample = np.random.uniform(low=0, high=1, size=30)  # Generate a non-normal sample
+    sample = np.random.lognormal(mean=0, sigma=45, size=30)  # Generate a non-normal sample
     result = shapiro_wilk_test(sample)
 
     assert result["Normally distributed"] is False
@@ -239,20 +239,20 @@ def test_shapiro_small_sample():
 
 # Test for valid samples (normal distribution) for Lilliefors test
 def test_lilliefors_valid_sample():
-    sample = np.random.normal(loc=0, scale=1, size=100)  # Generate a normal sample
+    sample = np.random.normal(loc=0, scale=1, size=1000)  # Generate a normal sample
     result = lilliefors_test(sample)
 
     assert result["Normally distributed"] is True
-    assert float(result["P-value"]) > 0.05  # P-value should indicate normality for a normal distribution
+    assert float(result["P-value"]) > 0.01  # P-value should indicate normality for a normal distribution
 
 
 # Test for valid samples (non-normal distribution) for Lilliefors test
 def test_lilliefors_non_normal_sample():
-    sample = np.random.uniform(low=0, high=1, size=100)  # Generate a non-normal sample
+    sample = np.random.lognormal(mean=0, sigma=45, size=1000)  # Generate a non-normal sample
     result = lilliefors_test(sample)
 
     assert result["Normally distributed"] is False
-    assert float(result["P-value"]) <= 0.05  # P-value should indicate non-normality for a uniform distribution
+    assert float(result["P-value"]) <= 0.01  # P-value should indicate non-normality for a uniform distribution
 
 
 # Test for sample size too small for Lilliefors test

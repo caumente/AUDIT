@@ -19,7 +19,7 @@ By the end of this tutorial, you will:
 Let’s get started!
 
 
-## 1. Load functions
+## 1. Prerequisites
 
 This tutorial uses some utility functions to manipulate files and sequences.
 
@@ -40,7 +40,7 @@ from audit.utils.commons.file_manager import (
 
 ---
 
-## 2. Understanding the data
+## 2. Data understanding
 
 Now, let's suppose we have a model that was pretrained on a brain MRI dataset. We will use this model to generate a 
 series of predictions on our own dataset. In our case, we want to run inference on LUMIERE.
@@ -122,7 +122,7 @@ Let’s take a moment to verify this new organization:
 ```
 
 
-## 4. Add extension name
+## 4. Rename files
 
 
 Another important aspect of AUDIT is that it uses file extensions to distinguish between sequences (e.g., _t1, _t2, 

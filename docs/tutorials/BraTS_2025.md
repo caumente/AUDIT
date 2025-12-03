@@ -1,7 +1,7 @@
 # BraTS 2025 Tutorial
 
 This tutorial guides you step-by-step through preparing the BraTS 2025 dataset, organizing it, extracting features, 
-and launching the interactive dashboard to explore your data—all powered by the AUDIT framework.
+and launching the interactive dashboard to explore your data using AUDIT framework.
 
 !!! note "Working with limited resources?"
     If you have computational or storage constraints, you can skip the feature extraction entirely! Pre-extracted features 
@@ -60,7 +60,7 @@ python -m ipykernel install --user --name=audit_env --display-name "Python (audi
 ```
 
 This command registers your environment with Jupyter, making it available in the kernel selection menu. The 
---display-name parameter determines what you'll see in the Jupyter interface.
+`--display-name` parameter determines what you'll see in the Jupyter interface.
 
 Now, launch Jupyter Notebook:
 

@@ -4,7 +4,7 @@ This tutorial guides you step by step through preparing the BraTS 2024 dataset, 
 extraction, and launching the interactive dashboard to explore your data using the AUDIT framework.
 
 Unlike [BraTS 2025](BraTS_2025.md), this dataset includes a demographic mapping file containing valuable metadata such as glioma type, 
-MRI scanner specifications, magnetic field strength, and patient demographics. This enables a deeper analysis—not only 
+MRI scanner specifications, magnetic field strength, and patient demographics. This enables a deeper analysis not only 
 exploring dataset structure and image-derived features but also uncovering potential biases or acquisition-related 
 differences that may affect model performance.
 
@@ -585,8 +585,8 @@ details at the patient and region level. Some of the analyses we can perform inc
 ### 10.1 Segmentation error matrix
 
 The segmentation error matrix allows you to analyze in detail which regions your model confuses. It is a pseudo-confusion 
-matrix normalized at the ground truth level. For more details about how this analysis mode works, consult the 
-[documentacion](./../analysis_modes/segmentation_error.md).
+matrix normalized at the ground truth level. For more details about how this analysis mode works, check out the 
+[documentation](./../analysis_modes/segmentation_error.md).
 
 > ![Segmentation error matrix for Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_l.png#only-light)
 > ![Segmentation error matrix for Duke dataset and BraTS2025_1 model](../assets/tutorials/brats2024_segmentation_matrix_d.png#only-dark)
@@ -619,7 +619,7 @@ characteristics of this patient to see if there is any peculiarity that makes th
 Analyzing model performance as a function of different characteristics allows us to understand whether our model has 
 any bias. For example, we can answer questions such as: does my model perform better when predicting tumors that are 
 far from the brain's center of mass, or does our model predict better for tumors belonging to a specific pathology? 
-For more details about how this analysis mode works, consult the [documentation](./../analysis_modes/single_model.md).
+For more details about how this analysis mode works, check out the [documentation](./../analysis_modes/single_model.md).
 
 Ideally, what we would expect to see is a plot where we don't visualize any specific trend, indicating that there is 
 no bias. That is precisely what we observe in the following figure:

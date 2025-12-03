@@ -128,7 +128,7 @@ masks that take into account the voxel spacing, and are independent of intensity
 to differences in acquisition and preprocessing, making them suitable for comparisons even across heterogeneous cohorts.
 
 !!! info
-    _More technical details can be found in_ [our publication](https://arxiv.org/) _and within the_ [API reference](https://caumente.github.io/AUDIT/API_reference/features/feature_extraction/).
+    _More technical details can be found in_ [our publication](https://doi.org/10.1016/j.cmpb.2025.108991) _and within the_ [API reference](https://caumente.github.io/AUDIT/API_reference/features/feature_extraction/).
 
 ---
 

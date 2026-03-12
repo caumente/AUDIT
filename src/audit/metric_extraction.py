@@ -13,6 +13,7 @@ from loguru import logger
 
 from audit.metrics.main import extract_audit_metrics
 from audit.metrics.main import extract_pymia_metrics
+from audit.metrics.backends.MetricsReloaded.metrics_reloaded import extract_metricsreloaded_metrics
 from audit.utils.internal._config_helpers import check_metric_extraction_config
 from audit.utils.internal._config_helpers import configure_logging
 from audit.utils.internal._config_helpers import load_config_file
@@ -46,6 +47,8 @@ def run_metric_extraction(config_path):
         extracted_metrics = extract_audit_metrics(config_file=config)
     elif config["package"] == "pymia":
         extracted_metrics = extract_pymia_metrics(config_file=config)
+    elif config["package"] == "metricsreloaded":
+        extracted_metrics = extract_metricsreloaded_metrics(config_file=config)
     else:
         extracted_metrics = pd.DataFrame()
 

@@ -4,14 +4,18 @@
 When the pipeline uses the Metrics Reloaded backend, segmentation performance is evaluated using a set of metrics 
 derived from pixel-wise comparisons between the predicted segmentation and the ground truth. 
 
+Although the Metrics Reloaded backend allows the computation of a wide range of metrics, some are more suitable than others 
+for segmentation problems. To discover which metrics are most appropriate for a given task, please consult 
+[Metrics Reloaded Metric Library](https://metrics-reloaded.dkfz.de/metric-library).
+
 We thank [Metrics Reloaded project](https://metrics-reloaded.dkfz.de/) and its 
 [GitHub repository](https://github.com/Project-MONAI/MetricsReloaded) for providing us with methods for all metrics computation.
 
 References:
 
-- Reinke, A., Tizabi, M.D., Baumgartner, M. et al. Understanding metric-related pitfalls in image analysis validation. Nat Methods 21, 182–194 (2024). https://doi.org/10.1038/s41592-023-02150-0
+- [Reinke, A., Tizabi, M.D., Baumgartner, M. et al. Understanding metric-related pitfalls in image analysis validation. Nat Methods 21, 182–194 (2024).](https://doi.org/10.1038/s41592-023-02150-0)
 
-- Maier-Hein, L., Reinke, A., Godau, P. et al. Metrics reloaded: recommendations for image analysis validation. Nat Methods 21, 195–212 (2024). https://doi.org/10.1038/s41592-023-02151-z
+- [Maier-Hein, L., Reinke, A., Godau, P. et al. Metrics reloaded: recommendations for image analysis validation. Nat Methods 21, 195–212 (2024).](https://doi.org/10.1038/s41592-023-02151-z)
 
 These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement.
 
@@ -26,7 +30,9 @@ Let:
 
 ---
 
-## Dice Score Coefficient (DSC)
+## Counting Metrics
+
+### Dice Score Coefficient (DSC)
 
 DSC measures the overlap between two structures.
 Find more information about [DSC](https://metrics-reloaded.dkfz.de/metric-library/dsc).
@@ -40,7 +46,7 @@ Values range from 0 to 1. A value of 1 indicates perfect overlap.
 
 ---
 
-## Intersection over Union (IoU)
+### Intersection over Union (IoU)
 
 Also known as Jaccard Index, IoU measures the overlap between two structures.
 Find more information about [IoU](https://metrics-reloaded.dkfz.de/metric-library/intersection_over_union).
@@ -52,7 +58,7 @@ Values range from 0 to 1. A value of 1 indicates perfect overlap.
 
 ---
 
-## F-Beta Score (Fβ)
+### F-Beta Score (Fβ)
 
 
 The special case of β = 1 is the harmonic mean of PPV and Sensitivity and is a common metric in segmentation problems 
@@ -71,7 +77,7 @@ Values range from 0 to 1. A value of 1 indicates perfect overlap.
 
 ---
 
-## Centreline Dice (CL Dice)
+### Centreline Dice (CL Dice)
 
 clDice measures the overlap between two structures, ideally tubular-shaped. The formula is similar to the DSC, but 
 relies on the topology precision and topology sensitivity which are defined based on the skeletons of the structures. 
@@ -92,7 +98,37 @@ Values range from 0 to 1. A value of 1 indicates perfect overlap.
 
 ---
 
-## Accuracy
+### Intersection over Reference (IoR)
+
+IoR measures the overlap between two structures. It is defined as the pixel-level Sensitivity and only considers the FN 
+pixels (not the FPs).
+Find more information about [IoR](https://metrics-reloaded.dkfz.de/metric-library/intersection_over_reference).
+
+$$
+\text{IoR(A, B)} = \frac{|\text{A} \cap \text{B}|}{|\text{A}|}
+$$
+
+
+**Interpretation:**  
+Values range from 0 to 1. A value of 1 indicates that the reference structure is fully covered by the prediction.
+
+---
+
+### Absolute Volume Difference Ratio (AVDR)
+
+AVDR measures the relative difference between the predicted and reference volumes.
+
+$$
+\text{AVDR} =
+\frac{|V_{pred} - V_{ref}|}{V_{ref}}
+$$
+
+**Interpretation:**  
+Lower values indicate better agreement between predicted and reference volumes.
+
+---
+
+### Accuracy
 
 Accuracy measures the ratio of samples that were correctly classified over all predictions made.
 Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/accuracy).
@@ -104,7 +140,7 @@ Values range from 0 to 1. A value of 1 indicates perfect classification.
 
 ---
 
-## Balanced Accuracy (BA)
+### Balanced Accuracy (BA)
 
 BA measures the arithmetic mean of Sensitivities for each class, i.e., for each class, it measures the fraction of 
 actual positive samples that were predicted as such.
@@ -118,7 +154,7 @@ Values range from 0 to 1. A value of 1 indicates perfect classification.
 
 ---
 
-## Sensitivity (Recall)
+### Sensitivity (Recall)
 
 Sensitivity measures how good a method is in classifying truly positive samples as positive.
 Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/sensitivity).
@@ -130,7 +166,7 @@ Values range from 0 to 1. A value of 1 indicates that all true positive samples 
 
 ---
 
-## Specificity
+### Specificity
 
 Specificity measures how good a method is in classifying truly negative samples as negative. 
 Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/specificity).
@@ -142,7 +178,7 @@ Values range from 0 to 1. A value of 1 indicates that all negatives samples were
 
 ---
 
-## Positive Predictive Value (PPV)
+### Positive Predictive Value (PPV)
 
 Also known as **Precision**, PPV represents the probability of a positive prediction corresponding to an actual positive sample.  
 Find more information about [PPV](https://metrics-reloaded.dkfz.de/metric-library/PPV).
@@ -158,7 +194,7 @@ Values range from 0 to 1. A value of 1 indicates that all predicted positive sam
 
 ---
 
-## Negative Predictive Value (NPV)
+### Negative Predictive Value (NPV)
 
 NPV represents the probability of a negative prediction corresponding to an actual negative sample. 
 Find more information about [NPV](https://metrics-reloaded.dkfz.de/metric-library/negative_predictive_value).
@@ -172,7 +208,7 @@ Values range from 0 to 1. A value of 1 indicates that all predicted negative sam
 
 ---
 
-## Matthews Correlation Coefficient (MCC)
+### Matthews Correlation Coefficient (MCC)
 
 MCC measures the correlation between the actual and the predicted class.  
 Find more information about [MCC](https://metrics-reloaded.dkfz.de/metric-library/matthews_correlation).
@@ -192,7 +228,7 @@ Values range from −1 to 1.
 
 ---
 
-## Cohen's Kappa
+### Cohen's Kappa
 
 Cohen's Kappa measures the agreement between prediction and ground truth while accounting for agreement occurring by chance.  
 Find more information about [Cohen's Kappa](https://metrics-reloaded.dkfz.de/metric-library/cohens_kappa).
@@ -245,7 +281,7 @@ Values range from −1 to 1.
 
 ---
 
-## Positive Likelihood Ratio (LR+)
+### Positive Likelihood Ratio (LR+)
 
 LR+ indicates the factor by which a positive prediction occurs more frequently among actual positive samples than among 
 actual negative samples. 
@@ -260,153 +296,7 @@ Values range from 0 to ∞. Higher values indicate stronger evidence.
 
 ---
 
-## Intersection over Reference (IoR)
-
-IoR measures the overlap between two structures. It is defined as the pixel-level Sensitivity and only considers the FN 
-pixels (not the FPs).
-Find more information about [IoR](https://metrics-reloaded.dkfz.de/metric-library/intersection_over_reference).
-
-$$
-\text{IoR(A, B)} = \frac{|\text{A} \cap \text{B}|}{|\text{A}|}
-$$
-
-
-**Interpretation:**  
-Values range from 0 to 1. A value of 1 indicates that the reference structure is fully covered by the prediction.
-
----
-
-## Average Symmetric Surface Distance (ASSD)
-
-ASSD measures the average distance between the surfaces of two segmentations.  
-Find more information about [ASSD](https://metrics-reloaded.dkfz.de/metric-library/average_symmetric_surface_distance).
-
-$$
-\text{ASSD}(\text{A}, \text{B}) =
-\frac{\displaystyle \sum_{\text{a} \in \text{A}} d(\text{a}, \text{B}) \, + \,
-        \displaystyle \sum_{\text{b} \in \text{B}} d(\text{b}, \text{A})}
-       {|\text{A}| + |\text{B}|}
-$$
-
-$$ \text{d}(\text{a}, \text{B}) = \min_{\text{b} \in \text{B}} d(\text{a}, \text{b}) $$
-
-
-
-**Interpretation:**  
-Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
-
----
-
-## Mean Average Surface Distance (MASD)
-
-MASD measures the mean of the averages over all shortest distances from all sampled points on one boundary to any other point on another boundary. 
-Find more information about [MASD](https://metrics-reloaded.dkfz.de/metric-library/masd).
-
-$$ \text{MASD}(A, B) = \frac{1}{2} \Biggl(
-\frac{\displaystyle \sum_{a \in A} d(a, B) \,}{|A|} + \frac{ \,
-        \displaystyle \sum_{b \in B} d(b, A)} {|B|} \Biggl) 
-$$
-
-$$ d(a,B) = \min_{b \in B} d(a,b) $$
-
-**Interpretation:**  
-Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
-
----
-
-## Hausdorff Distance (HD)
-
-HD is the largest of all the distances from a point on one boundary to the closest point on the other boundary.
-Find more information about [HD](https://metrics-reloaded.dkfz.de/metric-library/hd).
-
-$$
-\text{HD}(\text{A}, \text{B})
-= \max \Bigl\{\max_{\text{a} \in \text{A}} d(\text{a}, \text{B}), \,
-\max_{\text{b} \in \text{B}} d(\text{b}, \text{A}) \Bigr\}
-$$
-
-$$ d(\text{a}, \text{B}) = \min_{\text{b} \in \text{B}} d(\text{a}, \text{b}) $$
-
-**Interpretation:**  
-Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
-
-
----
-
-## Percentile Hausdorff Distance (xᵗʰ HD)
-
-The xᵗʰ percentile of the Hausdorff Distance (HD) measures the xᵗʰ percentile of all the distances from a point on one boundary to the closest point on the other boundary. A common value is x = 95 (HD95). 
-Find more information about [xᵗʰ HD](https://metrics-reloaded.dkfz.de/metric-library/xhd).
-
-$$
-\text{HD95}(\text{A}, \text{B})
-= \max \Bigl\{ d_{95}(\text{A}, \text{B}), \,
-d_{95}(\text{B}, \text{A}) \Bigr\}
-$$
-
-$$ d_{95}(\text{A}, \text{B}) = \text{x}_{\! \substack{95 \\ \text{a} \in \text{A}}} \Bigl\{ \min_{\text{b} \in \text{B}} d(\text{a}, \text{b})\Bigr\} $$
-
-**Interpretation:**  
-Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
-
----
-
-## Normalized Surface Distance (NSD)
-
-NSD measures the DSC on boundary pixels with an uncertainty margin. The degree of strictness for what constitutes a 
-correct boundary is represented by the tolerance parameter τ. Only boundary parts within the border regions defined by 
-τ are counted as TP. NSD therefore captures known uncertainties in the reference and allows acceptable deviations from 
-the reference for the predicted boundary. 
-Find more information about [NSD](https://metrics-reloaded.dkfz.de/metric-library/normalized_surface_distance).
-
-$$
-\text{NSD}(\text{A}, \text{B})^{(\tau)} =
-\frac{
-\lvert S_\text{A} \cap {\mathcal{B}_\text{B}}^{(\tau)} \rvert + \lvert S_\text{B} \cap {\mathcal{B}_\text{A}}^{(\tau)} \rvert
-}{
-\lvert S_{\text{A}} \rvert + \lvert S_{\text{B}} \rvert
-}
-$$
-
-Where:
-
-- $\tau$ is a distance tolerance
-
-**Interpretation:**  
-Values range from 0 to 1. Higher values indicate better surface agreement.
-
----
-
-## Boundary IoU
-
-Boundary IoU measures the overlap between the predicted and reference boundaries up to a predefined width d. 
-Find more information about [Boundary IoU](https://metrics-reloaded.dkfz.de/metric-library/boundary_intersection_over_union).
-
-$$
-\text{Boundary IoU}(\text{A}, \text{B}) = \frac{|\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|}{|\text{A}_{\text{d}}| + |\text{B}_{\text{d}}| - |\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|} = \frac{|\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|}{|\text{A}_{\text{d}} \cup \text{B}_{\text{d}}|}
-$$
-
-
-**Interpretation:**  
-Values range from 0 to 1. Higher values indicate better surface agreement.
-
----
-
-## Absolute Volume Difference Ratio (AVDR)
-
-AVDR measures the relative difference between the predicted and reference volumes.
-
-$$
-\text{AVDR} =
-\frac{|V_{pred} - V_{ref}|}{V_{ref}}
-$$
-
-**Interpretation:**  
-Lower values indicate better agreement between predicted and reference volumes.
-
----
-
-## Net Benefit (NB)
+### Net Benefit (NB)
 
 NB validates the quality of a model intended to support a specific clinical decision. NB gives the ‘net’ proportion of 
 TPs that results from a prediction. This is equivalent to the proportion of TPs in the absence of FPs. 
@@ -433,7 +323,7 @@ Values range from -∞ to 1. Higher values indicate better model performance.
 
 ---
 
-## Normalised Expected Cost (ECn)
+### Normalised Expected Cost (ECn)
 
 EC is a generalization of the probability of error (which is, in turn, 1 - Accuracy) for cases in which errors cannot 
 all be considered to have equally severe consequences. It is defined as the expectation of the cost, where the 
@@ -448,3 +338,120 @@ $$
 
 **Interpretation:**  
 Values range from 0 to ∞. Lower values indicate better model performance.
+
+
+## Distance-based metrics
+
+### Average Symmetric Surface Distance (ASSD)
+
+ASSD measures the average distance between the surfaces of two segmentations.  
+Find more information about [ASSD](https://metrics-reloaded.dkfz.de/metric-library/average_symmetric_surface_distance).
+
+$$
+\text{ASSD}(\text{A}, \text{B}) =
+\frac{\displaystyle \sum_{\text{a} \in \text{A}} d(\text{a}, \text{B}) \, + \,
+        \displaystyle \sum_{\text{b} \in \text{B}} d(\text{b}, \text{A})}
+       {|\text{A}| + |\text{B}|}
+$$
+
+$$ \text{d}(\text{a}, \text{B}) = \min_{\text{b} \in \text{B}} d(\text{a}, \text{b}) $$
+
+
+
+**Interpretation:**  
+Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
+
+---
+
+### Mean Average Surface Distance (MASD)
+
+MASD measures the mean of the averages over all shortest distances from all sampled points on one boundary to any other point on another boundary. 
+Find more information about [MASD](https://metrics-reloaded.dkfz.de/metric-library/masd).
+
+$$ \text{MASD}(A, B) = \frac{1}{2} \Biggl(
+\frac{\displaystyle \sum_{a \in A} d(a, B) \,}{|A|} + \frac{ \,
+        \displaystyle \sum_{b \in B} d(b, A)} {|B|} \Biggl) 
+$$
+
+$$ d(a,B) = \min_{b \in B} d(a,b) $$
+
+**Interpretation:**  
+Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
+
+---
+
+### Hausdorff Distance (HD)
+
+HD is the largest of all the distances from a point on one boundary to the closest point on the other boundary.
+Find more information about [HD](https://metrics-reloaded.dkfz.de/metric-library/hd).
+
+$$
+\text{HD}(\text{A}, \text{B})
+= \max \Bigl\{\max_{\text{a} \in \text{A}} d(\text{a}, \text{B}), \,
+\max_{\text{b} \in \text{B}} d(\text{b}, \text{A}) \Bigr\}
+$$
+
+$$ d(\text{a}, \text{B}) = \min_{\text{b} \in \text{B}} d(\text{a}, \text{b}) $$
+
+**Interpretation:**  
+Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
+
+
+---
+
+### Percentile Hausdorff Distance (xᵗʰ HD)
+
+The xᵗʰ percentile of the Hausdorff Distance (HD) measures the xᵗʰ percentile of all the distances from a point on one boundary to the closest point on the other boundary. A common value is x = 95 (HD95). 
+Find more information about [xᵗʰ HD](https://metrics-reloaded.dkfz.de/metric-library/xhd).
+
+$$
+\text{HD95}(\text{A}, \text{B})
+= \max \Bigl\{ d_{95}(\text{A}, \text{B}), \,
+d_{95}(\text{B}, \text{A}) \Bigr\}
+$$
+
+$$ d_{95}(\text{A}, \text{B}) = \text{x}_{\! \substack{95 \\ \text{a} \in \text{A}}} \Bigl\{ \min_{\text{b} \in \text{B}} d(\text{a}, \text{b})\Bigr\} $$
+
+**Interpretation:**  
+Values range from 0 to ∞. Lower values indicate better agreement between surfaces.
+
+---
+
+### Normalized Surface Distance (NSD)
+
+NSD measures the DSC on boundary pixels with an uncertainty margin. The degree of strictness for what constitutes a 
+correct boundary is represented by the tolerance parameter τ. Only boundary parts within the border regions defined by 
+τ are counted as TP. NSD therefore captures known uncertainties in the reference and allows acceptable deviations from 
+the reference for the predicted boundary. 
+Find more information about [NSD](https://metrics-reloaded.dkfz.de/metric-library/normalized_surface_distance).
+
+$$
+\text{NSD}(\text{A}, \text{B})^{(\tau)} =
+\frac{
+\lvert S_\text{A} \cap {\mathcal{B}_\text{B}}^{(\tau)} \rvert + \lvert S_\text{B} \cap {\mathcal{B}_\text{A}}^{(\tau)} \rvert
+}{
+\lvert S_{\text{A}} \rvert + \lvert S_{\text{B}} \rvert
+}
+$$
+
+Where:
+
+- $\tau$ is a distance tolerance
+
+**Interpretation:**  
+Values range from 0 to 1. Higher values indicate better surface agreement.
+
+---
+
+### Boundary IoU
+
+Boundary IoU measures the overlap between the predicted and reference boundaries up to a predefined width d. 
+Find more information about [Boundary IoU](https://metrics-reloaded.dkfz.de/metric-library/boundary_intersection_over_union).
+
+$$
+\text{Boundary IoU}(\text{A}, \text{B}) = \frac{|\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|}{|\text{A}_{\text{d}}| + |\text{B}_{\text{d}}| - |\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|} = \frac{|\text{A}_{\text{d}} \cap \text{B}_{\text{d}}|}{|\text{A}_{\text{d}} \cup \text{B}_{\text{d}}|}
+$$
+
+
+**Interpretation:**  
+Values range from 0 to 1. Higher values indicate better surface agreement.

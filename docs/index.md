@@ -30,7 +30,7 @@ sources, it allows for uncovering biases both intra and inter-dataset as well as
 - **Robust evaluation**: Extracts region-specific features and calculates a wide range of performance metrics.
 - **Interactive visualizations**: Includes a dynamic Streamlit-based web app for intuitive data exploration.
 - **Highly customizable**: Easily extendable for additional features and metrics tailored to your needs.
-- **Friendly integration**: Supports plugins and external libraries for advanced analysis (e.g., ITK-SNAP, pymia).
+- **Friendly integration**: Supports plugins and external libraries for advanced analysis (e.g., ITK-SNAP, pymia, Metrics Reloaded).
 - **Open Source**: Fully available on GitHub with comprehensive tutorials and examples.
 
 ## 📚 What You'll Find Here

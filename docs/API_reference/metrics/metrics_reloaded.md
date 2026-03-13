@@ -17,20 +17,46 @@ References:
 
 - [Maier-Hein, L., Reinke, A., Godau, P. et al. Metrics reloaded: recommendations for image analysis validation. Nat Methods 21, 195–212 (2024).](https://doi.org/10.1038/s41592-023-02151-z)
 
-These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement.
+These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement. Each of the
+available metrics are documented below, as well as their attribute names needed for the config file.
 
 # Available metrics
 
-Let:
+| Metric name (Documentation)               | Attribute name (config file) |
+|-------------------------------------------|------------------------------|
+| Number of reference pixels                | numb_ref                     |
+| Number of predicted pixels                | numb_pred                    |
+| True positives                            | numb_tp                      |
+| False positives                           | numb_fp                      |
+| False negatives                           | numb_fn                      |
+| Accuracy                                  | accuracy                     |
+| Balanced Accuracy (BA)                    | ba                           |
+| Sensitivity (Recall)                      | sensitivity                  |
+| Specificity                               | specificity                  |
+| Positive Predictive Value (PPV)           | ppv                          |
+| Negative Predictive Value (NPV)           | npv                          |
+| Intersection over Union (IoU)             | iou                          |
+| F-beta score                              | fbeta                        |
+| Dice Score Coefficient (DSC)              | dsc                          |
+| Matthews Correlation Coefficient (MCC)    | mcc                          |
+| Cohen's Kappa                             | cohens_kappa                 |
+| Weighted Cohen's Kappa                    | wck                          |
+| Positive Likelihood Ratio + (LR+)         | lr+                          |
+| Net Benefit (NB)                          | nb                           |
+| Normalised Expected Cost (ECn)            | ec                           |
+| Centreline Dice (CL Dice)                 | cldice                       |
+| Average Symmetric Surface Distance (ASSD) | assd                         |
+| Mean Average Surface Distance (MASD)      | masd                         |
+| Hausdorff Distance (HD)                   | hd                           |
+| Hausdorff Distance Percentile (HD95)      | hd_perc                      |
+| Normalized Surface Distance (NSD)         | nsd                          |
+| Boundary IoU                              | boundary_iou                 |
+| Intersection over Reference (IoR)         | ior                          |
+| Absolute Volume Difference Ratio (AVDR)   | avdr                         |
 
-- **TP** — True Positives  
-- **TN** — True Negatives  
-- **FP** — False Positives  
-- **FN** — False Negatives  
 
----
 
-## Counting Metrics
+## Counting metrics
 
 ### Dice Score Coefficient (DSC)
 

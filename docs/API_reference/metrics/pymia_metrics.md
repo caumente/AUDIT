@@ -16,15 +16,6 @@ Below is an outline of the metrics currently mapped and supported by this projec
 
 To extract these metrics, use the exact `Attribute name` under the `metrics` section of your configuration file.
 
-### Regression Metrics
-| Metric Name                     | Attribute Name (Config) |
-|---------------------------------|-------------------------|
-| Coefficient Of Determination    | `cd`                    |
-| Mean Absolute Error             | `mae`                   |
-| Mean Squared Error              | `mse`                   |
-| Root Mean Squared Error         | `rmse`                  |
-| Normalized Root Mean Squared Error | `nrmse`              |
-
 ### Overlap Metrics
 | Metric Name                     | Attribute Name (Config) |
 |---------------------------------|-------------------------|
@@ -68,3 +59,13 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | True Positive Count             | `tp`                    |
 
 ---
+
+
+### Regression Metrics
+| Metric Name                     | Attribute Name (Config) |
+|---------------------------------|-------------------------|
+| Coefficient Of Determination    | `cd`                    |
+| Mean Absolute Error             | `mae`                   |
+| Mean Squared Error              | `mse`                   |
+| Root Mean Squared Error         | `rmse`                  |
+| Normalized Root Mean Squared Error | `nrmse`              |

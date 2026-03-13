@@ -11,13 +11,13 @@
 # limitations under the License.
 
 
-from src.audit.metrics.backends.MetricsReloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
-from src.audit.metrics.backends.MetricsReloaded.metrics.pairwise_measures import (
+from src.audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import (
     BinaryPairwiseMeasures,
     MultiClassPairwiseMeasures,
 )
-from src.audit.metrics.backends.MetricsReloaded.metrics.calibration_measures import CalibrationMeasures
-from src.audit.metrics.backends.MetricsReloaded.utility.assignment_localization import AssignmentMapping
+from src.audit.metrics.backends.metrics_reloaded.metrics.calibration_measures import CalibrationMeasures
+from src.audit.metrics.backends.metrics_reloaded.utility.assignment_localization import AssignmentMapping
 import numpy as np
 import pandas as pd
 import nibabel as nib

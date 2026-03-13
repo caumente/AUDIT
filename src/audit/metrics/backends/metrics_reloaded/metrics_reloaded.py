@@ -1,50 +1,44 @@
 import os
-from multiprocessing import Manager, Lock, Pool
-from pathlib import Path
+from multiprocessing import Lock
+from multiprocessing import Manager
+from multiprocessing import Pool
 
 import pandas as pd
-from loguru import logger
 from colorama import Fore
-import nibabel as nib
+from loguru import logger
 
+from audit.metrics.backends.commons import check_multiprocessing
+from audit.metrics.backends.commons import initializer
+from audit.metrics.backends.commons import load_subject_data
+from audit.metrics.backends.commons import standardize_output
+from audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import MultiLabelPairwiseMeasures
 from audit.utils.commons.file_manager import list_dirs
-from audit.utils.commons.strings import fancy_print, fancy_tqdm
-from audit.metrics.main import check_multiprocessing
-from src.audit.metrics.backends.MetricsReloaded.processes.mixed_measures_processes import MultiLabelPairwiseMeasures
+from audit.utils.commons.strings import fancy_print
+from audit.utils.commons.strings import fancy_tqdm
 
 import warnings
 
 warnings.filterwarnings("ignore")
 
 
-def initializer(shared_df, lock):
-    global shared_dataframe, dataframe_lock
-    shared_dataframe = shared_df
-    dataframe_lock = lock
-
-
-
 def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
-    path_gt = os.path.join(params["path_ground_truth_dataset"], params["subject_id"],
-                           f"{params['subject_id']}_seg.nii.gz")
-    path_pred = os.path.join(params["path_predictions"], params["subject_id"],
-                             f"{params['subject_id']}_pred.nii.gz")
-
-    gt = nib.load(path_gt).get_fdata()
-    pred = nib.load(path_pred).get_fdata()
+    """Compute MetricsReloaded metrics for a single subject."""
+    # Use the shared loader — same convention as all other backends
+    gt, pred, spacing = load_subject_data(
+        params["path_ground_truth_dataset"],
+        params["path_predictions"],
+        params["subject_id"],
+    )
 
     list_values = [v for v in params["numeric_label"] if v != 0]
-    list_pred = [pred]
-    list_ref = [gt]
-    list_prob = [None]
-
     mlpm = MultiLabelPairwiseMeasures(
-        list_pred,
-        list_ref,
-        list_prob,
+        [pred],
+        [gt],
+        [None],
         list_values=list_values,
         measures_pcc=params["metrics_to_extract"],
-        per_case=True
+        per_case=True,
+        pixdim=spacing
     )
     df_seg, _ = mlpm.per_label_dict()
 
@@ -55,25 +49,26 @@ def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
         for metric_name in params["metrics_to_extract"]:
             if metric_name in row:
                 value = row[metric_name]
-                results.append({
-                    "ID": params["subject_id"],
-                    "region": region,
-                    "metric": metric_name,
-                    "value": float(value) if value is not None else float("nan"),
-                    "model": params["model_name"]
-                })
+                results.append(
+                    {
+                        "ID": params["subject_id"],
+                        "region": region,
+                        "metric": metric_name,
+                        "value": float(value) if value is not None else float("nan"),
+                        "model": params["model_name"],
+                    }
+                )
 
     df_metrics = pd.DataFrame(results)
 
     if cpu_cores == 1:
         return df_metrics
 
-    # multiprocessing
+    # multiprocessing path
     with dataframe_lock:
         shared_df[params["subject_id"]] = df_metrics
 
     return None
-
 
 
 def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
@@ -104,7 +99,7 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
                         "subject_id": subject_id,
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
-                        "model_name": model_name
+                        "model_name": model_name,
                     }
 
                     df_subject = process_subject_metricsreloaded(None, params, cpu_cores)
@@ -113,7 +108,6 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
             logger.info(f"Finishing metric extraction for model {model_name}")
 
     else:
-        # multiprocessing >1
         manager = Manager()
         shared_data = manager.dict()
         lock = Lock()
@@ -132,11 +126,11 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
                         "subject_id": subject_id,
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
-                        "model_name": model_name
+                        "model_name": model_name,
                     }
-
-                    tasks.append(pool.apply_async(process_subject_metricsreloaded,
-                                                  args=(shared_data, params, cpu_cores)))
+                    tasks.append(
+                        pool.apply_async(process_subject_metricsreloaded, args=(shared_data, params, cpu_cores))
+                    )
 
                 with fancy_tqdm(total=len(subjects_list), desc=f"{Fore.CYAN}Progress", leave=True) as pbar:
                     for task in tasks:
@@ -149,9 +143,9 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
 
                 logger.info(f"Finishing metric extraction for model {model_name}")
 
-    raw_metrics =  raw_metrics.sort_values(by=["model", "ID", "region"], ascending=[True, True, True])
-    return raw_metrics.pivot_table(
-                index=["ID", "region", "model"],
-                columns="metric",
-                values="value"
-            ).reset_index()
+    raw_metrics = raw_metrics.pivot_table(
+        index=["ID", "region", "model"],
+        columns="metric",
+        values="value",
+    ).reset_index()
+    return standardize_output(raw_metrics)

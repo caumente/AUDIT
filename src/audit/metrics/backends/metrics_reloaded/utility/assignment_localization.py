@@ -11,7 +11,7 @@
 # limitations under the License.
 
 """
-Assignment localization - :mod:`src.audit.metrics.backends.MetricsReloaded.utility.assignment_localization`
+Assignment localization - :mod:`src.audit.metrics.backends.metrics_reloaded.utility.assignment_localization`
 ================================================================================
 
 This module provides classes for performing the :ref:`assignment and localization  <assignloc>`
@@ -32,8 +32,8 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment as lsa
 from scipy.spatial.distance import cdist
 import warnings
-from src.audit.metrics.backends.MetricsReloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
-from src.audit.metrics.backends.MetricsReloaded.utility.utils import (
+from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
     intersection_boxes,
     area_box,
     union_boxes,

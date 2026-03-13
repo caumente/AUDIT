@@ -1,5 +1,5 @@
 """
-Utility functions - :mod:`src.audit.metrics.backends.MetricsReloaded.utility.utils`
+Utility functions - :mod:`src.audit.metrics.backends.metrics_reloaded.utility.utils`
 ========================================================
 
 This module provides functions for calculating common useful outputs and :ref:`morphological
@@ -16,7 +16,7 @@ Calculating morphological operations
 Defining utility functions
 --------------------------
 
-.. currentmodule:: src.audit.metrics.backends.MetricsReloaded.utility.utils
+.. currentmodule:: src.audit.metrics.backends.metrics_reloaded.utility.utils
 
 .. autofunction:: intersection_boxes
 .. autofunction:: union_boxes

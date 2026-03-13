@@ -11,7 +11,7 @@
 # limitations under the License.
 
 """
-Overall process - :mod:`src.audit.metrics.backends.MetricsReloaded.processes.overall_process`
+Overall process - :mod:`src.audit.metrics.backends.metrics_reloaded.processes.overall_process`
 ====================================================================
 
 This module provides class to perform the :ref:`overall evaluation process  <processeval>`.
@@ -181,10 +181,10 @@ The available measures per task are:
 """
 
 
-from src.audit.metrics.backends.MetricsReloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
-from src.audit.metrics.backends.MetricsReloaded.processes.mixed_measures_processes import *
+from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import *
 import warnings
-from src.audit.metrics.backends.MetricsReloaded.utility.utils import combine_df, merge_list_df
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import combine_df, merge_list_df
 import pandas as pd
 import numpy as np
 

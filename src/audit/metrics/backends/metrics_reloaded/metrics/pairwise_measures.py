@@ -16,7 +16,7 @@ import numpy as np
 from scipy import ndimage
 from functools import partial
 from skimage.morphology import skeletonize
-from src.audit.metrics.backends.MetricsReloaded.utility.utils import (
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
     one_hot_encode,
     compute_center_of_mass,
     compute_skeleton,

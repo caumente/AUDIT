@@ -17,7 +17,7 @@ import math
 from scipy.special import gamma
 import warnings
 # from metrics.pairwise_measures import CacheFunctionOutput
-from src.audit.metrics.backends.MetricsReloaded.utility.utils import (
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
     CacheFunctionOutput,
     max_x_at_y_more,
     max_x_at_y_less,

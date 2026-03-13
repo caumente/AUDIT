@@ -11,7 +11,7 @@
 # limitations under the License.
 
 """
-Probabilistic Pairwise Measures - :mod:`src.audit.metrics.backends.MetricsReloaded.metrics.prob_pairwise_measures`
+Probabilistic Pairwise Measures - :mod:`src.audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures`
 =======================================================================================
 
 This module provides classes for calculating :ref:`probabilistic
@@ -30,7 +30,7 @@ Calculating multi-threshold/probabilistic pairwise measures
 
 
 import numpy as np
-from src.audit.metrics.backends.MetricsReloaded.utility.utils import (
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
     CacheFunctionOutput,
     max_x_at_y_more,
     max_x_at_y_less,

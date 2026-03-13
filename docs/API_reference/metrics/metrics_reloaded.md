@@ -1,15 +1,10 @@
 [//]: # (::: src.metric_extraction)
 
 
-When the pipeline uses the Metrics Reloaded backend, segmentation performance is evaluated using a set of metrics 
-derived from pixel-wise comparisons between the predicted segmentation and the ground truth. 
-
+When the pipeline is configured to use the **Metrics Reloaded backend (`backend: "metricsreloaded"`)**, segmentation performance is evaluated using a comprehensive suite of rigorously validated metrics derived from pixel-wise classifications.
 Although the Metrics Reloaded backend allows the computation of a wide range of metrics, some are more suitable than others 
 for segmentation problems. To discover which metrics are most appropriate for a given task, please consult 
 [Metrics Reloaded Metric Library](https://metrics-reloaded.dkfz.de/metric-library).
-
-We thank [Metrics Reloaded project](https://metrics-reloaded.dkfz.de/) and its 
-[GitHub repository](https://github.com/Project-MONAI/MetricsReloaded) for providing us with methods for all metrics computation.
 
 References:
 
@@ -17,10 +12,11 @@ References:
 
 - [Maier-Hein, L., Reinke, A., Godau, P. et al. Metrics reloaded: recommendations for image analysis validation. Nat Methods 21, 195–212 (2024).](https://doi.org/10.1038/s41592-023-02151-z)
 
-These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement. Each of the
-available metrics are documented below, as well as their attribute names needed for the config file.
+These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement. 
 
-# Available metrics
+## Supported metrics configuration
+
+To extract these metrics, use the exact `Attribute name` under the `metrics` section of your configuration file.
 
 | Metric name (Documentation)               | Attribute name (config file) |
 |-------------------------------------------|------------------------------|

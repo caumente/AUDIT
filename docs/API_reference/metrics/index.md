@@ -1,39 +1,29 @@
-[//]: # (::: src.metrics.main)
+[//]: # (::: src.metric_extraction)
 
+This `metric_extraction` pipeline processes medical image segmentation data by comparing ground truth segmentations with model 
+predictions to compute a variety of evaluation metrics. 
 
-This `metric extraction` pipeline processes MRI segmentation data by comparing ground truth segmentations with model 
-predictions to compute a variety of metrics. The pipeline supports several backend frameworks for metrics computation,
-including custom AUDIT metrics, 
-[Pymia](), and 
-[Metrics Reloaded](https://github.com/Project-MONAI/MetricsReloaded), 
-handling multiple model predictions and datasets. The two 
-main components of the pipeline are metric_extraction.py, which serves as the entry point, and main.py, which contains 
-the core logic for metric computation.
+Following a modular architecture, the pipeline supports multiple independent backends for metrics computation:
+**AUDIT Custom Metrics**, **pymia**, and **Metrics Reloaded**.
 
-The pipeline operates as follows:
+The main entry point for the pipeline is `metric_extraction.py`, which routes the request to the appropriate decoupled backend located in `audit/metrics/backends/`.
 
-- **Configuration and Logging**: The pipeline begins by loading a configuration file, which defines the dataset paths, 
-models, metrics to be extracted, and output settings. Logging is set up to track the progress and output detailed logs.
+## Pipeline Workflow
 
-- **Metric Extraction**: Depending on the configuration, the pipeline can compute either custom metrics (using methods 
-defined in the project), Pymia metrics (using the Pymia library for medical image analysis), or Metrics Reloaded project.
-All evaluator process the predicted and reference segmentation volumes and output the computed metrics across 
-subjects, models, and regions.
+1. **Configuration & Setup**: The pipeline begins by loading a configuration file (`config.yaml`), which defines the dataset paths, 
+the list of model predictions to evaluate, the specific metrics to calculate, and the chosen execution backend. Logging is automatically configured to track processing progress.
 
-    - **Custom Metrics**: This approach calculates specific metrics like Dice coefficient, sensitivity, or others based on 
-  custom implementations. Users can create their own metrics to extend AUDIT capabilities based on specific requirements.
-  
-    - **Pymia**: Here Pymia's built-in metrics are used for segmentation evaluation.
+2. **Metric Extraction**: Depending on the `backend` specified in the configuration, the pipeline routes processing to one of three dedicated modules:
 
-    - **Metrics Reloaded**: Here Metrics Reloaded built-in metrics are used for segmentation evaluation.
+    *   **AUDIT Custom Metrics (`backend: "audit"`)**: Calculates specific metrics like Dice coefficient, Sensitivity, Hausdorff Distance, etc., based on 
+    native implementations optimized for this project. Developers can add new custom metrics directly to this backend.
+    *   **pymia (`backend: "pymia"`)**: Utilizes the popular `pymia` library's evaluation tools for medical image analysis. It natively supports confidence intervals and statistical aggregation during processing.
+    *   **Metrics Reloaded (`backend: "metricsreloaded"`)**: Delegates computation to the [Metrics Reloaded project](https://github.com/Project-MONAI/MetricsReloaded), which offers a comprehensive suite of rigorously validated medical imaging metrics.
 
+3. **Data Handling & Processing**: For the chosen dataset, metrics are computed across all specified models and all subjects. A shared utilities module (`audit/metrics/backends/commons.py`) ensures that NIfTI loading and multiprocessing execution remain consistent across all three backends.
 
-- **Data Processing**: For each dataset and model, metrics are computed for all subjects. The results are collected 
-into a DataFrame, and if longitudinal data is involved, it can further organize the results by time points.
+4. **Structured Output**: Before returning results, the pipeline guarantees a standardized output shape via a shared contract. Regardless of which backend computes the metrics, the resulting `.csv` file will always have the following structural format:
+    *   Rows are sorted by: `model` → `ID` (subject) → `region`
+    *   Columns are ordered horizontally: `ID`, `region`, `model`, followed by the requested metrics sorted alphabetically.
 
-- **Output**: The extracted metrics are stored as CSV files. The output is structured and ready for 
-further analysis or reporting.
-
-This pipeline provides a flexible and scalable solution for evaluating segmentation models, making it suitable for 
-multi-model comparisons and performance tracking across different datasets.
-
+This decoupled pipeline provides a flexible and scalable solution for evaluating segmentation models, allowing researchers to easily switch between evaluation frameworks while maintaining a consistent and comparable output format across their experiments.

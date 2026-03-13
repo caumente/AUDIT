@@ -80,16 +80,48 @@ def compute_statistics(pymia_evaluator, config, model_name: str):
 def instantiate_pymia_metrics(selected_metrics: list) -> list:
     """Map config metric keys to pymia metric objects."""
     metric_map = {
-        "haus": (metric.HausdorffDistance, {"percentile": 100}),
+        # Regression
+        "cd": (metric.CoefficientOfDetermination, {}),
+        "mae": (metric.MeanAbsoluteError, {}),
+        "mse": (metric.MeanSquaredError, {}),
+        "rmse": (metric.RootMeanSquaredError, {}),
+        "nrmse": (metric.NormalizedRootMeanSquaredError, {}),
+        
+        # Overlap
+        "ari": (metric.AdjustedRandIndex, {}),
+        "auc": (metric.AreaUnderCurve, {}),
+        "ckc": (metric.CohenKappaCoefficient, {}),
         "dice": (metric.DiceCoefficient, {}),
+        "ic": (metric.InterclassCorrelation, {}),
+        "jacc": (metric.JaccardCoefficient, {}),
+        "mi": (metric.MutualInformation, {}),
+        "rand": (metric.RandIndex, {}),
+        "so": (metric.SurfaceOverlap, {}),
+        "sdo": (metric.SurfaceDiceOverlap, {}),
+        "vs": (metric.VolumeSimilarity, {}),
+
+        # Distance
+        "haus": (metric.HausdorffDistance, {"percentile": 100}),
+        "avd": (metric.AverageDistance, {}),
+        "mahal": (metric.MahalanobisDistance, {}),
+        "vi": (metric.VariationOfInformation, {}),
+        "gce": (metric.GlobalConsistencyError, {}),
+        "prob": (metric.ProbabilisticDistance, {}),
+
+        # Classical
         "sens": (metric.Sensitivity, {}),
         "spec": (metric.Specificity, {}),
-        "accu": (metric.Accuracy, {}),
-        "jacc": (metric.JaccardCoefficient, {}),
         "prec": (metric.Precision, {}),
-        "auc": (metric.AreaUnderCurve, {}),
+        "fmeas": (metric.FMeasure, {}),
+        "accu": (metric.Accuracy, {}),
+        "fallout": (metric.Fallout, {}),
         "fnr": (metric.FalseNegativeRate, {}),
-        # add further pymia metrics here
+        "tp": (metric.TruePositive, {}),
+        "fp": (metric.FalsePositive, {}),
+        "tn": (metric.TrueNegative, {}),
+        "fn": (metric.FalseNegative, {}),
+        "ref_vol": (metric.ReferenceVolume, {}),
+        "pred_vol": (metric.PredictionVolume, {}),
     }
 
     metrics = []

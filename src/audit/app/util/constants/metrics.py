@@ -21,19 +21,25 @@ class Metrics:
             "Expected Cost": "ec",
             "Balanced Accuracy": "ba",
             "Cohen's kappa": "cohens_kappa",
+            "Weighted Cohen's Kappa": "wck",
             "Positive Likelihood ratio +": "lr+",
             "Intersection over Union": "iou",
             "F-beta score": "fbeta",
             "Dice Score Coefficient": "dsc",
-            "Youden index": "youden_ind",
             "Matthews Correlation Coefficient": "mcc",
             "CL Dice": "cldice",
-            "Average Aymmetric Aurface Sistance": "assd",
+            "Average Symmetric Surface Distance": "assd",
             "Boundary IoU": "boundary_iou",
             "Hausdorff dist.": "hd",
             "Hausdorff dist. percentile": "hd_perc",
             "Mean Absolute Surface Distance": "masd",
-            "Normalized Surface Distance": "nsd"
+            "Normalized Surface Distance": "nsd",
+            "Positive Predictive Value": "ppv",
+            "Negative Predictive Value": "npv",
+            "Intersection over Reference": "ior",
+            "Sensitivity (Recall)": "sensitivity",
+            "Specificity ": "specificity",
+            "Absolute Volume Difference Ratio": "avdr"
 
         }
 

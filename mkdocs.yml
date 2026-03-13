@@ -56,7 +56,8 @@ nav:
       - Spatial features: API_reference/features/spatial.md
     - Metric extraction:
       - Metric extraction: API_reference/metrics/metric_extraction.md
-      - Audit metrics: API_reference/metrics/audit_metrics.md
+      - AUDIT custom: API_reference/metrics/audit_metrics.md
+      - Metrics Reloaded: API_reference/metrics/metrics_reloaded.md
     - Utils:
       - Sequences: API_reference/utils/sequences.md
       - File manager: API_reference/utils/file_manager.md

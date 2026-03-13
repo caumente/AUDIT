@@ -131,7 +131,7 @@ Lower values indicate better agreement between predicted and reference volumes.
 ### Accuracy
 
 Accuracy measures the ratio of samples that were correctly classified over all predictions made.
-Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/accuracy).
+Find more information about [Accuracy](https://metrics-reloaded.dkfz.de/metric-library/accuracy).
 
 $$ \text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}} $$ 
 
@@ -144,7 +144,7 @@ Values range from 0 to 1. A value of 1 indicates perfect classification.
 
 BA measures the arithmetic mean of Sensitivities for each class, i.e., for each class, it measures the fraction of 
 actual positive samples that were predicted as such.
-Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/balanced_accuracy).
+Find more information about [BA](https://metrics-reloaded.dkfz.de/metric-library/balanced_accuracy).
 
 $$ \text{BA} = \frac{1}{2} \Biggl( \frac{\text{TP}}{\text{TP} + \text{FN}} + \frac{\text{TN}}{\text{TN} + \text{FP}} \Biggr) = \frac{1}{2} (\text{Sensitivity} + \text{Specificity}) $$
 
@@ -169,12 +169,12 @@ Values range from 0 to 1. A value of 1 indicates that all true positive samples 
 ### Specificity
 
 Specificity measures how good a method is in classifying truly negative samples as negative. 
-Find more information about [CL Dice](https://metrics-reloaded.dkfz.de/metric-library/specificity).
+Find more information about [Specificity](https://metrics-reloaded.dkfz.de/metric-library/specificity).
 
 $$ \text{Specificity} = \frac{\text{TN}}{\text{TN} + \text{FP}} $$
 
 **Interpretation:**  
-Values range from 0 to 1. A value of 1 indicates that all negatives samples were correctly classified.
+Values range from 0 to 1. A value of 1 indicates that all negative samples were correctly classified.
 
 ---
 

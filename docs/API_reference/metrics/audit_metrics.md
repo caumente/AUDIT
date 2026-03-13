@@ -2,7 +2,9 @@
 
 # AUDIT Custom Metrics
 
-The **AUDIT backend (`backend: "audit"`)** computes a variety of native metrics to evaluate the performance of a segmentation model in relation to a ground truth reference. These metrics provide insights into the model's accuracy, overlap, and shape conformity with the actual segmented regions.
+The **AUDIT backend (`backend: "audit"`)** computes a variety of native metrics to evaluate the performance of a 
+segmentation model in relation to a ground truth reference. These metrics provide insights into the model's accuracy, 
+overlap, and shape conformity with the actual segmented regions.
 
 Below is an overview of each metric supported by the custom AUDIT extractor.
 

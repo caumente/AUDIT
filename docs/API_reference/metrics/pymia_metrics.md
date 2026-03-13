@@ -10,13 +10,19 @@ Volume 198, January 2021, 105796](https://doi.org/10.1016/j.cmpb.2020.105796)
 
 
 
-Below is an outline of the metrics currently mapped and supported by this project's `pymia` wrapper, including their exact configuration keys.
+Below is an outline of the metrics currently mapped and supported by this project's `pymia` wrapper, including their 
+exact configuration keys. It is important to note that not all metrics provided by `pymia` are necessarily meaningful 
+or commonly used in the context of segmentation evaluation. The pymia library exposes a broad set of evaluation 
+measures, some of which are designed for more general machine learning or statistical comparison tasks. Nevertheless, 
+for completeness and flexibility, the wrapper implemented in `AUDIT` exposes most of the metrics currently supported by pymia, 
+allowing users to select those that best fit their specific evaluation needs.
 
 ## Supported metrics configuration
 
 To extract these metrics, use the exact `Attribute name` under the `metrics` section of your configuration file.
 
 ### Overlap Metrics
+
 | Metric Name                     | Attribute Name (Config) |
 |---------------------------------|-------------------------|
 | Adjusted Rand Index             | `ari`                   |

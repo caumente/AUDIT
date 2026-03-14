@@ -10,10 +10,10 @@ from loguru import logger
 from pymia.evaluation.metric import metric
 from pymia.evaluation.writer import CSVStatisticsWriter
 
+from audit.metrics.backends.commons import standardize_output
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_print
 from audit.utils.commons.strings import fancy_tqdm
-from audit.metrics.backends.commons import standardize_output
 
 
 def _pivot_and_standardize(raw: list) -> pd.DataFrame:
@@ -86,7 +86,6 @@ def instantiate_pymia_metrics(selected_metrics: list) -> list:
         "mse": (metric.MeanSquaredError, {}),
         "rmse": (metric.RootMeanSquaredError, {}),
         "nrmse": (metric.NormalizedRootMeanSquaredError, {}),
-        
         # Overlap
         "ari": (metric.AdjustedRandIndex, {}),
         "auc": (metric.AreaUnderCurve, {}),
@@ -99,7 +98,6 @@ def instantiate_pymia_metrics(selected_metrics: list) -> list:
         "so": (metric.SurfaceOverlap, {}),
         "sdo": (metric.SurfaceDiceOverlap, {}),
         "vs": (metric.VolumeSimilarity, {}),
-
         # Distance
         "haus": (metric.HausdorffDistance, {"percentile": 100}),
         "avd": (metric.AverageDistance, {}),
@@ -107,7 +105,6 @@ def instantiate_pymia_metrics(selected_metrics: list) -> list:
         "vi": (metric.VariationOfInformation, {}),
         "gce": (metric.GlobalConsistencyError, {}),
         "prob": (metric.ProbabilisticDistance, {}),
-
         # Classical
         "sens": (metric.Sensitivity, {}),
         "spec": (metric.Specificity, {}),
@@ -174,9 +171,7 @@ def extract_pymia_metrics(config_file) -> pd.DataFrame:
         all_raw_metrics.extend(aggregate_results(evaluator, model_name))
 
         if config_file.get("calculate_stats", None):
-            Path(os.path.join(config_file["output_path"], "stats", f"{model_name}")).mkdir(
-                parents=True, exist_ok=True
-            )
+            Path(os.path.join(config_file["output_path"], "stats", f"{model_name}")).mkdir(parents=True, exist_ok=True)
             compute_statistics(evaluator, config_file, model_name)
 
         evaluator.clear()

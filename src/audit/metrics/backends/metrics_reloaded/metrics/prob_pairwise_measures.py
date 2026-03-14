@@ -30,15 +30,13 @@ Calculating multi-threshold/probabilistic pairwise measures
 
 
 import numpy as np
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
-    CacheFunctionOutput,
-    max_x_at_y_more,
-    max_x_at_y_less,
-    min_x_at_y_more,
-    min_x_at_y_less,
-    trapezoidal_integration,
-)
 
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
 
 __all__ = [
     "ProbabilityPairwiseMeasures",
@@ -102,9 +100,7 @@ class ProbabilityPairwiseMeasures(object):
         return np.sum(1 - self.ref)
 
     @CacheFunctionOutput
-    def all_multi_threshold_values(
-        self, max_number_samples=150, max_number_thresh=1500
-    ):
+    def all_multi_threshold_values(self, max_number_samples=150, max_number_thresh=1500):
         """
         Function defining the list of values for ppv, sensitivity, specificity
         and FPPI according to a list of probabilistic thresholds. The thresholds are defined to obtain equal bin sizes
@@ -121,7 +117,7 @@ class ProbabilityPairwiseMeasures(object):
 
             unique_new_thresh = [0]
             current_count = 0
-            for (f, c) in zip(unique_thresh, unique_counts):
+            for f, c in zip(unique_thresh, unique_counts):
                 if current_count < numb_samples_temp:
                     current_count += c
                     new_thresh = f
@@ -129,9 +125,7 @@ class ProbabilityPairwiseMeasures(object):
                     unique_new_thresh.append(new_thresh)
                     current_count = 0
             unique_new_thresh = np.asarray(unique_new_thresh)
-        unique_new_thresh = np.concatenate(
-            [unique_new_thresh, np.asarray([1 + np.max(unique_thresh)])]
-        )
+        unique_new_thresh = np.concatenate([unique_new_thresh, np.asarray([1 + np.max(unique_thresh)])])
         list_sens = []
         list_spec = []
         list_ppv = []
@@ -210,15 +204,11 @@ class ProbabilityPairwiseMeasures(object):
             list_sum = []
             for f in range(np.max(self.case)):
                 ind_case = np.where(self.case == f)[0]
-                case_tmp = ProbabilityPairwiseMeasures(
-                    self.pred[ind_case], self.ref[ind_case]
-                )
+                case_tmp = ProbabilityPairwiseMeasures(self.pred[ind_case], self.ref[ind_case])
                 list_sum.append(case_tmp.fp_thr(thresh))
             fppi = np.mean(np.asarray(list_sum))
         else:
-            sum_per_image = np.sum(
-                np.reshape(self.__fp_map_thr(thresh), [-1, self.ref.shape[-1]]), axis=0
-            )
+            sum_per_image = np.sum(np.reshape(self.__fp_map_thr(thresh), [-1, self.ref.shape[-1]]), axis=0)
             fppi = np.mean(sum_per_image)
         return fppi
 
@@ -282,14 +272,14 @@ class ProbabilityPairwiseMeasures(object):
         array_fppi = np.asarray(list_fppi)
         array_sens = np.asarray(list_sens)
         max_fppi = np.max(array_fppi)
-        added_fppi = np.asarray([1.0/8, 1.0/4, 1.0/2, 1, 2, 4, 8])
-        added_sens = np.ones([7])*array_sens[-1]
+        added_fppi = np.asarray([1.0 / 8, 1.0 / 4, 1.0 / 2, 1, 2, 4, 8])
+        added_sens = np.ones([7]) * array_sens[-1]
         if np.max(array_fppi) > 8:
-            ind = np.where(array_fppi>8)
+            ind = np.where(array_fppi > 8)
             min_ind = np.min(ind)
             array_sens_new = array_sens[:ind]
             array_fppi_new = array_fppi[:ind]
-        elif max_fppi < 1.0/8:
+        elif max_fppi < 1.0 / 8:
             array_fppi_new = np.concatenate([array_fppi, added_fppi])
             array_sens_new = np.concatenate([array_sens, added_sens])
         elif max_fppi == 8:
@@ -301,7 +291,6 @@ class ProbabilityPairwiseMeasures(object):
             added_sens_fin = added_sens[ind:]
             array_fppi_new = np.concatenate([array_fppi, added_fppi_fin])
             array_sens_new = np.concatenate([array_sens, added_sens_fin])
-        
 
         # diff_fppi = array_fppi[1:] - array_fppi[:-1]
         # diff_sens = array_sens[1:] - array_sens[:-1]
@@ -507,6 +496,6 @@ class ProbabilityPairwiseMeasures(object):
         result_dict = {}
         for key in self.measures:
             result = self.measures_dict[key][0]()
-            #result_dict[key] = fmt.format(result)
+            # result_dict[key] = fmt.format(result)
             result_dict[key] = result
         return result_dict  # trim the last comma

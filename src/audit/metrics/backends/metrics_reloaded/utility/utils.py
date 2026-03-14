@@ -35,33 +35,34 @@ Defining utility functions
 from functools import partial
 
 import numpy as np
-from scipy import ndimage
-from skimage.morphology import skeletonize
-from scipy.spatial.distance import squareform, pdist
 import pandas as pd
-
+from scipy import ndimage
+from scipy.spatial.distance import pdist
+from scipy.spatial.distance import squareform
+from skimage.morphology import skeletonize
 
 __all__ = [
-    'CacheFunctionOutput',
-    'MorphologyOps',
-    'intersection_boxes',
-    'area_box',
-    'union_boxes',
-    'box_iou',
-    'compute_skeleton',
-    'compute_center_of_mass',
-    'distance_transform_edt',
-    'max_x_at_y_more',
-    'max_x_at_y_less',
-    'min_x_at_y_less',
-    'min_x_at_y_more',
-    'one_hot_encode',
-    'to_string_count',
-    'to_string_dist',
-    'to_string_mt',
-    'to_dict_meas_',
-    'trapezoidal_integration',
+    "CacheFunctionOutput",
+    "MorphologyOps",
+    "intersection_boxes",
+    "area_box",
+    "union_boxes",
+    "box_iou",
+    "compute_skeleton",
+    "compute_center_of_mass",
+    "distance_transform_edt",
+    "max_x_at_y_more",
+    "max_x_at_y_less",
+    "min_x_at_y_less",
+    "min_x_at_y_more",
+    "one_hot_encode",
+    "to_string_count",
+    "to_string_dist",
+    "to_string_mt",
+    "to_dict_meas_",
+    "trapezoidal_integration",
 ]
+
 
 class CacheFunctionOutput(object):
     """
@@ -103,7 +104,7 @@ class MorphologyOps(object):
 
     def border_map(self):
         """
-        Create the border map defined as the difference between the original image 
+        Create the border map defined as the difference between the original image
         and its eroded version
 
         :return: border
@@ -138,13 +139,12 @@ class MorphologyOps(object):
         list_values = np.unique(labels)
         for f in list_values:
             if f > 0:
-                tmp_lab = np.where(
-                    labels == f, np.ones_like(labels), np.zeros_like(labels)
-                )
+                tmp_lab = np.where(labels == f, np.ones_like(labels), np.zeros_like(labels))
                 list_ind_lab.append(tmp_lab)
                 list_volumes.append(np.sum(tmp_lab))
                 list_com.append(ndimage.center_of_mass(tmp_lab))
         return list_ind_lab, list_volumes, list_com
+
 
 def intersection_boxes(box1, box2):
     """
@@ -159,9 +159,7 @@ def intersection_boxes(box1, box2):
     box_inter = max_values[: min_values.shape[0] // 2]
     box_inter2 = min_values[max_values.shape[0] // 2 :]
     box_intersect = np.concatenate([box_inter, box_inter2])
-    box_intersect_area = np.prod(
-        np.maximum(box_inter2 + 1 - box_inter, np.zeros_like(box_inter))
-    )
+    box_intersect_area = np.prod(np.maximum(box_inter2 + 1 - box_inter, np.zeros_like(box_inter)))
     return np.max([0, box_intersect_area])
 
 
@@ -174,12 +172,13 @@ def guess_input_style(a):
 
     """
     if a.ndim > 1:
-        return 'mask'
+        return "mask"
     else:
         if np.size(a) > 3:
-            return 'box'
+            return "box"
         else:
-            return 'com'
+            return "com"
+
 
 def com_from_box(box):
     """
@@ -188,11 +187,12 @@ def com_from_box(box):
     :param: box: box identified as a vector of size 2xndim with first the ndim minimum values and then the ndim maximum values
     :return: Centre of mass of the box as a vector of size ndim
     """
-    min_corner = box[:box.shape[0]//2]
-    max_corner = box[box.shape[0]//2:]
-    aggregate = np.vstack([min_corner,max_corner])
+    min_corner = box[: box.shape[0] // 2]
+    max_corner = box[box.shape[0] // 2 :]
+    aggregate = np.vstack([min_corner, max_corner])
     com = np.mean(aggregate, 0)
     return com
+
 
 def point_in_box(point, box):
     """
@@ -202,16 +202,17 @@ def point_in_box(point, box):
     :param: box: vector of size 2 x ndim (2 or 3), the first ndim values corresponding to the minimum corner and the last ndim to the maximum corner
     :return: 1 if the point is in the box 0 otherwise
     """
-    min_corner = box[:box.shape[0]//2]
-    max_corner = box[box.shape[0]//2:]
+    min_corner = box[: box.shape[0] // 2]
+    max_corner = box[box.shape[0] // 2 :]
     diff_min = point - min_corner
     diff_max = max_corner - point
     diff_all = np.concatenate([diff_min, diff_max])
-    diff_select = diff_all[diff_all<0]
-    if diff_select.size > 0 :
+    diff_select = diff_all[diff_all < 0]
+    if diff_select.size > 0:
         return 0
     else:
         return 1
+
 
 def point_in_mask(point, mask):
     """
@@ -223,21 +224,22 @@ def point_in_mask(point, mask):
     """
     new_mask = np.zeros_like(mask)
     if new_mask.ndim == 2:
-        new_mask[point[0],point[1]] = 1
+        new_mask[point[0], point[1]] = 1
     else:
-        new_mask[point[0],point[1],point[2]] = 1
+        new_mask[point[0], point[1], point[2]] = 1
     overlap = np.multiply(new_mask, mask)
     if np.sum(overlap) > 0:
         return 1
     else:
         return 0
 
+
 def area_box(box1):
     """
     Determines the area / volume given the coordinates of extreme corners
-    
+
     :param: box extreme corners specified as :math:`x_{min},y_{min},x_{max},y_{max}` or
-    :math:`x_{min},y_{min},z_{min},x_{max},y_{max},z_{max}` 
+    :math:`x_{min},y_{min},z_{min},x_{max},y_{max},z_{max}`
     :return: area/volume of the box (in pixels/voxels)
     """
     box_corner1 = box1[: box1.shape[0] // 2]
@@ -248,7 +250,7 @@ def area_box(box1):
 def union_boxes(box1, box2):
     """
     Calculates the union of two boxes given their corner coordinates
-    
+
     :param: box1 and box2 specified as for area_box
     :return: union of two boxes in number of pixels
     """
@@ -259,7 +261,7 @@ def union_boxes(box1, box2):
 def box_iou(box1, box2):
     """
     Calculates the iou of two boxes given their extreme corners coordinates
-    
+
     :param: box1, box2
     :return: intersection over union of the two boxes
     """
@@ -277,11 +279,11 @@ def box_ior(box1, box2):
     denominator = area_box(box2)
     return numerator / denominator
 
+
 def median_heuristic(matrix_proba):
     pairwise_dist = squareform(pdist(matrix_proba))
     median_heuristic = np.median(pairwise_dist)
     return median_heuristic
-
 
 
 def compute_skeleton(img):
@@ -293,6 +295,7 @@ def compute_skeleton(img):
     """
     return skeletonize(img)
 
+
 def compute_box(img):
     """
     Computes the coordinates of the bounding box based on a mask (in img)
@@ -300,8 +303,8 @@ def compute_box(img):
     :param: img: mask of the element for which to compute bounding box
     :return: indices of the bottom left and top right corners of the bounding box axis aligned.
     """
-    indices = np.asarray(np.where(img>0)).T
-    min_corner = np.min(indices,0)
+    indices = np.asarray(np.where(img > 0)).T
+    min_corner = np.min(indices, 0)
     max_corner = np.max(indices, 0)
     box_final = np.concatenate([min_corner, max_corner])
     return box_final
@@ -318,70 +321,72 @@ def compute_center_of_mass(img):
 
 
 def distance_transform_edt(img, sampling=None):
-    """Computes Euclidean distance transform using ndimage
-    """
-    return ndimage.distance_transform_edt(
-            img, sampling=sampling, return_indices=False
-        )
+    """Computes Euclidean distance transform using ndimage"""
+    return ndimage.distance_transform_edt(img, sampling=sampling, return_indices=False)
+
 
 def max_x_at_y_more(x, y, cut_off):
-    """Gets max of elements in x where elements 
+    """Gets max of elements in x where elements
     in y are geq to a cut off value - used in the metrics based on probability thresholds
 
     :param: x: array of values
     :param: y: array of values similar length to x
     :param: cutoff - value at which to consider the cut-offon y
     :param
-    :return: return the maximum of x for all corresponding values of y greater than or equal to the cut-off 
+    :return: return the maximum of x for all corresponding values of y greater than or equal to the cut-off
     """
     x = np.asarray(x)
-    y = np.asarray(y)    
+    y = np.asarray(y)
     ix = np.where(y >= cut_off)
     return np.max(x[ix])
 
+
 def max_x_at_y_less(x, y, cut_off):
-    """Gets max of elements in x where elements 
+    """Gets max of elements in x where elements
     in y are leq to a cut off value
 
     :param: x: array of values
     :param: y: array of values similar length to x
     :param: cutoff - value at which to consider the cut-offon y
     :param
-    :return: return the maximum of x for all corresponding values of y less than the cut-off 
+    :return: return the maximum of x for all corresponding values of y less than the cut-off
     """
     x = np.asarray(x)
-    y = np.asarray(y)    
+    y = np.asarray(y)
     ix = np.where(y <= cut_off)
     return np.max(x[ix])
 
+
 def min_x_at_y_less(x, y, cut_off):
-    """Gets min of elements in x where elements 
+    """Gets min of elements in x where elements
     in y are leq to a cut off value
 
     :param: x: array of values
     :param: y: array of values similar length to x
     :param: cutoff - value at which to consider the cut-offon y
     :param
-    :return: return the maximum of x for all corresponding values of y less than the cut-off 
+    :return: return the maximum of x for all corresponding values of y less than the cut-off
     """
     x = np.asarray(x)
-    y = np.asarray(y)    
+    y = np.asarray(y)
     ix = np.where(y <= cut_off)
     return np.min(x[ix])
 
-def min_x_at_y_more(x,y,cut_off):
-    """Gets min of elements in x where elements in 
+
+def min_x_at_y_more(x, y, cut_off):
+    """Gets min of elements in x where elements in
     y are greater than cutoff value
-    
+
     :param: x, vector of values
     :param: y, vector of values same size of x
     :param: cutoff cutoff value for y
     :return: min of x where y >= cut_off
     """
     x = np.asarray(x)
-    y = np.asarray(y)    
+    y = np.asarray(y)
     ix = np.where(y >= cut_off)
     return np.min(x[ix])
+
 
 def one_hot_encode(img, n_classes):
     """One-hot encodes categorical image
@@ -392,6 +397,7 @@ def one_hot_encode(img, n_classes):
     """
     return np.eye(n_classes)[img]
 
+
 def to_string_count(measures_count, counting_dict, fmt="{:.4f}"):
     result_str = ""
     # list_space = ['com_ref', 'com_pred', 'list_labels']
@@ -400,11 +406,7 @@ def to_string_count(measures_count, counting_dict, fmt="{:.4f}"):
             result = counting_dict[key][0]()
         else:
             result = counting_dict[key][0](counting_dict[key][2])
-        result_str += (
-            ",".join(fmt.format(x) for x in result)
-            if isinstance(result, tuple)
-            else fmt.format(result)
-        )
+        result_str += ",".join(fmt.format(x) for x in result) if isinstance(result, tuple) else fmt.format(result)
         result_str += ","
     return result_str[:-1]  # trim the last comma
 
@@ -425,11 +427,7 @@ def to_string_dist(measures_dist, distance_dict, fmt="{:.4f}"):
             result = distance_dict[key][0]()
         else:
             result = distance_dict[key][0](distance_dict[key][2])
-        result_str += (
-            ",".join(fmt.format(x) for x in result)
-            if isinstance(result, tuple)
-            else fmt.format(result)
-        )
+        result_str += ",".join(fmt.format(x) for x in result) if isinstance(result, tuple) else fmt.format(result)
         result_str += ","
     return result_str[:-1]  # trim the last comma
 
@@ -449,20 +447,14 @@ def to_string_mt(measures_mthresh, multi_thresholds_dict, fmt="{:.4f}"):
         if len(multi_thresholds_dict[key]) == 2:
             result = multi_thresholds_dict[key][0]()
         else:
-            result = multi_thresholds_dict[key][0](
-                multi_thresholds_dict[key][2]
-            )
-        result_str += (
-            ",".join(fmt.format(x) for x in result)
-            if isinstance(result, tuple)
-            else fmt.format(result)
-        )
+            result = multi_thresholds_dict[key][0](multi_thresholds_dict[key][2])
+        result_str += ",".join(fmt.format(x) for x in result) if isinstance(result, tuple) else fmt.format(result)
         result_str += ","
     return result_str[:-1]  # trim the last comma
 
-    
+
 def to_dict_meas_(measures, measures_dict, fmt="{:.4f}"):
-    """Given the selected metrics provides a dictionary 
+    """Given the selected metrics provides a dictionary
     with relevant metrics"""
     result_dict = {}
     # list_space = ['com_ref', 'com_pred', 'list_labels']
@@ -474,7 +466,8 @@ def to_dict_meas_(measures, measures_dict, fmt="{:.4f}"):
         result_dict[key] = fmt.format(result)
     return result_dict  # trim the last comma
 
-def combine_df(df1,df2):
+
+def combine_df(df1, df2):
     """
     Perform the concatenation of two dataframes - is used in the overall process when combining dataframe from existing and missing/failed prediction
 
@@ -482,21 +475,22 @@ def combine_df(df1,df2):
     :param: df2 Second dataframe to concatenate
     :return: concatenated dataframe of df1 and df2
     """
-    if df1 is None or df1.shape[0]==0:
-        print('Nothing in first')
+    if df1 is None or df1.shape[0] == 0:
+        print("Nothing in first")
         if df2 is None:
             return None
         elif df2.shape[0] == 0:
             return None
         else:
             return df2
-    elif df2 is None or df2.shape[0]==0:
+    elif df2 is None or df2.shape[0] == 0:
         return df1
     else:
         print("Performing concatenation")
         return pd.concat([df1, df2])
 
-def merge_list_df(list_df, on=['label','case']):
+
+def merge_list_df(list_df, on=["label", "case"]):
     """
     Performs the merging of different dataframes of results given the label and cases values
 
@@ -519,15 +513,11 @@ def merge_list_df(list_df, on=['label','case']):
     elif len(list_fin) == 1:
         return list_fin[0]
     else:
-        print("list fin is ",list_fin)
+        print("list fin is ", list_fin)
         df_fin = list_fin[0]
         for k in list_fin[1:]:
             df_fin = pd.merge(df_fin, k, on=on)
-        return df_fin    
-
-
-    
-
+        return df_fin
 
 
 def trapezoidal_integration(x, fx):
@@ -536,4 +526,4 @@ def trapezoidal_integration(x, fx):
     Reference
        https://en.wikipedia.org/w/index.php?title=Trapezoidal_rule&oldid=1104074899#Non-uniform_grid
     """
-    return np.sum((fx[:-1] + fx[1:])/2 * (x[1:] - x[:-1]))
+    return np.sum((fx[:-1] + fx[1:]) / 2 * (x[1:] - x[:-1]))

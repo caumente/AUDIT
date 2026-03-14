@@ -11,22 +11,21 @@
 # limitations under the License.
 
 
+import math
+import warnings
 
 import numpy as np
-import math
 from scipy.special import gamma
-import warnings
+
 # from metrics.pairwise_measures import CacheFunctionOutput
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import (
-    CacheFunctionOutput,
-    max_x_at_y_more,
-    max_x_at_y_less,
-    min_x_at_y_more,
-    min_x_at_y_less,
-    trapezoidal_integration,
-    one_hot_encode,
-    median_heuristic
-)
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import median_heuristic
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import one_hot_encode
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
 
 __all__ = [
     "CalibrationMeasures",
@@ -50,8 +49,8 @@ class CalibrationMeasures(object):
             "ls": (self.logarithmic_score, "LS"),
             "cwece": (self.class_wise_expectation_calibration_error, "cwECE"),
             "ece_kde": (self.kernel_based_ece, "ECE-KDE"),
-            "kce":(self.kernel_calibration_error, "KCE"),
-            "nll":(self.negative_log_likelihood,"NLL")
+            "kce": (self.kernel_calibration_error, "KCE"),
+            "nll": (self.negative_log_likelihood, "NLL"),
         }
 
         self.pred = np.asarray(pred_proba)
@@ -85,7 +84,7 @@ class CalibrationMeasures(object):
         n_classes = self.pred.shape[1]
         for k in range(n_classes):
             list_values_k = []
-            for (l, u) in zip(range_values[:-1], range_values[1:]):
+            for l, u in zip(range_values[:-1], range_values[1:]):
                 pred_k = self.pred[:, k]
                 ref_tmp = np.where(
                     np.logical_and(pred_k > l, pred_k <= u),
@@ -93,9 +92,7 @@ class CalibrationMeasures(object):
                     np.ones_like(self.ref) * -1,
                 )
                 ref_sel = ref_tmp[ref_tmp > -1]
-                ref_selk = np.where(
-                    ref_sel == k, np.ones_like(ref_sel), np.zeros_like(ref_sel)
-                )
+                ref_selk = np.where(ref_sel == k, np.ones_like(ref_sel), np.zeros_like(ref_sel))
                 nsamples = np.size(ref_sel)
                 prop = np.sum(ref_selk) / nsamples
                 pred_tmp = np.where(
@@ -134,8 +131,8 @@ class CalibrationMeasures(object):
         range_values = np.arange(0, 1.00001, step)
         list_values = []
         numb_samples = 0
-        pred_prob = self.pred[:,1]
-        for (l, u) in zip(range_values[:-1], range_values[1:]):
+        pred_prob = self.pred[:, 1]
+        for l, u in zip(range_values[:-1], range_values[1:]):
             ref_tmp = np.where(
                 np.logical_and(pred_prob > l, pred_prob <= u),
                 self.ref,
@@ -157,7 +154,6 @@ class CalibrationMeasures(object):
             numb_samples += nsamples
         ece = np.sum(np.asarray(list_values)) / numb_samples
         return ece
-    
 
     def maximum_calibration_error(self):
         """
@@ -177,8 +173,8 @@ class CalibrationMeasures(object):
         range_values = np.arange(0, 1.00001, step)
         list_values = []
         numb_samples = 0
-        pred_prob = self.pred[:,1]
-        for (l, u) in zip(range_values[:-1], range_values[1:]):
+        pred_prob = self.pred[:, 1]
+        for l, u in zip(range_values[:-1], range_values[1:]):
             ref_tmp = np.where(
                 np.logical_and(pred_prob > l, pred_prob <= u),
                 self.ref,
@@ -200,7 +196,6 @@ class CalibrationMeasures(object):
         mce = np.max(np.asarray(list_values))
         return mce
 
-
     def brier_score(self):
         """
         Calculation of the Brier score https://en.wikipedia.org/wiki/Brier_score
@@ -212,7 +207,7 @@ class CalibrationMeasures(object):
         :return: brier score (BS)
 
         """
-        bs = np.mean(np.sum(np.square(self.one_hot_ref - self.pred),1))
+        bs = np.mean(np.sum(np.square(self.one_hot_ref - self.pred), 1))
         return bs
 
     def root_brier_score(self):
@@ -236,38 +231,37 @@ class CalibrationMeasures(object):
         """
         eps = 1e-10
         log_pred = np.log(self.pred + eps)
-        to_log = self.pred[np.arange(log_pred.shape[0]),self.ref]
-        to_sum = log_pred[np.arange(log_pred.shape[0]),self.ref]
-        ls =  np.mean(to_sum)
+        to_log = self.pred[np.arange(log_pred.shape[0]), self.ref]
+        to_sum = log_pred[np.arange(log_pred.shape[0]), self.ref]
+        ls = np.mean(to_sum)
         return ls
 
-    def distance_ij(self,i,j):
+    def distance_ij(self, i, j):
         """
         Determines the euclidean distance between two vectors of prediction for two samples i and j
 
         :return: distance
         """
-        pred_i = self.pred[i,:]
-        pred_j = self.pred[j,:]
+        pred_i = self.pred[i, :]
+        pred_j = self.pred[j, :]
         distance = np.sqrt(np.sum(np.square(pred_i - pred_j)))
         return distance
 
-
-    def kernel_calculation(self, i,j):
+    def kernel_calculation(self, i, j):
         """
         Defines the kernel value for two samples i and j with the following definition for k(x_i,x_j)
 
         :return: kernel_value
 
         """
-        distance = self.distance_ij(i,j)
-        if 'bandwidth_kce' in self.dict_args.keys():
-            bandwidth = self.dict_args['bandwidth_kce']
+        distance = self.distance_ij(i, j)
+        if "bandwidth_kce" in self.dict_args.keys():
+            bandwidth = self.dict_args["bandwidth_kce"]
         else:
             bandwidth = median_heuristic(self.pred)
-        value = np.exp(-distance/bandwidth)
+        value = np.exp(-distance / bandwidth)
         identity = np.eye(self.pred.shape[1])
-        kernel_value = value*identity
+        kernel_value = value * identity
         return kernel_value
 
     def kernel_calibration_error(self):
@@ -282,18 +276,16 @@ class CalibrationMeasures(object):
         one_hot_ref = one_hot_encode(self.ref, self.pred.shape[1])
         numb_samples = self.pred.shape[0]
         sum_tot = 0
-        for i in range(0,numb_samples):
-            for j in range(0,i):
-                kernel = self.kernel_calculation(i,j)
-                vect_i = one_hot_ref[i,:] - self.pred[i,:]
-                vect_j = one_hot_ref[j,:] - self.pred[j,:]
-                value_ij = np.matmul(vect_i, np.matmul(kernel,vect_j.T))
+        for i in range(0, numb_samples):
+            for j in range(0, i):
+                kernel = self.kernel_calculation(i, j)
+                vect_i = one_hot_ref[i, :] - self.pred[i, :]
+                vect_j = one_hot_ref[j, :] - self.pred[j, :]
+                value_ij = np.matmul(vect_i, np.matmul(kernel, vect_j.T))
                 sum_tot += value_ij
-        multiplicative_factor = math.factorial(numb_samples)/ (2 * math.factorial(numb_samples-2))
-        kce = 1/multiplicative_factor * sum_tot
+        multiplicative_factor = math.factorial(numb_samples) / (2 * math.factorial(numb_samples - 2))
+        kce = 1 / multiplicative_factor * sum_tot
         return kce
-
-
 
     def top_label_classification_error(self):
         """
@@ -393,7 +385,6 @@ class CalibrationMeasures(object):
         kernel_value = numerator / denominator * prod
         return kernel_value
 
-
     def negative_log_likelihood(self):
         """
         Derives the negative log-likelihood defined as
@@ -408,7 +399,7 @@ class CalibrationMeasures(object):
         log_pred = np.log(self.pred)
         numb_samples = self.pred.shape[0]
         ll = np.sum(log_pred[range(numb_samples), self.ref])
-        nll = -1/numb_samples * ll
+        nll = -1 / numb_samples * ll
         return nll
 
     def to_dict_meas(self, fmt="{:.4f}"):
@@ -416,6 +407,6 @@ class CalibrationMeasures(object):
         result_dict = {}
         for key in self.measures:
             result = self.measures_dict[key][0]()
-            #result_dict[key] = fmt.format(result)
+            # result_dict[key] = fmt.format(result)
             result_dict[key] = result
-        return result_dict 
+        return result_dict

@@ -1,3 +1,7 @@
+from multiprocessing import Lock
+from multiprocessing import Manager
+from multiprocessing import Pool
+
 import pandas as pd
 from colorama import Fore
 from loguru import logger
@@ -11,9 +15,6 @@ from audit.metrics.segmentation_metrics import one_hot_encoding
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_print
 from audit.utils.commons.strings import fancy_tqdm
-from multiprocessing import Lock
-from multiprocessing import Manager
-from multiprocessing import Pool
 
 
 def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.DataFrame:

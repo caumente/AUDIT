@@ -181,48 +181,109 @@ The available measures per task are:
 """
 
 
+import warnings
+
+import numpy as np
+import pandas as pd
+
 from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
 from src.audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import *
-import warnings
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import combine_df, merge_list_df
-import pandas as pd
-import numpy as np
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import combine_df
+from src.audit.metrics.backends.metrics_reloaded.utility.utils import merge_list_df
 
 __all__ = [
     "ProcessEvaluation",
 ]
 
-dict_valid={
-    'ImLC': ['auroc','ap','sens@spec','spec@sens',
-    'ppv@sens','fbeta','accuracy','ba',
-    'ec','nb','mcc',
-    'wck','lr+','bs','cwece',
-    'nll','rbs','ece_kde','kce','ece',"numb_ref",'ls',
-                    "numb_pred",
-                    "numb_tp",
-                    "numb_fp",
-                    "numb_fn",]
-,
-    'ObD': ['fbeta','sens@spec','spec@sens','sens@ppv','ppv@sens','sens@fppi','fppi@sens','sensitivity','ap','froc', "numb_ref",
-                    "numb_pred",
-                    "numb_tp",
-                    "numb_fp",
-                    "numb_fn",
-],
-    'SemS': ['dsc','fbeta','cldice','iou','assd','masd','hd','hd_perc','nsd','boundary_iou',"numb_ref",
-                    "numb_pred",
-                    "numb_tp",
-                    "numb_fp",
-                    "numb_fn",
-],
-    'InS': ['pq','fbeta','sens@spec','spec@sens','sens@ppv','ppv@sens',
-    'fppi@sens','sens@fppi','ap','froc','dsc','cldice','iou','hd','boundary_iou',
-    'masd','assd','nsd','hd_perc',"numb_ref",
-                    "numb_pred",
-                    "numb_tp",
-                    "numb_fp",
-                    "numb_fn",]
-
+dict_valid = {
+    "ImLC": [
+        "auroc",
+        "ap",
+        "sens@spec",
+        "spec@sens",
+        "ppv@sens",
+        "fbeta",
+        "accuracy",
+        "ba",
+        "ec",
+        "nb",
+        "mcc",
+        "wck",
+        "lr+",
+        "bs",
+        "cwece",
+        "nll",
+        "rbs",
+        "ece_kde",
+        "kce",
+        "ece",
+        "numb_ref",
+        "ls",
+        "numb_pred",
+        "numb_tp",
+        "numb_fp",
+        "numb_fn",
+    ],
+    "ObD": [
+        "fbeta",
+        "sens@spec",
+        "spec@sens",
+        "sens@ppv",
+        "ppv@sens",
+        "sens@fppi",
+        "fppi@sens",
+        "sensitivity",
+        "ap",
+        "froc",
+        "numb_ref",
+        "numb_pred",
+        "numb_tp",
+        "numb_fp",
+        "numb_fn",
+    ],
+    "SemS": [
+        "dsc",
+        "fbeta",
+        "cldice",
+        "iou",
+        "assd",
+        "masd",
+        "hd",
+        "hd_perc",
+        "nsd",
+        "boundary_iou",
+        "numb_ref",
+        "numb_pred",
+        "numb_tp",
+        "numb_fp",
+        "numb_fn",
+    ],
+    "InS": [
+        "pq",
+        "fbeta",
+        "sens@spec",
+        "spec@sens",
+        "sens@ppv",
+        "ppv@sens",
+        "fppi@sens",
+        "sens@fppi",
+        "ap",
+        "froc",
+        "dsc",
+        "cldice",
+        "iou",
+        "hd",
+        "boundary_iou",
+        "masd",
+        "assd",
+        "nsd",
+        "hd_perc",
+        "numb_ref",
+        "numb_pred",
+        "numb_tp",
+        "numb_fp",
+        "numb_fn",
+    ],
 }
 
 MAX = 1000
@@ -238,7 +299,7 @@ WORSE = {
     "ppv@sens": 0,
     "sens@fppi": 0,
     "fbeta": 0,
-    "ec":1,
+    "ec": 1,
     "accuracy": 0,
     "ba": 0,
     "lr+": 0,
@@ -257,11 +318,12 @@ WORSE = {
     "nsd": 0,
 }
 
+
 class ProcessEvaluation(object):
     """
     Performs the evaluation of the data stored in a pickled file according to all the measures, categories and choices of processing
 
-    :param data: dictionary containing all the data to be used for the comparison; possible keys include "pred_loc", "ref_loc", "pred_prob", 
+    :param data: dictionary containing all the data to be used for the comparison; possible keys include "pred_loc", "ref_loc", "pred_prob",
     :param category: task to be considered choice among ImLC, ObD, SemS, InS
     :param measures_pcc: list of per class counting measures (these need to be adequate for the chosen task category)
     :param measures_mcc: list of multi class counting measures
@@ -277,7 +339,7 @@ class ProcessEvaluation(object):
     :param file: name of files
     :param thresh_ass: threshold chosen for the assignment (default 0.5)
     :param case: indication of the handling of cases separately (True) or jointly (False)
-    :param flag_fp_in: indicates that false positive should be accounted for 
+    :param flag_fp_in: indicates that false positive should be accounted for
     :param ignore_missing: indicates whether the missing predictions should be considered in the overall assessment (True) or not (False)
     """
 
@@ -292,15 +354,15 @@ class ProcessEvaluation(object):
         measures_mt=[],
         measures_detseg=[],
         measures_cal=[],
-        localization='mask_iou',
-        assignment='greedy_matching',
+        localization="mask_iou",
+        assignment="greedy_matching",
         pixdim=[],
         flag_map=False,
         file=[],
         thresh_ass=0.5,
         case=True,
         flag_fp_in=True,
-        ignore_missing = False
+        ignore_missing=False,
     ):
         self.data = data
         self.category = category
@@ -323,13 +385,13 @@ class ProcessEvaluation(object):
         self.pixdim = pixdim
         if self.flag_valid:
             self.process_data()
-            if 'ref_missing' in self.data.keys():
+            if "ref_missing" in self.data.keys():
                 self.complete_missing_cases()
-            if 'weights_labels' in self.data.keys():
-                self.weights_labels = self.data['weights_labels']
+            if "weights_labels" in self.data.keys():
+                self.weights_labels = self.data["weights_labels"]
             else:
                 self.weights_labels = {}
-                for v in self.data['list_values']:
+                for v in self.data["list_values"]:
                     self.weights_labels[v] = 1
             self.grouped_lab = self.label_aggregation()
             if self.case:
@@ -342,18 +404,24 @@ class ProcessEvaluation(object):
         :return: flag_valid
         """
         flag_valid = True
-        if self.category not in ['ImLC','SemS','InS','ObD']:
-            warnings.warn('No appropriate category chosen, please choose between ImLC, SemS, InS and ObD')
+        if self.category not in ["ImLC", "SemS", "InS", "ObD"]:
+            warnings.warn("No appropriate category chosen, please choose between ImLC, SemS, InS and ObD")
             return False
-        all_measures = self.measures_boundary + self.measures_cal + self.measures_detseg + self.measures_mcc + self.measures_mt + self.measures_overlap + self.measures_pcc
+        all_measures = (
+            self.measures_boundary
+            + self.measures_cal
+            + self.measures_detseg
+            + self.measures_mcc
+            + self.measures_mt
+            + self.measures_overlap
+            + self.measures_pcc
+        )
 
         for k in all_measures:
             if k not in dict_valid[self.category]:
-                warnings.warn( '%s is not a suitable metric for %s' %(k,self.category))
+                warnings.warn("%s is not a suitable metric for %s" % (k, self.category))
                 flag_valid = False
         return flag_valid
-
-
 
     def process_data(self):
         """
@@ -367,7 +435,7 @@ class ProcessEvaluation(object):
         * rescal - calibration results
 
         All these dataframes are initialised as None and replaced according to the chosen task. The tasks should yield the following outputs:
-        
+
         * ImLC:
 
           * resdet
@@ -386,12 +454,12 @@ class ProcessEvaluation(object):
           * resmcc
 
         * InS:
-        
+
           * resdet
           * resseg
           * resmt
           * resmcc
-        
+
         """
         data = self.data
         df_resdet = None
@@ -419,7 +487,7 @@ class ProcessEvaluation(object):
                 list_values=data["list_values"],
                 per_case=self.case,
                 flag_fp_in=self.flag_fp_in,
-                pixdim=self.pixdim
+                pixdim=self.pixdim,
             )
             df_resseg, df_resdet, df_resmt = MLLS.per_label_dict()
         elif self.category == "ObD":
@@ -437,14 +505,13 @@ class ProcessEvaluation(object):
                 measures_mt=self.measures_mt,
                 per_case=self.case,
                 flag_fp_in=self.flag_fp_in,
-                pixdim=self.pixdim
-                
+                pixdim=self.pixdim,
             )
             df_resdet, df_resmt = MLDT.per_label_dict()
             df_resseg = None
         elif self.category in ["ImLC", "SemS"]:
-            if 'names' in data.keys():
-                list_names=data['names']
+            if "names" in data.keys():
+                list_names = data["names"]
             else:
                 list_names = []
             MLPM = MultiLabelPairwiseMeasures(
@@ -460,7 +527,7 @@ class ProcessEvaluation(object):
                 list_values=data["list_values"],
                 names=list_names,
                 per_case=self.case,
-                pixdim=self.pixdim
+                pixdim=self.pixdim,
             )
             df_bin, df_mt = MLPM.per_label_dict()
             df_mcc, df_cal = MLPM.multi_label_res()
@@ -487,32 +554,32 @@ class ProcessEvaluation(object):
         return
 
     def complete_missing_cases(self):
-        if len(self.data['ref_missing']) == 0:
+        if len(self.data["ref_missing"]) == 0:
             return
         if self.flag_ignore_missing:
             warnings.warn("The set up currently ignores any missing case / dataset")
-            return 
+            return
         else:
             list_missing_det = []
             list_missing_seg = []
             list_missing_mt = []
             list_missing_mcc = []
-            numb_valid = len(self.data['ref_class'])
+            numb_valid = len(self.data["ref_class"])
             if self.case:
-                for (i,f) in enumerate(self.data['ref_missing']):
+                for i, f in enumerate(self.data["ref_missing"]):
                     dict_mt = {}
                     dict_mcc = {}
                     dict_seg = {}
                     dict_det = {}
-                    dict_mcc['case'] = i + numb_valid
+                    dict_mcc["case"] = i + numb_valid
                     for m in self.measures_mcc:
                         dict_mcc[m] = WORSE[m]
-                    list_missing_mcc.append(dict_mcc)    
-                    for l in self.data['list_values']:
+                    list_missing_mcc.append(dict_mcc)
+                    for l in self.data["list_values"]:
                         dict_seg = {}
                         dict_mt = {}
                         dict_det = {}
-                        
+
                         for m in self.measures_boundary:
                             dict_seg[m] = WORSE[m]
                         for m in self.measures_overlap:
@@ -524,15 +591,15 @@ class ProcessEvaluation(object):
                         for m in self.measures_detseg:
                             dict_seg[m] = WORSE[m]
                         if len(self.measures_boundary) + len(self.measures_overlap) > 0:
-                            dict_seg['case'] = i + numb_valid
+                            dict_seg["case"] = i + numb_valid
                             dict_seg["label"] = l
                             list_missing_seg.append(dict_seg)
-                        if len(self.measures_pcc) + len(self.measures_detseg) > 0 : 
-                            dict_det['case'] = i + numb_valid
+                        if len(self.measures_pcc) + len(self.measures_detseg) > 0:
+                            dict_det["case"] = i + numb_valid
                             dict_det["label"] = l
                             list_missing_det.append(dict_det)
                         if len(self.measures_mt) > 0:
-                            dict_mt['case'] = i + numb_valid
+                            dict_mt["case"] = i + numb_valid
                             dict_mt["label"] = l
                             list_missing_mt.append(dict_mt)
             df_miss_det = pd.DataFrame.from_dict(list_missing_det)
@@ -544,45 +611,49 @@ class ProcessEvaluation(object):
             self.resmt = combine_df(self.resmt, df_miss_mt)
             self.resmcc = combine_df(self.resmcc, df_miss_mcc)
 
-    def label_aggregation(self, option='average',dict_args={}):
-        if len(self.data['list_values']) == 1:
+    def label_aggregation(self, option="average", dict_args={}):
+        if len(self.data["list_values"]) == 1:
             # print('DET', self.resdet,'CAL',self.rescal, 'SEG',self.resseg,'MT', self.resmt,'MCC', self.resmcc)
-            df_grouped_all = merge_list_df([self.resdet, self.resseg, self.resmt,self.resmcc, self.rescal])
+            df_grouped_all = merge_list_df([self.resdet, self.resseg, self.resmt, self.resmcc, self.rescal])
             return df_grouped_all
-        df_all_labels = merge_list_df([self.resdet, self.resseg, self.resmt], on=['label','case'])
-        df_all_labels['weights_labels'] = 1
-        df_all_labels['prevalence_labels'] = 1 
+        df_all_labels = merge_list_df([self.resdet, self.resseg, self.resmt], on=["label", "case"])
+        df_all_labels["weights_labels"] = 1
+        df_all_labels["prevalence_labels"] = 1
         for k in self.weights_labels.keys():
-            df_all_labels['weights_labels'] = np.where(df_all_labels['label']==k,self.weights_labels[k],df_all_labels['weights_labels'])
-        for (c,rc) in enumerate(self.data['ref_class']):
-            values,counts = np.unique(rc, return_counts=True)
-            for (v,co) in zip(values,counts):
-                df_all_labels['prevalence_labels'] = np.where(np.logical_and(df_all_labels['case']==c, df_all_labels['label']==v),co,df_all_labels['prevalence_labels'])
-        wm = lambda x: np.ma.average(np.ma.masked_array(x,np.isnan(x)), weights=df_all_labels.loc[x.index, "prevalence_labels"])
-        wm2 = lambda x: np.ma.average(np.ma.masked_array(x,np.isnan(x)), weights=df_all_labels.loc[x.index, "weights_labels"])
-        wm3 = lambda x: np.ma.average(np.ma.masked_array(x,np.isnan(x)))
-        list_measures = self.measures_boundary + self.measures_overlap + self.measures_detseg + self.measures_pcc + self.measures_mt
-        dict_measures = {k:[('prevalence',wm),('weights',wm2),('average',wm3)] for k in list_measures}
-        df_grouped_lab = df_all_labels.groupby('case',as_index=False).agg(dict_measures).reset_index()
-        df_grouped_lab.columns = ['_'.join(col).rstrip('_') for col in df_grouped_lab.columns.values
-]
-        
-        # print(df_grouped_lab, " grouped lab ")                                             
-        df_grouped_all = merge_list_df([df_grouped_lab.reset_index(), self.resmcc, self.rescal], on=['case'])
+            df_all_labels["weights_labels"] = np.where(
+                df_all_labels["label"] == k, self.weights_labels[k], df_all_labels["weights_labels"]
+            )
+        for c, rc in enumerate(self.data["ref_class"]):
+            values, counts = np.unique(rc, return_counts=True)
+            for v, co in zip(values, counts):
+                df_all_labels["prevalence_labels"] = np.where(
+                    np.logical_and(df_all_labels["case"] == c, df_all_labels["label"] == v),
+                    co,
+                    df_all_labels["prevalence_labels"],
+                )
+        wm = lambda x: np.ma.average(
+            np.ma.masked_array(x, np.isnan(x)), weights=df_all_labels.loc[x.index, "prevalence_labels"]
+        )
+        wm2 = lambda x: np.ma.average(
+            np.ma.masked_array(x, np.isnan(x)), weights=df_all_labels.loc[x.index, "weights_labels"]
+        )
+        wm3 = lambda x: np.ma.average(np.ma.masked_array(x, np.isnan(x)))
+        list_measures = (
+            self.measures_boundary + self.measures_overlap + self.measures_detseg + self.measures_pcc + self.measures_mt
+        )
+        dict_measures = {k: [("prevalence", wm), ("weights", wm2), ("average", wm3)] for k in list_measures}
+        df_grouped_lab = df_all_labels.groupby("case", as_index=False).agg(dict_measures).reset_index()
+        df_grouped_lab.columns = ["_".join(col).rstrip("_") for col in df_grouped_lab.columns.values]
+
+        # print(df_grouped_lab, " grouped lab ")
+        df_grouped_all = merge_list_df([df_grouped_lab.reset_index(), self.resmcc, self.rescal], on=["case"])
         # print(df_grouped_all, 'grouped all')
         return df_grouped_all
 
     def get_stats_res(self):
         df_stats_all = self.grouped_lab.describe()
-        df_all_labels = merge_list_df([self.resdet, self.resseg, self.resmt], on=['label','case'])
-        df_stats_lab = df_all_labels.groupby('label').describe()
+        df_all_labels = merge_list_df([self.resdet, self.resseg, self.resmt], on=["label", "case"])
+        df_stats_lab = df_all_labels.groupby("label").describe()
         self.stats_lab = df_stats_lab
         self.stats_all = df_stats_all
-        return 
-
-    
-
-
-
-
-
+        return

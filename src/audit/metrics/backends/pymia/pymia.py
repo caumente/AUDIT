@@ -140,9 +140,10 @@ def instantiate_pymia_metrics(selected_metrics: list) -> list:
 def extract_pymia_metrics(config_file) -> pd.DataFrame:
     labels, processed_labels = config_file["labels"], {}
     for key, value in labels.items():
-        if isinstance(value, list):
-            value = tuple(value)
-        processed_labels[value] = key
+        if value != 0:
+            if isinstance(value, list):
+                value = tuple(value)
+            processed_labels[value] = key
 
     path_ground_truth_dataset = config_file["data_path"]
     metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]

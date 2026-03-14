@@ -1,7 +1,7 @@
 [//]: # (::: src.metric_extraction)
 
-
-When the pipeline is configured to use the **Metrics Reloaded backend (`backend: "metricsreloaded"`)**, segmentation performance is evaluated using a comprehensive suite of rigorously validated metrics derived from pixel-wise classifications.
+When the pipeline is configured to use the **Metrics Reloaded backend (`backend: "metricsreloaded"`)**, segmentation 
+performance is evaluated using a comprehensive suite of rigorously validated metrics derived from pixel-wise classifications.
 Although the Metrics Reloaded backend allows the computation of a wide range of metrics, some are more suitable than others 
 for segmentation problems. To discover which metrics are most appropriate for a given task, please check 
 [Metrics Reloaded Metric Library](https://metrics-reloaded.dkfz.de/metric-library) out.
@@ -12,7 +12,7 @@ References:
 
 - [Maier-Hein, L., Reinke, A., Godau, P. et al. Metrics reloaded: recommendations for image analysis validation. Nat Methods 21, 195–212 (2024).](https://doi.org/10.1038/s41592-023-02151-z)
 
-These metrics capture different aspects of segmentation quality, including overlap, and boundary agreement. 
+Each of the available metrics are documented below, as well as their attribute names needed for the config file.
 
 ## Supported metrics configuration
 

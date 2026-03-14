@@ -1,5 +1,6 @@
 [//]: # (::: src.metric_extraction)
 
+
 When the pipeline is configured to use the **`pymia` backend (`backend: "pymia"`)**, segmentation evaluation is 
 delegated to the robust [pymia image analysis library](https://pymia.readthedocs.io/en/latest/).
 
@@ -8,8 +9,7 @@ References:
 - [Jungo, Alain and Scheidegger, Olivier and Reyes, Mauricio and Balsiger, Fabian. pymia: A Python package for data handling and evaluation in deep learning-based medical image analysis. Computer Methods and Programs in Biomedicine
 Volume 198, January 2021, 105796](https://doi.org/10.1016/j.cmpb.2020.105796)
 
-
-
+  
 Below is an outline of the metrics currently mapped and supported by this project's `pymia` wrapper, including their 
 exact configuration keys. It is important to note that not all metrics provided by `pymia` are necessarily meaningful 
 or commonly used in the context of segmentation evaluation. The pymia library exposes a broad set of evaluation 
@@ -64,8 +64,6 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | True Negative Count             | `tn`                    |
 | True Positive Count             | `tp`                    |
 
----
-
 
 ### Regression Metrics
 | Metric Name                     | Attribute Name (Config) |
@@ -75,3 +73,4 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | Mean Squared Error              | `mse`                   |
 | Root Mean Squared Error         | `rmse`                  |
 | Normalized Root Mean Squared Error | `nrmse`              |
+

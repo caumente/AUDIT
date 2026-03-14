@@ -9,7 +9,6 @@ class Metrics:
             "Precision": "PREC",
             "Specificity": "SPEC",
             "Sensitivity": "SENS",
-
             # metrics reloaded backend
             "Number of reference pixels": "numb_ref",
             "Number of predicted pixels": "numb_pred",
@@ -40,7 +39,6 @@ class Metrics:
             "Sensitivity (Recall)": "sensitivity",
             "Specificity ": "specificity",
             "Absolute Volume Difference Ratio": "avdr",
-
             # PyMIA backend
             "Adjusted Rand Index": "ari",
             "Area Under Curve": "auc",
@@ -74,8 +72,6 @@ class Metrics:
             "Variation of Information": "vi",
             "Volume Similarity": "vs",
         }
-
-
 
         self.orderby = {"Ascending": True, "Descending": False}
 

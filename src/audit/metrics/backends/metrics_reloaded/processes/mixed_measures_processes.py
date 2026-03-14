@@ -11,19 +11,18 @@
 # limitations under the License.
 
 
-from src.audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import (
-    BinaryPairwiseMeasures,
-    MultiClassPairwiseMeasures,
-)
-from src.audit.metrics.backends.metrics_reloaded.metrics.calibration_measures import CalibrationMeasures
-from src.audit.metrics.backends.metrics_reloaded.utility.assignment_localization import AssignmentMapping
-import numpy as np
-import pandas as pd
-import nibabel as nib
 import os
 import warnings
 
+import nibabel as nib
+import numpy as np
+import pandas as pd
+
+from src.audit.metrics.backends.metrics_reloaded.metrics.calibration_measures import CalibrationMeasures
+from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import MultiClassPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
+from src.audit.metrics.backends.metrics_reloaded.utility.assignment_localization import AssignmentMapping
 
 __all__ = [
     "MixedLocSegPairwiseMeasure",
@@ -37,7 +36,7 @@ class MixedLocSegPairwiseMeasure(object):
     """
     This class is for use in the context of instance segmentation when identification of location, classification of instances and contour segmentation are required
     This is initialised with the following parameters:
-    
+
     :param pred: np array with prediction of class of individual elements
     :param ref: np array with reference class of individual elements
     :param list_predimg: list of the prediction images (one per element to consider in the comparison)
@@ -50,6 +49,7 @@ class MixedLocSegPairwiseMeasure(object):
     :param measures_detseg: consideration (list) of metrics combining both segmentation and detection performance
     :param dict_args: dictionary with relevant arguments for the metrics
     """
+
     def __init__(
         self,
         pred,
@@ -76,12 +76,8 @@ class MixedLocSegPairwiseMeasure(object):
         self.measures_det = measures_pcc
         self.measures_seg = measures_boundary + measures_overlap
         self.dict_args = dict_args
-        self.prob_res = ProbabilityPairwiseMeasures(
-            pred_prob, ref, self.measures_mt, self.dict_args
-        )
-        self.det_res = BinaryPairwiseMeasures(
-            pred, ref, self.measures_det, dict_args=self.dict_args
-        )
+        self.prob_res = ProbabilityPairwiseMeasures(pred_prob, ref, self.measures_mt, self.dict_args)
+        self.det_res = BinaryPairwiseMeasures(pred, ref, self.measures_det, dict_args=self.dict_args)
         self.seg_res = [
             BinaryPairwiseMeasures(p, r, self.measures_seg, dict_args=self.dict_args)
             for (p, r) in zip(list_predimg, list_refimg)
@@ -92,10 +88,10 @@ class MixedLocSegPairwiseMeasure(object):
         Calculates the segmentation quality in an instance segmentation case with SQ defined as the average IoU over TP instances
         """
         list_iou = []
-        for (p, r) in zip(self.predimg, self.refimg):
+        for p, r in zip(self.predimg, self.refimg):
             PE = BinaryPairwiseMeasures(p, r)
             list_iou.append(PE.intersection_over_union())
-        
+
         return np.mean(np.asarray(list_iou))
 
     def detection_quality(self):
@@ -115,7 +111,7 @@ class MixedLocSegPairwiseMeasure(object):
 
         :return: PQ
         """
-        
+
         DQ = self.detection_quality()
         SQ = self.segmentation_quality()
         if np.isnan(SQ):
@@ -124,7 +120,7 @@ class MixedLocSegPairwiseMeasure(object):
             else:
                 SQ = 1
                 # TODO modify to nan if this is the value adopted for empty situations
-        
+
         return DQ * SQ
 
     def to_dict_mt(self):
@@ -156,15 +152,15 @@ class MixedLocSegPairwiseMeasure(object):
 
 class MultiLabelLocSegPairwiseMeasure(object):
     """
-    This class represents the processing for instance segmentation on true positive 
+    This class represents the processing for instance segmentation on true positive
     Characterised by the predicted classes and associated reference classes
 
-    :param pred_class: list for each considered case of classes predicted 
+    :param pred_class: list for each considered case of classes predicted
     :param ref_class:list for each considered case of reference classes
     :param pred_loc: list for each considered case of the individual image considering an individual predicted element
     :param ref_loc: list for each considered case of the individual images considering individual reference elements (note that ref_loc and ref_class entities are matching)
     :param pred_prob:
-    :param list_values: list of possible label values 
+    :param list_values: list of possible label values
     :param measures_pcc: list of per class counting measures to be derived during the process
     :param measures_overlap: list of overlap (segmentation) measures to be derived during the process
     :param measures_boundary: list of boundary measures to be derived during the comparison process
@@ -179,7 +175,7 @@ class MultiLabelLocSegPairwiseMeasure(object):
     :param flag_fp_in: flag to consider the false positive elements in the assessment
     :param dict_args: dictionary for additional arguments related to the chosen metrics.
     """
-    
+
     def __init__(
         self,
         pred_class,
@@ -206,8 +202,6 @@ class MultiLabelLocSegPairwiseMeasure(object):
         flag_fp_in=True,
         dict_args={},
     ):
-
-   
         self.pred_loc = pred_loc
         self.list_values = list_values
         self.ref_class = ref_class
@@ -259,14 +253,14 @@ class MultiLabelLocSegPairwiseMeasure(object):
 
     def per_label_dict(self):
         """
-        According to the specifications of metrics to be used and the type of assignment and localization, performs, per label value in 
+        According to the specifications of metrics to be used and the type of assignment and localization, performs, per label value in
         list_values the processing per case (overall prediction associated to overall reference image).
         This is organised in multiple steps:
             - identification for each predicted case of the items considered as of the class specified by label considered
-            - identification for each associated case, the items considered as of the class specified by the considered label 
+            - identification for each associated case, the items considered as of the class specified by the considered label
             - creation of the associated list of individual images of elements selected beforehand both in the prediction images and the reference images (the images are listed in the same order with one element per image)
             - assigment procedure based on the segmentation images
-            - derivation of metrics either on a case by case basis or grouping all cases together. 
+            - derivation of metrics either on a case by case basis or grouping all cases together.
 
         """
         list_det = []
@@ -278,12 +272,11 @@ class MultiLabelLocSegPairwiseMeasure(object):
             list_prob = []
             list_pred_loc = []
             list_ref_loc = []
-            for (case, name) in zip(range(len(self.pred_class)), self.names):
-                
+            for case, name in zip(range(len(self.pred_class)), self.names):
                 pred_class_case = np.asarray(self.pred_class[case])
                 ref_class_case = np.asarray(self.ref_class[case])
                 ind_pred = np.where(pred_class_case == lab)
-                
+
                 # identification of the elements of pred classified according to label lab
                 pred_tmp = np.where(
                     pred_class_case == lab,
@@ -305,14 +298,14 @@ class MultiLabelLocSegPairwiseMeasure(object):
                 if len(self.pixdim) == 0:
                     if len(pred_loc_tmp) > 0:
                         self.pixdim = np.ones([pred_loc_tmp[0].ndim])
-                    elif len(ref_loc_tmp)>0:
+                    elif len(ref_loc_tmp) > 0:
                         self.pixdim = np.ones([ref_loc_tmp[0].ndim])
 
                 if self.flag_valid_prob:
                     pred_prob_tmp = [self.pred_prob[case][i, lab] for i in ind_pred[0]]
                 else:
                     pred_prob_tmp = None
-                
+
                 # Performing the assignment mapping based on the list of locations
                 AS = AssignmentMapping(
                     pred_loc=pred_loc_tmp,
@@ -322,7 +315,7 @@ class MultiLabelLocSegPairwiseMeasure(object):
                     localization=self.localization,
                     thresh=self.thresh,
                     flag_fp_in=self.flag_fp_in,
-                    pixdim=self.pixdim
+                    pixdim=self.pixdim,
                 )
 
                 pred_tmp_fin = np.asarray(AS.df_matching["pred"])
@@ -367,19 +360,19 @@ class MultiLabelLocSegPairwiseMeasure(object):
                         measures_overlap=self.measures_overlap,
                         measures_mt=self.measures_mt,
                         dict_args=self.dict_args,
-                        pixdim=self.pixdim
+                        pixdim=self.pixdim,
                     )
-                    if len(self.measures_boundary) + len(self.measures_overlap)  > 0:
+                    if len(self.measures_boundary) + len(self.measures_overlap) > 0:
                         seg_res = MLSPM.to_pd_seg()
                         seg_res["label"] = lab
                         seg_res["case"] = name
                         list_seg.append(seg_res)
-                    if len(self.measures_pcc) + len(self.measures_detseg)>0:
+                    if len(self.measures_pcc) + len(self.measures_detseg) > 0:
                         det_res = MLSPM.to_dict_det()
                         det_res["label"] = lab
                         det_res["case"] = name
                         list_det.append(det_res)
-                    if len(self.measures_mt) > 0 :
+                    if len(self.measures_mt) > 0:
                         mt_res = MLSPM.to_dict_mt()
                         mt_res["label"] = lab
                         mt_res["case"] = name
@@ -395,7 +388,7 @@ class MultiLabelLocSegPairwiseMeasure(object):
                             self.pixdim = np.ones([p.ndim])
                     for r in ref_loc_tmp_fin:
                         list_ref_loc.append(r)
-                        if len(self.pixdim) == 0 and r.shape[0] >0:
+                        if len(self.pixdim) == 0 and r.shape[0] > 0:
                             self.pixdim = np.ones([r.ndim])
                     for p in pred_tmp_fin:
                         list_pred.append(p)
@@ -411,7 +404,7 @@ class MultiLabelLocSegPairwiseMeasure(object):
                 overall_pred = np.asarray(list_pred)
                 overall_ref = np.asarray(list_ref)
                 overall_prob = np.asarray(list_prob)
-                
+
                 MLSPM = MixedLocSegPairwiseMeasure(
                     pred=overall_pred,
                     ref=overall_ref,
@@ -424,9 +417,9 @@ class MultiLabelLocSegPairwiseMeasure(object):
                     measures_overlap=self.measures_overlap,
                     measures_mt=self.measures_mt,
                     dict_args=self.dict_args,
-                    pixdim=self.pixdim
+                    pixdim=self.pixdim,
                 )
-                if len(self.measures_boundary) + len(self.measures_overlap) > 0 :
+                if len(self.measures_boundary) + len(self.measures_overlap) > 0:
                     res_seg = MLSPM.to_pd_seg()
                     res_seg["label"] = lab
                     list_seg.append(res_seg)
@@ -453,12 +446,12 @@ class MultiLabelLocSegPairwiseMeasure(object):
 class MultiLabelLocMeasures(object):
     """
     Class for the processing of multilabel object detection processes
-    :param pred_class: list for each considered case of classes predicted 
+    :param pred_class: list for each considered case of classes predicted
     :param ref_class:list for each considered case of reference classes
     :param pred_loc: list for each considered case of the individual image considering an individual predicted element
     :param ref_loc: list for each considered case of the individual images considering individual reference elements (note that ref_loc and ref_class entities are matching)
     :param pred_prob:
-    :param list_values: list of possible label values 
+    :param list_values: list of possible label values
     :param measures_pcc: list of per class counting measures to be derived during the process
     :param measures_mt: list of multi-threshold measures to be derived during the comparison process
     :param per_case: flag indicating whether each case should be derived individually or if all cases should be assessed at once
@@ -469,6 +462,7 @@ class MultiLabelLocMeasures(object):
     :param dict_args: dictionary for additional arguments related to the chosen metrics.
 
     """
+
     def __init__(
         self,
         pred_class,
@@ -508,7 +502,7 @@ class MultiLabelLocMeasures(object):
             self.names = range(len(self.ref))
         self.flag_valid_proba = True
         if pred_prob is None or pred_prob[0] is None:
-            self.flag_valid_proba=False
+            self.flag_valid_proba = False
 
     def per_label_dict(self):
         list_det = []
@@ -517,21 +511,17 @@ class MultiLabelLocMeasures(object):
             list_pred = []
             list_ref = []
             list_prob = []
-            for (case, name) in zip(range(len(self.ref_class)), self.names):
+            for case, name in zip(range(len(self.ref_class)), self.names):
                 pred_arr = np.asarray(self.pred_class[case])
                 ref_arr = np.asarray(self.ref_class[case])
                 ind_pred = np.where(pred_arr == lab)
-                pred_tmp = np.where(
-                    pred_arr == lab, np.ones_like(pred_arr), np.zeros_like(pred_arr)
-                )
-                ref_tmp = np.where(
-                    ref_arr == lab, np.ones_like(ref_arr), np.zeros_like(ref_arr)
-                )
+                pred_tmp = np.where(pred_arr == lab, np.ones_like(pred_arr), np.zeros_like(pred_arr))
+                ref_tmp = np.where(ref_arr == lab, np.ones_like(ref_arr), np.zeros_like(ref_arr))
                 ind_ref = np.where(ref_arr == lab)
                 pred_loc_tmp = [self.pred_loc[case][f] for f in ind_pred[0]]
                 ref_loc_tmp = [self.ref_loc[case][f] for f in ind_ref[0]]
                 if self.flag_valid_proba:
-                    pred_prob_tmp = [self.pred_prob[case][lab,f] for f in ind_pred[0]]
+                    pred_prob_tmp = [self.pred_prob[case][lab, f] for f in ind_pred[0]]
                 else:
                     pred_prob_tmp = None
                 AS = AssignmentMapping(
@@ -542,7 +532,7 @@ class MultiLabelLocMeasures(object):
                     localization=self.localization,
                     thresh=self.thresh,
                     flag_fp_in=self.flag_fp_in,
-                    pixdim=self.pixdim
+                    pixdim=self.pixdim,
                 )
                 df_matching = AS.df_matching
                 pred_tmp_fin = np.asarray(df_matching["pred"])
@@ -614,24 +604,25 @@ class MultiLabelLocMeasures(object):
 
 class MultiLabelPairwiseMeasures(object):
     """
-      Semantic segmentation or Image wide classification with possibility of multiple labels
-      :param pred:
-      :param ref:
-      :param pred_proba:
-      :param list_values:
-      :param names:
-      :param measures_pcc:
-      :param measures_mt:
-      :param measures_mcc:
-      :param measures_overlap:
-      :param measures_boundary:
-      :param measures_calibration:
-      :param connectivity_type:
-      :param per_case:
-      :param pixdim:
-      :param empty:
-      :param dict_args: 
+    Semantic segmentation or Image wide classification with possibility of multiple labels
+    :param pred:
+    :param ref:
+    :param pred_proba:
+    :param list_values:
+    :param names:
+    :param measures_pcc:
+    :param measures_mt:
+    :param measures_mcc:
+    :param measures_overlap:
+    :param measures_boundary:
+    :param measures_calibration:
+    :param connectivity_type:
+    :param per_case:
+    :param pixdim:
+    :param empty:
+    :param dict_args:
     """
+
     def __init__(
         self,
         pred,
@@ -663,11 +654,11 @@ class MultiLabelPairwiseMeasures(object):
         self.connectivity_type = connectivity_type
         ndim = 0
         self.pixdim = pixdim
-        if len(self.pred)>0:
+        if len(self.pred) > 0:
             ndim = np.asarray(self.pred[0]).ndim
-        if len(self.pixdim) == 0 and ndim>0:
+        if len(self.pixdim) == 0 and ndim > 0:
             self.pixdim = np.ones([ndim])
-        elif ndim>0:
+        elif ndim > 0:
             self.pixdim = pixdim[:ndim]
         else:
             self.pixdim = pixdim
@@ -676,7 +667,7 @@ class MultiLabelPairwiseMeasures(object):
         self.names = names
         if len(self.names) < len(self.ref):
             self.names = range(len(self.ref))
-        
+
         if pred_proba is None or pred_proba[0] is None:
             self.flag_valid_proba = False
 
@@ -688,27 +679,23 @@ class MultiLabelPairwiseMeasures(object):
             list_ref = []
             list_prob = []
             list_case = []
-            for (case, name) in zip(range(len(self.ref)), self.names):
+            for case, name in zip(range(len(self.ref)), self.names):
                 pred_case = np.asarray(self.pred[case])
                 ref_case = np.asarray(self.ref[case])
                 if self.pred_proba[case] is not None:
                     prob_case = np.asarray(self.pred_proba[case])
                 else:
                     prob_case = None
-                pred_tmp = np.where(
-                    pred_case == lab, np.ones_like(pred_case), np.zeros_like(pred_case)
-                )
-                
+                pred_tmp = np.where(pred_case == lab, np.ones_like(pred_case), np.zeros_like(pred_case))
+
                 if prob_case is not None:
-                    pred_proba_tmp = prob_case[...,lab]
+                    pred_proba_tmp = prob_case[..., lab]
                 else:
                     pred_proba_tmp = None
                     self.flag_valid_proba = False
-                
-                ref_tmp = np.where(
-                    ref_case == lab, np.ones_like(ref_case), np.zeros_like(ref_case)
-                )
-                
+
+                ref_tmp = np.where(ref_case == lab, np.ones_like(ref_case), np.zeros_like(ref_case))
+
                 if self.per_case:
                     if len(self.measures_binary) > 0:
                         BPM = BinaryPairwiseMeasures(
@@ -723,19 +710,21 @@ class MultiLabelPairwiseMeasures(object):
                         dict_bin["label"] = lab
                         dict_bin["case"] = name
                         list_bin.append(dict_bin)
-                    if self.flag_valid_proba and len(self.measures_mt)>0:
+                    if self.flag_valid_proba and len(self.measures_mt) > 0:
                         PPM = ProbabilityPairwiseMeasures(
-                        pred_proba=pred_proba_tmp,
-                        ref_proba=ref_tmp,
-                        measures=self.measures_mt,
-                        dict_args=self.dict_args,
+                            pred_proba=pred_proba_tmp,
+                            ref_proba=ref_tmp,
+                            measures=self.measures_mt,
+                            dict_args=self.dict_args,
                         )
                         dict_mt = PPM.to_dict_meas()
                         dict_mt["label"] = lab
                         dict_mt["case"] = name
                         list_mt.append(dict_mt)
-                    if not self.flag_valid_proba and len(self.measures_mt)>0:
-                        warnings.warn('No probabilistic input or no probabilistic measure so impossible to get multi-threshold metric')
+                    if not self.flag_valid_proba and len(self.measures_mt) > 0:
+                        warnings.warn(
+                            "No probabilistic input or no probabilistic measure so impossible to get multi-threshold metric"
+                        )
                 else:
                     list_pred.append(pred_tmp)
                     list_ref.append(ref_tmp)
@@ -749,7 +738,7 @@ class MultiLabelPairwiseMeasures(object):
                     overall_prob = np.concatenate(list_prob)
                 else:
                     overall_prob = None
-                if len(self.measures_binary)>0:
+                if len(self.measures_binary) > 0:
                     BPM = BinaryPairwiseMeasures(
                         overall_pred,
                         overall_ref,
@@ -761,8 +750,8 @@ class MultiLabelPairwiseMeasures(object):
                     dict_bin = BPM.to_dict_meas()
                     dict_bin["label"] = lab
                     list_bin.append(dict_bin)
-                
-                if len(self.measures_mt)>0 and self.flag_valid_proba:
+
+                if len(self.measures_mt) > 0 and self.flag_valid_proba:
                     PPM = ProbabilityPairwiseMeasures(
                         overall_prob,
                         overall_ref,
@@ -772,7 +761,7 @@ class MultiLabelPairwiseMeasures(object):
                     )
                     dict_mt = PPM.to_dict_meas()
                     dict_mt["label"] = lab
-                    
+
                     list_mt.append(dict_mt)
 
         return pd.DataFrame.from_dict(list_bin), pd.DataFrame.from_dict(list_mt)
@@ -783,7 +772,7 @@ class MultiLabelPairwiseMeasures(object):
         list_prob = []
         list_mcc = []
         list_cal = []
-        for (case, name) in zip(range(len(self.ref)), self.names):
+        for case, name in zip(range(len(self.ref)), self.names):
             pred_case = np.asarray(self.pred[case])
             ref_case = np.asarray(self.ref[case])
             if self.pred_proba[case] is not None and self.flag_valid_proba:
@@ -799,14 +788,16 @@ class MultiLabelPairwiseMeasures(object):
                         measures=self.measures_mcc,
                         dict_args=self.dict_args,
                     )
-                
+
                     dict_mcc = MPM.to_dict_meas()
                     dict_mcc["case"] = name
                     list_mcc.append(dict_mcc)
                 if len(self.measures_calibration) > 0 and prob_case is not None:
-                    CM = CalibrationMeasures(prob_case, ref_case,measures=self.measures_calibration, dict_args=self.dict_args)
+                    CM = CalibrationMeasures(
+                        prob_case, ref_case, measures=self.measures_calibration, dict_args=self.dict_args
+                    )
                     dict_cm = CM.to_dict_meas()
-                    dict_cm['case'] = name
+                    dict_cm["case"] = name
                     list_cal.append(dict_cm)
 
             else:
@@ -838,7 +829,7 @@ class MultiLabelPairwiseMeasures(object):
             else:
                 pd_mcc = None
             if len(self.measures_calibration) > 0 and overall_prob is not None:
-                CM = CalibrationMeasures(overall_prob, overall_ref,measures=self.measures_calibration)
+                CM = CalibrationMeasures(overall_prob, overall_ref, measures=self.measures_calibration)
                 dict_cal = CM.to_dict_meas()
                 list_cal.append(dict_cal)
                 pd_cal = pd.DataFrame.from_dict(list_cal)

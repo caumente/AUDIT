@@ -1,4 +1,5 @@
 import os
+import warnings
 from multiprocessing import Lock
 from multiprocessing import Manager
 from multiprocessing import Pool
@@ -15,8 +16,6 @@ from audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes 
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_print
 from audit.utils.commons.strings import fancy_tqdm
-
-import warnings
 
 warnings.filterwarnings("ignore")
 
@@ -38,7 +37,7 @@ def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
         list_values=list_values,
         measures_pcc=params["metrics_to_extract"],
         per_case=True,
-        pixdim=spacing
+        pixdim=spacing,
     )
     df_seg, _ = mlpm.per_label_dict()
 

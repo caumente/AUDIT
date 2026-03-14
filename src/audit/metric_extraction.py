@@ -12,8 +12,8 @@ import pandas as pd
 from loguru import logger
 
 from audit.metrics.backends.audit.audit import extract_audit_metrics
-from audit.metrics.backends.pymia.pymia import extract_pymia_metrics
 from audit.metrics.backends.metrics_reloaded.metrics_reloaded import extract_metricsreloaded_metrics
+from audit.metrics.backends.pymia.pymia import extract_pymia_metrics
 from audit.utils.internal._config_helpers import check_metric_extraction_config
 from audit.utils.internal._config_helpers import configure_logging
 from audit.utils.internal._config_helpers import load_config_file

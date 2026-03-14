@@ -168,6 +168,9 @@ labels:
   ENH: 1
   NEC: 2
 
+# Library used for computing all the metrics
+backend: audit
+
 # List of metrics to compute
 metrics:
   dice: true
@@ -178,9 +181,6 @@ metrics:
   spec: true
   haus: true
   size: true
-
-# Library used for computing all the metrics
-package: audit
 
 # Path where output metrics will be saved
 output_path: './outputs/metrics'
@@ -290,8 +290,8 @@ def check_metric_extraction_config(config: dict) -> None:
         logger.error("Missing metrics key in the metric_extraction.yml file")
         sys.exit(1)
 
-    if not config.get("package"):
-        logger.error("Missing package key in the metric_extraction.yml file")
+    if not config.get("backend"):
+        logger.error("Missing backend key in the metric_extraction.yml file")
         sys.exit(1)
 
     if not config.get("filename"):

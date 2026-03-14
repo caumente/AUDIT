@@ -71,12 +71,19 @@ class Longitudinal(BasePage):
     @staticmethod
     def merge_features_metrics(features_df, metrics_df):
         features_df = features_df.loc[~features_df["longitudinal_id"].isna(), :]
-        if "SIZE" in metrics_df.columns:
+        col_map = {
+            "SIZE": "audit",
+            "numb_pred": "metrics_reloaded",
+            "pred_vol": "pymia",
+        }
+
+        col = next((c for c in col_map if c in metrics_df.columns), None)
+        if col:
             metrics_df = (
-                metrics_df.groupby(["ID", "model", "set"])["SIZE"]
+                metrics_df.groupby(["ID", "model", "set"])[col]
                 .sum()
                 .reset_index()
-                .rename(columns={"SIZE": "lesion_size_pred"})
+                .rename(columns={col: "lesion_size_pred"})
             )
         elif "lesion_size_pred" in metrics_df.columns:
             metrics_df = metrics_df.groupby(["ID", "model", "set"])["lesion_size_pred"].sum().reset_index()
@@ -84,7 +91,7 @@ class Longitudinal(BasePage):
             return pd.DataFrame()
         # metrics_df = metrics_df.groupby(["ID", "model", "set"])["lesion_size_pred"].sum().reset_index()
         merged = metrics_df.merge(features_df, on=["ID", "set"])
-
+        st.table(merged)
         return merged
 
     @staticmethod

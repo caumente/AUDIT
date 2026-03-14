@@ -1,85 +1,89 @@
 [//]: # (::: src.metric_extraction)
 
-# Metrics Computed
+# AUDIT Custom Metrics
 
-The provided code computes a variety of metrics to evaluate the performance of a segmentation model in relation to the 
-ground truth. These metrics provide insights into the model's accuracy, overlap, and shape conformity with the actual 
-segmented regions. Below is an overview of each metric computed:
+The **AUDIT backend (`backend: "audit"`)** computes a variety of native metrics to evaluate the performance of a 
+segmentation model in relation to a ground truth reference. These metrics provide insights into the model's accuracy, 
+overlap, and shape conformity with the actual segmented regions.
 
-## 1. Dice Score (DICE)
+Below is an overview of each metric supported by the custom AUDIT extractor.
 
-The Dice score (or Dice coefficient) is a measure of overlap between the ground truth and the predicted segmentation. It ranges from 0 to 1, with 1 indicating perfect overlap.
+---
+
+## Overlap Metrics
+
+### 1. Dice Score (DICE)
+
+The Dice Score Coefficient (DSC) is a measure of spatial overlap between the ground truth and the predicted segmentation. It ranges from 0 to 1, with 1 indicating perfect overlap.
 
 $$ \text{Dice} = \frac{2 \cdot TP}{2 \cdot TP + FP + FN} $$
 
-Where _TP_ is true positives, _FP_ is false positives, and _FN_ is false negatives.
+Where $TP$ is true positives, $FP$ is false positives, and $FN$ is false negatives.
 
-Interpretation: A higher Dice score indicates better agreement between prediction and ground truth.
+**Interpretation:** A higher Dice score indicates better agreement between the model's prediction and the ground truth. It is the most common metric for medical segmentation.
 
-## 2. Jaccard Index (JACC)
+### 2. Jaccard Index (JACC)
 
-Also known as the Intersection over Union (IoU), the Jaccard index is another overlap-based metric. It measures the 
-size of the intersection divided by the size of the union of the predicted and ground truth regions.
+Also known as the Intersection over Union (IoU), the Jaccard index is a stricter overlap-based metric. It measures the size of the intersection divided by the size of the union of the predicted and ground truth regions.
 
 $$ \text{Jaccard} = \frac{TP}{TP + FP + FN} $$ 
 
-Interpretation: A higher Jaccard index indicates a more accurate segmentation. It is always lower than the Dice score 
-for the same segmentation.
+**Interpretation:** A higher Jaccard index indicates a more accurate segmentation. Because it penalizes errors more heavily than Dice, it is always lower than the Dice score for the same non-perfect segmentation.
 
-## 3. Sensitivity (SENS)
+---
 
-Sensitivity, also known as recall or true positive rate, measures the ability of the model to correctly identify all 
-the positive regions (i.e., tumor voxels).
+## Classification Metrics
+
+### 3. Sensitivity (SENS)
+
+Sensitivity, also known as **Recall** or the True Positive Rate, measures the ability of the model to correctly identify all the positive regions (e.g., all tumor voxels in an image).
 
 $$ \text{Sensitivity} = \frac{TP}{TP + FN} $$
 
-Interpretation: A higher sensitivity value indicates the model is good at detecting positive regions (e.g., tumor 
-regions), but it doesn’t account for false positives.
+**Interpretation:** A higher sensitivity value implies the model successfully detects positive regions. However, it does not account for oversegmentation (false positives).
 
-## 4. Specificity (SPEC)
+### 4. Specificity (SPEC)
 
-Specificity measures the model's ability to correctly identify negative regions (i.e., non-tumor voxels).
+Specificity measures the model's ability to correctly identify negative regions (e.g., healthy background voxels).
 
 $$ \text{Specificity} = \frac{TN}{TN + FP} $$
 
-Interpretation: A higher specificity value indicates the model is good at ignoring false positives, but doesn’t account
-for missing true positives.
+**Interpretation:** A higher specificity value means the model is good at ignoring areas that should not be segmented, though it does not account for undersegmentation (missing true positives).
 
-## 5. Precision (PREC)
+### 5. Precision (PREC)
 
-Precision, or positive predictive value, measures the proportion of predicted positive cases that are actually positive.
+Precision, or the Positive Predictive Value (PPV), measures the proportion of predicted positive voxels that are *actually* positive in the ground truth.
 
 $$ \text{Precision} = \frac{TP}{TP + FP} $$
 
-Interpretation: A high precision value means that when the model predicts a positive case (e.g., tumor), it is likely 
-correct.
+**Interpretation:** A high precision value means that when the model predicts a region to be part of the target class, that prediction is highly likely to be correct. It penalizes oversegmentation heavily.
 
-## 6. Accuracy (ACCU)
+### 6. Accuracy (ACCU)
 
-Accuracy provides an overall measure of how often the model makes correct predictions (both true positives and true 
-negatives) across all regions.
+Accuracy provides an overall measure of how often the model makes correct predictions (both true positives and true negatives) across all voxels in the image.
 
 $$ \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN} $$
 
-Interpretation: A high accuracy score reflects the model’s general performance in predicting both positive and negative cases.
+**Interpretation:** While a high accuracy score reflects general prediction success, it can be deceiving in highly imbalanced datasets (e.g., small targets in a large background).
 
-## 7. Hausdorff Distance (HAUS)
+---
 
-The Hausdorff distance is a shape-based metric that measures the maximum distance between points on the predicted 
-segmentation and the corresponding points on the ground truth.
+## Distance & Structural Metrics
 
-$$ \text{Hausdorff Distance} = \max_{x \in A} \min_{y \in B} d(x, y) $$
+### 7. Hausdorff Distance (HAUS)
 
-Where _A_ is the set of points on the predicted segmentation, _B_ is the set of points on the ground truth, and 
-_d(x, y)_ is the Euclidean distance between points.
+The Hausdorff distance is a spatial shape-based metric. It computes the maximum distance from a point on the predicted segmentation boundary to the closest point on the ground truth boundary.
 
-Interpretation: Lower Hausdorff distances indicate that the boundary of the predicted segmentation is closer to the ground truth boundary, implying better shape similarity.
+$$ \text{Hausdorff Distance} = \max_{a \in A} \min_{b \in B} d(a, b) $$
 
-## 8. Segmentation Size (SIZE)
+Where $A$ is the set of points on the predicted segmentation boundary, $B$ is the set of points on the ground truth boundary, and $d(a, b)$ is the Euclidean distance between points.
 
-This metric calculates the physical size of the predicted segmentation in terms of voxel count, adjusted by the voxel spacing to provide a volume measurement.
+**Interpretation:** Lower Hausdorff distances indicate that the furthest outlier boundary of the predicted segmentation is physically close to the ground truth boundary, implying better overall shape similarity.
 
-$$ \text{Size} = \text{Voxel count of predicted region} \times \text{Spacing} $$
+### 8. Segmentation Size (SIZE)
 
-Interpretation: This helps to quantify the total volume of the segmented region, which can be compared to the expected 
-size from the ground truth.
+This physical metric calculates the absolute size of the predicted segmentation, adjusted by the image's coordinate spacing to provide an accurate physical volume measurement.
+
+$$ \text{Size} = (\text{Voxel count of predicted region}) \times (\text{Voxel Spacing}) $$
+
+**Interpretation:** Allows researchers to quantify the total predicted target volume, which can be clinically relevant and compared directly against the expected physical volume from the ground truth.

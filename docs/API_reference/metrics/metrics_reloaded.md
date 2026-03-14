@@ -3,8 +3,8 @@
 
 When the pipeline is configured to use the **Metrics Reloaded backend (`backend: "metricsreloaded"`)**, segmentation performance is evaluated using a comprehensive suite of rigorously validated metrics derived from pixel-wise classifications.
 Although the Metrics Reloaded backend allows the computation of a wide range of metrics, some are more suitable than others 
-for segmentation problems. To discover which metrics are most appropriate for a given task, please consult 
-[Metrics Reloaded Metric Library](https://metrics-reloaded.dkfz.de/metric-library).
+for segmentation problems. To discover which metrics are most appropriate for a given task, please check 
+[Metrics Reloaded Metric Library](https://metrics-reloaded.dkfz.de/metric-library) out.
 
 References:
 

@@ -40,7 +40,8 @@ theme:
 
 nav:
   - AUDIT library: index.md
-  - Getting started: 
+  - Getting started:
+    - getting_started/index.md
     - Installation: getting_started/installation.md
     - Project structure: getting_started/project_structure.md
     - Configuration file: getting_started/configuration.md

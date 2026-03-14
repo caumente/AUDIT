@@ -17,7 +17,7 @@ the list of model predictions to evaluate, the specific metrics to calculate, an
 
     *   **AUDIT Custom Metrics (`backend: "audit"`)**: Calculates specific metrics like Dice coefficient, Sensitivity, Hausdorff Distance, etc., based on 
     native implementations optimized for this project. Developers can add new custom metrics directly to this backend.
-    *   **pymia (`backend: "pymia"`)**: Utilizes the popular `pymia` library's evaluation tools for medical image analysis. It natively supports confidence intervals and statistical aggregation during processing.
+    *   **pymia (`backend: "pymia"`)**: Utilizes the popular [Pymia](https://github.com/rundherum/pymia) library's evaluation tools for medical image analysis. It natively supports confidence intervals and statistical aggregation during processing.
     *   **Metrics Reloaded (`backend: "metricsreloaded"`)**: Delegates computation to the [Metrics Reloaded project](https://github.com/Project-MONAI/MetricsReloaded), which offers a comprehensive suite of rigorously validated medical imaging metrics.
 
 3. **Data Handling & Processing**: For the chosen dataset, metrics are computed across all specified models and all subjects. A shared utilities module (`audit/metrics/backends/commons.py`) ensures that NIfTI loading and multiprocessing execution remain consistent across all three backends.

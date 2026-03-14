@@ -92,7 +92,7 @@ This approach allows experiments to be **reproducible and easily configurable**,
 
 ---
 
-# 6. External Tools Integration
+# 6. External tools integration
 
 AUDIT also supports integration with external tools that complement the evaluation workflow.
 

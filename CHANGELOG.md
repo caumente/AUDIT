@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2] - 2026-03-14
+
+### Added
+- Multi-backend metric extraction support: Metrics Reloaded included!
+
+### Changed
+- Metrics module code refactoring: Now each backend is an individual module (AUDIT, pymia, metrics reloaded)
+
+
+---
+
+## [0.1.1] - 2025-12-09
+
+### Added
+- Extended documentation
+- Added new tutorials
+
+### Changed
+- Utils module code refactoring: 
+  - Helpers
+  - Config checks
+  - File manager
+
+---
+
 ## [0.1.0] - 2025-07-10
 
 ### Added

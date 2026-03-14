@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "auditapp"
-version = "0.1.0"
+version = "0.1.2"
 description = "AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence"
 authors = ["Carlos Aumente Maestro <carlosaumente@gmail.com>"]
 license = "Apache-2.0"

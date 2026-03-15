@@ -52,7 +52,10 @@ def init_app_yaml(dest: Path):
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     yaml_content = """\
-# Sequences available. First of them will be used to compute properties like spacing
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
+
+# Sequences available. Optional if modality is not MRI.
 sequences:
   - '_t1'
   - '_t2'
@@ -109,7 +112,10 @@ data_paths:
   dataset_1: '/path/to/dataset_1/images'
   dataset_2: '/path/to/dataset_2/images'
 
-# Sequences available
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
+
+# Sequences available. Optional if modality is not MRI.
 sequences:
   - '_t1'
   - '_t2'
@@ -155,6 +161,9 @@ def init_metric_extraction_yaml(dest: Path):
     yaml_content = """\
 # Path to the raw dataset
 data_path: '/path/to/dataset_2/images'
+
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
 
 # Paths to model predictions
 model_predictions_paths:
@@ -245,9 +254,12 @@ def check_feature_extraction_config(config: dict) -> None:
         logger.error("Missing labels key in the feature_extraction.yml file")
         sys.exit(1)
 
-    if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extraction.yml file")
-        sys.exit(1)
+    # Modality and sequence enforcement
+    modality = config.get("modality", "MRI")
+    if modality.upper() == "MRI":
+        if not config.get("sequences"):
+            logger.error("Missing sequences key in the feature_extraction.yml file. It is required for MRI.")
+            sys.exit(1)
 
 
 def check_metric_extraction_config(config: dict) -> None:
@@ -341,12 +353,15 @@ def check_app_config(config: dict) -> None:
 
     # Ensure features, labels, and sequences are not empty
     if not config.get("labels"):
-        logger.error("Missing labels key in the feature_extraction.yml file")
+        logger.error("Missing labels key in the app.yml file")
         sys.exit(1)
 
-    if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extraction.yml file")
-        sys.exit(1)
+    # Modality and sequence enforcement
+    modality = config.get("modality", "MRI")
+    if modality.upper() == "MRI":
+        if not config.get("sequences"):
+            logger.error("Missing sequences key in the app.yml file. It is required for MRI.")
+            sys.exit(1)
 
 
 def configure_logging(log_filename: str):

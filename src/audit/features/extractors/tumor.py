@@ -59,7 +59,19 @@ class TumorFeatures:
         self.segmentation = segmentation
         self.spacing = np.array(spacing)
         self.mapping_names = mapping_names
-        self.planes = planes if planes is not None else ["axial", "coronal", "sagittal"]
+        # Default planes mapping based on dimensions
+        if self.segmentation is not None:
+            self.dims = len(self.segmentation.shape)
+            if self.dims == 3:
+                self.planes = planes if planes is not None else ["axial", "coronal", "sagittal"]
+            elif self.dims == 2:
+                self.planes = planes if planes is not None else ["height", "width"]
+            else:
+                self.planes = planes if planes is not None else [f"dim_{i}" for i in range(self.dims)]
+        else:
+            self.dims = 3
+            self.planes = planes if planes is not None else ["axial", "coronal", "sagittal"]
+
         self.tumor_centre_mass_per_label = {}
 
     def count_tumor_pixels(self):
@@ -128,34 +140,31 @@ class TumorFeatures:
             return np.array([np.nan] * len(self.segmentation.shape))
 
         center_of_mass_mean = np.mean(coordinates, axis=0)
-        return center_of_mass_mean * self.spacing
+        return center_of_mass_mean * self.spacing[: len(center_of_mass_mean)]
 
     def get_tumor_slices(self):
         if self.segmentation is None:
-            return np.nan, np.nan, np.nan
+            return tuple(np.nan for _ in self.planes)
 
-        axial_dim, coronal_dim, sagittal_dim = self.segmentation.shape
-        axial_tumor_slices, coronal_tumor_slices, sagittal_tumor_slices = [], [], []
+        shape = self.segmentation.shape
+        slices_per_dim = []
 
-        # axial plane
-        for n, s in enumerate(range(axial_dim)):
-            slc = self.segmentation[s, :, :]
-            if Counter(slc.flatten()).get(0) != (coronal_dim * sagittal_dim):
-                axial_tumor_slices.append(n)
+        for dim, size in enumerate(shape):
+            dim_slices = []
 
-        # coronal plane
-        for n, s in enumerate(range(coronal_dim)):
-            slc = self.segmentation[:, s, :]
-            if Counter(slc.flatten()).get(0) != (axial_dim * sagittal_dim):
-                coronal_tumor_slices.append(n)
+            for s in range(size):
+                # Dynamically slice the current dimension
+                slices = [slice(None)] * len(shape)
+                slices[dim] = s
+                slc = self.segmentation[tuple(slices)]
 
-        # sagittal plane
-        for n, s in enumerate(range(sagittal_dim)):
-            slc = self.segmentation[:, :, s]
-            if Counter(slc.flatten()).get(0) != (axial_dim * coronal_dim):
-                sagittal_tumor_slices.append(n)
+                # Check if this slice contains tumor pixels (i.e. not all background/zero)
+                if np.count_nonzero(slc) > 0:
+                    dim_slices.append(s)
 
-        return axial_tumor_slices, coronal_tumor_slices, sagittal_tumor_slices
+            slices_per_dim.append(dim_slices)
+
+        return tuple(slices_per_dim)
 
     def calculate_tumor_slices(self):
         if self.segmentation is None:
@@ -223,11 +232,11 @@ class TumorFeatures:
             self.tumor_centre_mass_per_label[name.lower()] = self.get_tumor_center_mass(label=idx)
 
         # Flatten the dictionary to get the center of mass in each plane
-        center_mass_dict = {
-            f"{plane}_{label}_center_mass": coord
-            for label, coords in self.tumor_centre_mass_per_label.items()
-            for plane, coord in zip(["axial", "coronal", "sagittal"], coords)
-        }
+        center_mass_dict = {}
+        for label, set_of_coords in self.tumor_centre_mass_per_label.items():
+            for i, coord in enumerate(set_of_coords):
+                plane_name = self.planes[i] if i < len(self.planes) else f"dim_{i}"
+                center_mass_dict[f"{plane_name}_{label}_center_mass"] = coord
 
         return center_mass_dict
 

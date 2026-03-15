@@ -85,24 +85,22 @@ def load_nii_by_subject_id(
 
 
 def read_sequences_dict(
-    root_dir: str, subject_id: str, sequences: Optional[List[str]] = None
+    root_dir: str, subject_id: str, sequences: Optional[List[str]] = None, modality_name: str = "MRI"
 ) -> Dict[str, Optional[np.ndarray]]:
     """
-    Read multiple NIfTI sequences for a subject and return them as a dictionary.
-
-    For each sequence in ``sequences`` (defaults to ``["_t1", "_t1ce", "_t2", "_flair"]``),
-    attempts to load ``{subject_id}{seq}.nii.gz`` and returns a map from the sequence
-    name without underscore (e.g., ``"t1"``) to a NumPy array. Missing or unreadable
-    sequences are returned as ``None``.
+    Read multiple sequences for a subject and return them as a dictionary.
+    Delegates the operation to the appropriate Modality implementation.
 
     Parameters
     ----------
     root_dir : str
         Root directory where subject data is stored.
     subject_id : str
-        Subject identifier used to locate the NIfTI files.
+        Subject identifier used to locate the files.
     sequences : list of str, optional
-        Sequence suffixes to load. Defaults to ``["_t1", "_t1ce", "_t2", "_flair"]``.
+        Sequence suffixes to load. If None, the modality uses its default.
+    modality_name : str, default "MRI"
+        The name of the imaging modality to use (e.g., "MRI", "US").
 
     Returns
     -------
@@ -110,34 +108,40 @@ def read_sequences_dict(
         Mapping from sequence key (without leading underscore) to the loaded array,
         or ``None`` if the sequence file is missing/unreadable.
     """
+    from audit.utils.modalities.factory import get_modality
+
+    modality = get_modality(modality_name)
+
     if sequences is None:
-        sequences = ["_t1", "_t1ce", "_t2", "_flair"]
+        sequences = modality.get_default_sequences()
+
     if not root_dir or not subject_id:
         raise ValueError("Both 'root_dir path' and 'subject id' must be non-empty strings.")
 
-    out = {}
-    for seq in sequences:
-        nii_path = os.path.join(root_dir, subject_id, f"{subject_id}{seq}.nii.gz")
+    # MRI Modality specific fallback path to avoid cyclic dependency
+    if modality_name.upper() == "MRI":
+        out = {}
+        for seq in sequences:
+            nii_path = os.path.join(root_dir, subject_id, f"{subject_id}{seq}.nii.gz")
 
-        # Check if the NIfTI file exists
-        if not os.path.isfile(nii_path):
-            out[seq.replace("_", "")] = None
-            logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
-        else:
-            try:
-                # Attempt to load the sequence using load_nii
-                out[seq.replace("_", "")] = load_nii(nii_path, as_array=True)
-            except Exception as e:
-                # Handle errors in loading the NIfTI file (e.g., corrupted file)
+            if not os.path.isfile(nii_path):
                 out[seq.replace("_", "")] = None
-                logger.error(f"Error loading sequence '{seq}' for subject '{subject_id}': {e}")
+                logger.warning(f"Sequence '{seq}' for subject '{subject_id}' not found at {nii_path}.")
+            else:
+                try:
+                    out[seq.replace("_", "")] = load_nii(nii_path, as_array=True)
+                except Exception as e:
+                    out[seq.replace("_", "")] = None
+                    logger.error(f"Error loading sequence '{seq}' for subject '{subject_id}': {e}")
+        return out
+    else:
+        return modality.read_sequences_dict(root_dir, subject_id, sequences)
 
-    return out
 
-
-def get_spacing(img: Optional[SimpleITK.Image]) -> np.ndarray:
+def get_spacing(img: Optional[SimpleITK.Image], modality_name: str = "MRI") -> np.ndarray:
     """
-    Get voxel spacing of a SimpleITK image as a NumPy array.
+    Get voxel spacing of an image as a NumPy array.
+    Delegates to Modality implementation dynamically if provided.
 
     If ``img`` is ``None``, returns isotropic spacing ``[1, 1, 1]`` and logs a warning.
 
@@ -145,16 +149,25 @@ def get_spacing(img: Optional[SimpleITK.Image]) -> np.ndarray:
     ----------
     img : SimpleITK.Image or None
         Input image from which to read spacing.
+    modality_name : str, default "MRI"
+        The image modality to use for retrieving spacing.
 
     Returns
     -------
     np.ndarray
         The spacing vector as ``(z, y, x)``.
     """
-    if img is not None:
+    from audit.utils.modalities.factory import get_modality
+
+    if img is None:
+        logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1).")
+        return np.array([1, 1, 1])
+
+    if modality_name.upper() == "MRI":
         return np.array(img.GetSpacing())
-    logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1).")
-    return np.array([1, 1, 1])
+    else:
+        modality = get_modality(modality_name)
+        return modality.get_spacing(img)
 
 
 def build_nifty_image(segmentation: Union[np.ndarray, list]) -> SimpleITK.Image:
@@ -338,3 +351,16 @@ def fit_brain_boundaries(sequence: np.ndarray, padding: int = 1) -> np.ndarray:
     seq = seq[zmin : zmax + 1, ymin : ymax + 1, xmin : xmax + 1]
 
     return seq
+
+
+def crop_nonzero_region(seq: np.ndarray, padding: int = 0) -> np.ndarray:
+    """
+    Crop array tightly around non-zero region. Works for 1D, 2D, 3D.
+    """
+    if np.all(seq == 0):
+        return seq
+    nonzero_idx = np.nonzero(seq != 0)
+    mins = [max(0, np.min(idx) - padding) for idx in nonzero_idx]
+    maxs = [min(dim - 1, np.max(idx) + padding) for idx, dim in zip(nonzero_idx, seq.shape)]
+    slices = tuple(slice(min_i, max_i + 1) for min_i, max_i in zip(mins, maxs))
+    return seq[slices]

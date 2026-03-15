@@ -61,24 +61,25 @@ class SpatialFeatures:
 
         # Calculate the center of mass
         center_of_mass_mean = np.mean(coordinates, axis=0)
-        return dict(
-            zip(
-                ["axial_plane_center_of_mass", "coronal_plane_center_of_mass", "sagittal_plane_center_of_mass"],
-                center_of_mass_mean * self.spacing,
-            )
-        )
+
+        if len(center_of_mass_mean) == 3:
+            keys = ["axial_plane_center_of_mass", "coronal_plane_center_of_mass", "sagittal_plane_center_of_mass"]
+        elif len(center_of_mass_mean) == 2:
+            keys = ["height_center_of_mass", "width_center_of_mass"]
+        else:
+            keys = [f"dim_{i}_center_of_mass" for i in range(len(center_of_mass_mean))]
+
+        return dict(zip(keys, center_of_mass_mean * self.spacing[: len(keys)]))
 
     def get_shape(self):
         """
-        Gets the dimensions of the sequence in axial, coronal, and sagittal planes.
+        Gets the dimensions of the sequence in axial, coronal, and sagittal planes (if 3D).
+        For 2D images, dimensions map strictly to height and width.
 
         Returns:
         -------
         dict
-            A dictionary containing the dimensions of the sequence:
-            - Axial plane resolution
-            - Coronal plane resolution
-            - Sagittal plane resolution
+            A dictionary containing the dimensions of the sequence.
         """
         if self.sequence is None:
             logger.warning("Sequence not found. Assigning dimensions (nan, nan, nan)")
@@ -88,12 +89,24 @@ class SpatialFeatures:
                 "sagittal_plane_resolution": np.nan,
             }
 
-        axial, coronal, sagittal = self.sequence.shape
-        dimensions = {
-            "axial_plane_resolution": int(axial),
-            "coronal_plane_resolution": int(coronal),
-            "sagittal_plane_resolution": int(sagittal),
-        }
+        shape = self.sequence.shape
+        if len(shape) == 3:
+            axial, coronal, sagittal = shape
+            dimensions = {
+                "axial_plane_resolution": int(axial),
+                "coronal_plane_resolution": int(coronal),
+                "sagittal_plane_resolution": int(sagittal),
+            }
+        elif len(shape) == 2:
+            height, width = shape
+            dimensions = {
+                "height_resolution": int(height),
+                "width_resolution": int(width),
+                "depth_resolution": 1,
+            }
+        else:
+            dimensions = {f"dim_{i}_resolution": int(s) for i, s in enumerate(shape)}
+
         return dimensions
 
     def extract_features(self) -> dict:

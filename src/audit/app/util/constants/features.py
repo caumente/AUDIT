@@ -1,10 +1,12 @@
 class Features:
     def __init__(self, config):
-        self.sequences = (
-            ["T1", "T1ce", "T2", "FLAIR"]
-            if config is None
-            else [s[1:] if s.startswith("_") else s for s in config.get("sequences")]
-        )
+        if config is None:
+            self.sequences = ["T1", "T1ce", "T2", "FLAIR"]
+        else:
+            sequences_param = config.get("sequences")
+            self.sequences = (
+                [s[1:] if s.startswith("_") else s for s in sequences_param] if sequences_param is not None else [""]
+            )
         self.lesion_regions = list(config.get("labels").keys())
         self.planes = ["Axial", "Coronal", "Sagittal"]
         self.categories = ["Statistical", "Texture", "Spatial", "Tumor"]
@@ -39,7 +41,11 @@ class Features:
             "Kurtosis",
         ]
         return {
-            f"{metric} ({sequence})": f"{sequence.lower()}_{metric.lower().replace('.', '').replace(' ', '_').replace('-', '_')}"
+            f"{metric} ({sequence})"
+            if sequence
+            else metric: f"{sequence.lower()}_{metric.lower().replace('.', '').replace(' ', '_').replace('-', '_')}"
+            if sequence
+            else metric.lower().replace(".", "").replace(" ", "_").replace("-", "_")
             for metric in metrics
             for sequence in self.sequences
         }
@@ -63,7 +69,11 @@ class Features:
         textures = ["contrast", "correlation", "dissimilarity", "energy", "homogeneity", "ASM"]
 
         return {
-            f"{metric} {texture} ({sequence})": f"{sequence.lower()}_{metric.lower()}_{texture.lower()}"
+            f"{metric} {texture} ({sequence})"
+            if sequence
+            else f"{metric} {texture}": f"{sequence.lower()}_{metric.lower()}_{texture.lower()}"
+            if sequence
+            else f"{metric.lower()}_{texture.lower()}"
             for metric in metrics
             for texture in textures
             for sequence in self.sequences

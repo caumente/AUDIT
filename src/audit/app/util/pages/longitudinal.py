@@ -91,7 +91,7 @@ class Longitudinal(BasePage):
             return pd.DataFrame()
         # metrics_df = metrics_df.groupby(["ID", "model", "set"])["lesion_size_pred"].sum().reset_index()
         merged = metrics_df.merge(features_df, on=["ID", "set"])
-        st.table(merged)
+
         return merged
 
     @staticmethod

@@ -1,0 +1,22 @@
+/* Style inline code elements to look like PyTorch's purple parameter names */
+.md-typeset code {
+  color: teal;                /* matches your primary palette */
+  font-weight: 600;           /* slightly lighter than 700 for body text */
+  background-color: rgba(0, 128, 128, 0.06); /* subtle teal tint background */
+  padding: 0.15em 0.35em;     /* small breathing space */
+  border-radius: 4px;         /* smooth corners */
+}
+
+.md-typeset h1 code,
+.md-typeset h2 code,
+.md-typeset h3 code {
+  font-weight: 500;
+  color: var(--md-accent-fg-color);
+  background-color: color-mix(in srgb, var(--md-accent-fg-color) 10%, transparent);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+.highlight pre {
+  margin-left: .5em;
+  margin-right: .5em;
+}

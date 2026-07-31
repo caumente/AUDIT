@@ -125,6 +125,14 @@ data_paths:
   UCSF: '/home/usr/AUDIT/datasets/UCSF/UCSF_images'
   LUMIERE: '/home/usr/AUDIT/datasets/LUMIERE/LUMIERE_images'
 
+# Clinical modality controls domain-specific processing and features
+modality: MRI
+
+# Storage format controls the reader independently from modality
+formats:
+  image: .nii.gz
+  segmentation: .nii.gz
+
 # Sequences available
 sequences:
   - '_t1'
@@ -178,6 +186,13 @@ This configuration file defines the paths to datasets and model predictions, the
 # Path to the raw dataset
 data_path: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
 
+modality: MRI
+
+formats:
+  image: .nii.gz
+  segmentation: .nii.gz
+  prediction: .nii.gz
+
 # Paths to model predictions
 model_predictions_paths:
   nnUnet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
@@ -193,16 +208,16 @@ labels:
 # List of metrics to compute
 metrics:
   dice: true
-  jacc: true
-  accu: true
-  prec: true
-  sens: true
-  spec: true
-  haus: true
-  size: true
+  jaccard: true
+  accuracy: true
+  precision: true
+  sensitivity: true
+  specificity: true
+  hausdorff_distance: true
+  predicted_size: true
 
-# Library used for computing all the metrics
-package: audit
+# Metrics backend. Metric keys are backend-specific; see the metric reference.
+backend: audit
 
 # Path where output metrics will be saved
 output_path: '/home/usr/AUDIT/outputs/metrics'
@@ -223,6 +238,14 @@ This configuration file sets up paths for datasets, extracted features, metrics,
   <summary><strong>Show configuration</strong></summary>
 
 ```yaml
+# The app currently uses one global modality and format mapping
+modality: MRI
+
+formats:
+  image: .nii.gz
+  segmentation: .nii.gz
+  prediction: .nii.gz
+
 # Sequences available. First of them will be used to compute properties like spacing
 sequences:
   - '_t1'
@@ -377,7 +400,4 @@ Please feel free to contact us with any issues, comments, or questions.
 
 ## License
 Apache License 2.0
-
-
-
 

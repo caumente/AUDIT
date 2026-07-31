@@ -6,10 +6,14 @@ import pandas as pd
 from colorama import Fore
 from loguru import logger
 
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
 from audit.metrics.backends.commons import check_multiprocessing
 from audit.metrics.backends.commons import initializer
 from audit.metrics.backends.commons import load_subject_data
 from audit.metrics.backends.commons import standardize_output
+from audit.metrics.backends.metric_names import normalize_metric_config
+from audit.metrics.backends.metric_names import validate_metric_names
 from audit.metrics.segmentation_metrics import calculate_metrics
 from audit.metrics.segmentation_metrics import one_hot_encoding
 from audit.utils.commons.file_manager import list_dirs
@@ -26,9 +30,21 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
     label_names = params["label_names"]
     metrics_to_extract = params["metrics_to_extract"]
     model_name = params["model_name"]
+    modality_name = params.get("modality", "MRI")
+    ground_truth_format = params.get("ground_truth_format")
+    prediction_format = params.get("prediction_format")
 
     # load arrays using the shared utility
-    gt, pred, spacing = load_subject_data(path_ground_truth_dataset, path_predictions, subject_id)
+    gt, pred, spacing = load_subject_data(
+        path_ground_truth_dataset,
+        path_predictions,
+        subject_id,
+        modality_name=modality_name,
+        ground_truth_format=ground_truth_format,
+        prediction_format=prediction_format,
+        ground_truth_reader_options=params.get("ground_truth_reader_options"),
+        prediction_reader_options=params.get("prediction_reader_options"),
+    )
 
     # one-hot encode each region
     gt = one_hot_encoding(gt, numeric_label)
@@ -59,9 +75,16 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
 def extract_audit_metrics(config_file) -> pd.DataFrame:
     label_names = list(config_file["labels"].keys())
     numeric_label = list(config_file["labels"].values())
+    modality_name = config_file.get("modality", "MRI")
+    ground_truth_format = resolve_configured_format(config_file, "segmentation", modality_name)
+    prediction_format = resolve_configured_format(config_file, "prediction", modality_name)
+    ground_truth_reader_options = resolve_reader_options(config_file, "segmentation")
+    prediction_reader_options = resolve_reader_options(config_file, "prediction")
 
     path_ground_truth_dataset = config_file["data_path"]
-    metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
+    metrics_config = normalize_metric_config(config_file["metrics"], "audit")
+    metrics_to_extract = [key for key, value in metrics_config.items() if value]
+    validate_metric_names(metrics_to_extract, "audit")
     subjects_list = list_dirs(path_ground_truth_dataset)
 
     models = config_file["model_predictions_paths"]
@@ -86,6 +109,11 @@ def extract_audit_metrics(config_file) -> pd.DataFrame:
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
                         "model_name": model_name,
+                        "modality": modality_name,
+                        "ground_truth_format": ground_truth_format,
+                        "prediction_format": prediction_format,
+                        "ground_truth_reader_options": ground_truth_reader_options,
+                        "prediction_reader_options": prediction_reader_options,
                     }
 
                     subject_info_df = process_subject(pd.DataFrame(), params, cpu_cores)
@@ -115,6 +143,11 @@ def extract_audit_metrics(config_file) -> pd.DataFrame:
                     "label_names": label_names,
                     "metrics_to_extract": metrics_to_extract,
                     "model_name": model_name,
+                    "modality": modality_name,
+                    "ground_truth_format": ground_truth_format,
+                    "prediction_format": prediction_format,
+                    "ground_truth_reader_options": ground_truth_reader_options,
+                    "prediction_reader_options": prediction_reader_options,
                 }
                 tasks.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 

@@ -11,8 +11,7 @@ import os
 import numpy as np
 from loguru import logger
 
-from audit.utils.sequences.sequences import get_spacing
-from audit.utils.sequences.sequences import load_nii_by_subject_id
+from audit.io.readers import read_subject_image
 
 
 @logger.catch
@@ -36,18 +35,77 @@ def initializer(shared_df, lock):
     dataframe_lock = lock
 
 
+def normalize_empty_region_metric(
+    metric_name: str,
+    value: float,
+    ground_truth_present: bool,
+    prediction_present: bool,
+) -> float:
+    """Normalize equivalent backend metrics for empty label masks."""
+    if ground_truth_present and prediction_present:
+        return value
+
+    equivalents = {
+        "dsc": "dice",
+        "jacc": "jaccard",
+        "iou": "jaccard",
+        "accu": "accuracy",
+        "prec": "precision",
+        "ppv": "precision",
+        "sens": "sensitivity",
+        "spec": "specificity",
+        "haus": "hausdorff_distance",
+        "hd": "hausdorff_distance",
+        "pred_vol": "predicted_size",
+        "numb_pred": "predicted_size",
+    }
+    metric_name = equivalents.get(metric_name, metric_name)
+
+    if not ground_truth_present and not prediction_present:
+        return {
+            "dice": 1.0,
+            "jaccard": 1.0,
+            "accuracy": 1.0,
+            "precision": 0.0,
+            "sensitivity": np.nan,
+            "specificity": 1.0,
+            "hausdorff_distance": 0.0,
+            "predicted_size": 0.0,
+        }.get(metric_name, value)
+
+    if ground_truth_present:
+        return {
+            "dice": 0.0,
+            "jaccard": 0.0,
+            "precision": 0.0,
+            "sensitivity": 0.0,
+            "hausdorff_distance": np.nan,
+            "predicted_size": 0.0,
+        }.get(metric_name, value)
+
+    return {
+        "dice": 0.0,
+        "jaccard": 0.0,
+        "precision": 0.0,
+        "sensitivity": np.nan,
+        "hausdorff_distance": np.nan,
+    }.get(metric_name, value)
+
+
 def load_subject_data(
     path_ground_truth_dataset: str,
     path_predictions: str,
     subject_id: str,
-) -> tuple[np.ndarray, np.ndarray, tuple]:
+    modality_name: str = "MRI",
+    ground_truth_format: str = None,
+    prediction_format: str = None,
+    ground_truth_reader_options: dict = None,
+    prediction_reader_options: dict = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Load ground-truth and prediction arrays for a single subject.
 
-    Uses the project's ``load_nii_by_subject_id`` utility so that all backends
-    follow the same file-naming convention::
-
-        <root>/<subject_id>/<subject_id>_seg.nii.gz   (ground truth)
-        <root>/<subject_id>/<subject_id>_pred.nii.gz  (prediction)
+    Uses the shared format-reader layer so every backend loads MRI and US data
+    with the same naming, shape, and physical-spacing rules.
 
     Returns
     -------
@@ -55,14 +113,41 @@ def load_subject_data(
         Ground-truth segmentation array.
     pred : np.ndarray
         Predicted segmentation array.
-    spacing : tuple
-        Voxel spacing extracted from the prediction image.
+    spacing : np.ndarray
+        Ground-truth spacing in NumPy axis order.
     """
-    gt = load_nii_by_subject_id(root_dir=path_ground_truth_dataset, subject_id=subject_id, as_array=True)
-    pred_img = load_nii_by_subject_id(root_dir=path_predictions, subject_id=subject_id, seq="_pred")
-    pred = load_nii_by_subject_id(root_dir=path_predictions, subject_id=subject_id, seq="_pred", as_array=True)
-    spacing = get_spacing(pred_img)
-    return gt, pred, spacing
+    from audit.utils.modalities.factory import get_modality
+
+    modality = get_modality(modality_name)
+    ground_truth_format = ground_truth_format or modality.get_default_format()
+    prediction_format = prediction_format or ground_truth_format
+    gt_data = read_subject_image(
+        path_ground_truth_dataset,
+        subject_id,
+        "_seg",
+        ground_truth_format,
+        **(ground_truth_reader_options or {}),
+    )
+    pred_data = read_subject_image(
+        path_predictions,
+        subject_id,
+        "_pred",
+        prediction_format,
+        **(prediction_reader_options or {}),
+    )
+
+    if gt_data.array.shape != pred_data.array.shape:
+        raise ValueError(
+            f"Shape mismatch for {subject_id}: ground truth {gt_data.array.shape}, "
+            f"prediction {pred_data.array.shape}."
+        )
+    if gt_data.spacing.shape != pred_data.spacing.shape or not np.allclose(gt_data.spacing, pred_data.spacing):
+        raise ValueError(
+            f"Spacing mismatch for {subject_id}: ground truth {gt_data.spacing.tolist()}, "
+            f"prediction {pred_data.spacing.tolist()}."
+        )
+
+    return gt_data.array, pred_data.array, gt_data.spacing
 
 
 def standardize_output(df: "pd.DataFrame") -> "pd.DataFrame":

@@ -184,8 +184,8 @@ def test_sensitivity_no_true_positives():
     tp = 0
     fn = 5
     result = sensitivity(tp, fn)
-    # If there are no true positives, return np.nan
-    assert np.isnan(result)
+    # Positives exist in the reference but none were detected.
+    assert result == 0.0
 
 
 def test_sensitivity_all_positives_detected():
@@ -258,8 +258,8 @@ def test_precision_no_true_positives():
     tp = 0
     fp = 5
     result = precision(tp, fp)
-    expected_result = np.nan  # No true positives, precision is NaN
-    assert np.isnan(result)
+    expected_result = 0.0  # Predicted positives exist but none are correct
+    assert result == expected_result
 
 
 def test_precision_no_false_positives():
@@ -268,6 +268,10 @@ def test_precision_no_false_positives():
     result = precision(tp, fp)
     expected_result = 1.0  # No false positives, precision is 1
     assert result == expected_result
+
+
+def test_precision_no_predicted_positives():
+    assert precision(0, 0) == 0.0
 
 
 # Tests for accuracy function
@@ -422,9 +426,12 @@ def test_hausdorff_distance_standard_case():
     gt = np.array([[1, 0, 0], [1, 1, 1], [0, 1, 0]])
     seg = np.array([[1, 0, 0], [1, 1, 1], [0, 0, 0]])
 
-    # Directed Hausdorff from seg to gt and from gt to seg
+    # Standard Hausdorff is the maximum of both directed distances.
     result = hausdorff_distance(gt, seg)
-    expected_result = directed_hausdorff(np.argwhere(seg), np.argwhere(gt))[0]
+    expected_result = max(
+        directed_hausdorff(np.argwhere(seg), np.argwhere(gt))[0],
+        directed_hausdorff(np.argwhere(gt), np.argwhere(seg))[0],
+    )
 
     assert result == expected_result
 

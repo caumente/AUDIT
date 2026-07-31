@@ -61,8 +61,14 @@ class TextureFeatures:
             sequence = crop_nonzero_region(self.sequence)
             # sequence = fit_brain_boundaries(self.sequence)
 
-        # Normalize the image to values between 0 and 255
-        image_array = (255 * (sequence - np.min(sequence)) / (np.max(sequence) - np.min(sequence))).astype(np.uint8)
+        # Normalize the image to values between 0 and 255. A non-zero
+        # constant image has a valid (uniform) GLCM and must not divide by 0.
+        sequence_min = np.min(sequence)
+        sequence_range = np.max(sequence) - sequence_min
+        if sequence_range == 0:
+            image_array = np.zeros_like(sequence, dtype=np.uint8)
+        else:
+            image_array = (255 * (sequence - sequence_min) / sequence_range).astype(np.uint8)
 
         # Define distances and angles for GLCM calculation
         distances = [1]
@@ -95,11 +101,11 @@ class TextureFeatures:
         elif dims == 2:
             plane = image_array
 
-            if not np.all(plane == 0):
-                # Compute GLCM for the single 2D plane
-                glcm = graycomatrix(plane, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
-                feature_value = graycoprops(glcm, prop=texture).mean()
-                texture_values.append(feature_value)
+            # Compute GLCM for the single 2D plane. An all-zero normalized
+            # plane can represent a non-zero constant source image.
+            glcm = graycomatrix(plane, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
+            feature_value = graycoprops(glcm, prop=texture).mean()
+            texture_values.append(feature_value)
 
         if not texture_values:
             return np.array([np.nan])

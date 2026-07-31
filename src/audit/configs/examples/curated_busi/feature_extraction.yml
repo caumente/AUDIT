@@ -1,0 +1,30 @@
+# Concrete US/PNG example used for the Curated_BUSI thesis experiment.
+datasets_path: './datasets/US'
+
+data_paths:
+  Curated_BUSI: "${datasets_path}/Curated_BUSI/Curated_BUSI_images"
+
+modality: 'US'
+
+formats:
+  image: '.png'
+  segmentation: '.png'
+
+sequences: []
+
+labels:
+  BKG: 0
+  TUMOR: 255
+
+features:
+  statistical: true
+  texture: true
+  spatial: true
+  tumor: true
+
+# Example: set normalize: true to apply US min-max normalization.
+preprocessing: {}
+
+output_path: './outputs/features/thesis'
+logs_path: './logs/features'
+cpu_cores: 1

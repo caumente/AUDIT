@@ -163,11 +163,8 @@ def get_spacing(img: Optional[SimpleITK.Image], modality_name: str = "MRI") -> n
         logger.warning("Sequence empty. Assuming isotropic spacing (1, 1, 1).")
         return np.array([1, 1, 1])
 
-    if modality_name.upper() == "MRI":
-        return np.array(img.GetSpacing())
-    else:
-        modality = get_modality(modality_name)
-        return modality.get_spacing(img)
+    modality = get_modality(modality_name)
+    return modality.get_spacing(img)
 
 
 def build_nifty_image(segmentation: Union[np.ndarray, list]) -> SimpleITK.Image:

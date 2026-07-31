@@ -65,6 +65,14 @@ def test_compute_texture_values_zero_sequence(mock_zero_sequence):
     assert np.isnan(result), "The texture value should be NaN for a sequence of all zeros."
 
 
+def test_compute_texture_values_nonzero_constant_sequence():
+    texture_features = TextureFeatures(np.full((4, 5), 7, dtype=np.uint8))
+
+    result = texture_features.compute_texture_values("contrast")
+
+    np.testing.assert_allclose(result, [0.0])
+
+
 def test_compute_texture_values_with_empty_planes(mock_sequence_with_empty_planes):
     """Test if empty planes are handled correctly when remove_empty_planes is True."""
     texture_features = TextureFeatures(mock_sequence_with_empty_planes, remove_empty_planes=True)
@@ -72,8 +80,8 @@ def test_compute_texture_values_with_empty_planes(mock_sequence_with_empty_plane
     # Perform texture value computation for 'contrast'
     result = texture_features.compute_texture_values("contrast")
 
-    # After removing empty planes, the number of planes should be 1 (the middle plane)
-    assert len(result) == 4, "There should be 1 texture value after removing empty planes."
+    # The fixture contains two non-empty planes, so only those two should remain.
+    assert len(result) == 2, "There should be 2 texture values after removing empty planes."
 
     # # The result should be a numpy array
     assert isinstance(result, np.ndarray), "Result should be a numpy array."

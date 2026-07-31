@@ -23,7 +23,7 @@ mock_nii_image.GetSpacing.return_value = (2.0, 2.0, 2.0)  # Mock spacing returne
 
 @pytest.fixture
 def dummy_sequence_path():
-    return "dummy_sequence.nii.gz"
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dummy_sequence.nii.gz"))
 
 
 @pytest.fixture
@@ -165,6 +165,13 @@ def test_get_spacing_with_image():
 
     # Assert the correct spacing was returned
     np.testing.assert_array_equal(spacing, np.array([2.0, 2.0, 2.0]))
+
+
+def test_get_spacing_uses_numpy_axis_order():
+    image = sitk.GetImageFromArray(np.zeros((3, 4, 5), dtype=np.uint8))
+    image.SetSpacing((0.5, 0.75, 2.0))
+
+    np.testing.assert_allclose(get_spacing(image), [2.0, 0.75, 0.5])
 
 
 def test_get_spacing_with_none_image():

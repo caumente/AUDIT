@@ -8,10 +8,16 @@ import pandas as pd
 from colorama import Fore
 from loguru import logger
 
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
 from audit.metrics.backends.commons import check_multiprocessing
 from audit.metrics.backends.commons import initializer
 from audit.metrics.backends.commons import load_subject_data
+from audit.metrics.backends.commons import normalize_empty_region_metric
 from audit.metrics.backends.commons import standardize_output
+from audit.metrics.backends.metric_names import backend_metric_pairs
+from audit.metrics.backends.metric_names import normalize_metric_config
+from audit.metrics.backends.metric_names import validate_metric_names
 from audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import MultiLabelPairwiseMeasures
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_print
@@ -22,20 +28,28 @@ warnings.filterwarnings("ignore")
 
 def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
     """Compute MetricsReloaded metrics for a single subject."""
+    modality_name = params.get("modality", "MRI")
     # Use the shared loader — same convention as all other backends
     gt, pred, spacing = load_subject_data(
         params["path_ground_truth_dataset"],
         params["path_predictions"],
         params["subject_id"],
+        modality_name=modality_name,
+        ground_truth_format=params.get("ground_truth_format"),
+        prediction_format=params.get("prediction_format"),
+        ground_truth_reader_options=params.get("ground_truth_reader_options"),
+        prediction_reader_options=params.get("prediction_reader_options"),
     )
 
     list_values = [v for v in params["numeric_label"] if v != 0]
+    metric_pairs = backend_metric_pairs(params["metrics_to_extract"], "metricsreloaded")
+    backend_metrics = [backend_name for _, backend_name in metric_pairs]
     mlpm = MultiLabelPairwiseMeasures(
         [pred],
         [gt],
         [None],
         list_values=list_values,
-        measures_pcc=params["metrics_to_extract"],
+        measures_pcc=backend_metrics,
         per_case=True,
         pixdim=spacing,
     )
@@ -45,9 +59,17 @@ def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
     results = []
     for _, row in df_seg.iterrows():
         region = label_to_region[row["label"]]
-        for metric_name in params["metrics_to_extract"]:
-            if metric_name in row:
-                value = row[metric_name]
+        ground_truth_present = bool((gt == row["label"]).any())
+        prediction_present = bool((pred == row["label"]).any())
+        for metric_name, backend_name in metric_pairs:
+            if backend_name in row:
+                value = row[backend_name]
+                value = normalize_empty_region_metric(
+                    metric_name,
+                    value,
+                    ground_truth_present,
+                    prediction_present,
+                )
                 results.append(
                     {
                         "ID": params["subject_id"],
@@ -73,8 +95,15 @@ def process_subject_metricsreloaded(shared_df, params: dict, cpu_cores: int):
 def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
     label_names = list(config_file["labels"].keys())
     numeric_label = list(config_file["labels"].values())
+    modality_name = config_file.get("modality", "MRI")
+    ground_truth_format = resolve_configured_format(config_file, "segmentation", modality_name)
+    prediction_format = resolve_configured_format(config_file, "prediction", modality_name)
+    ground_truth_reader_options = resolve_reader_options(config_file, "segmentation")
+    prediction_reader_options = resolve_reader_options(config_file, "prediction")
     path_ground_truth_dataset = config_file["data_path"]
-    metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
+    metrics_config = normalize_metric_config(config_file["metrics"], "metricsreloaded")
+    metrics_to_extract = [key for key, value in metrics_config.items() if value]
+    validate_metric_names(metrics_to_extract, "metricsreloaded")
     subjects_list = list_dirs(path_ground_truth_dataset)
     models = config_file["model_predictions_paths"]
     cpu_cores = check_multiprocessing(config_file)
@@ -99,6 +128,11 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
                         "model_name": model_name,
+                        "modality": modality_name,
+                        "ground_truth_format": ground_truth_format,
+                        "prediction_format": prediction_format,
+                        "ground_truth_reader_options": ground_truth_reader_options,
+                        "prediction_reader_options": prediction_reader_options,
                     }
 
                     df_subject = process_subject_metricsreloaded(None, params, cpu_cores)
@@ -126,6 +160,11 @@ def extract_metricsreloaded_metrics(config_file) -> pd.DataFrame:
                         "label_names": label_names,
                         "metrics_to_extract": metrics_to_extract,
                         "model_name": model_name,
+                        "modality": modality_name,
+                        "ground_truth_format": ground_truth_format,
+                        "prediction_format": prediction_format,
+                        "ground_truth_reader_options": ground_truth_reader_options,
+                        "prediction_reader_options": prediction_reader_options,
                     }
                     tasks.append(
                         pool.apply_async(process_subject_metricsreloaded, args=(shared_data, params, cpu_cores))

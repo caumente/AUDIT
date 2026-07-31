@@ -7,6 +7,8 @@ from typing import Union
 
 import numpy as np
 
+from audit.io.readers import ImageData
+
 
 class ModalityBase(ABC):
     """
@@ -15,7 +17,9 @@ class ModalityBase(ABC):
     """
 
     @abstractmethod
-    def load_sequence(self, path: str, as_array: bool = False) -> Optional[Union[object, np.ndarray]]:
+    def load_sequence(
+        self, path: str, as_array: bool = False, format_name: Optional[str] = None
+    ) -> Optional[Union[object, np.ndarray]]:
         """
         Loads a single image/sequence from disk.
         """
@@ -23,11 +27,28 @@ class ModalityBase(ABC):
 
     @abstractmethod
     def read_sequences_dict(
-        self, root_dir: str, subject_id: str, sequences: Optional[List[str]] = None
+        self,
+        root_dir: str,
+        subject_id: str,
+        sequences: Optional[List[str]] = None,
+        format_name: Optional[str] = None,
+        reader_options: Optional[dict] = None,
     ) -> Dict[str, Optional[np.ndarray]]:
         """
         Reads all relevant sequences for a subject and returns them as a dictionary.
         """
+        pass
+
+    @abstractmethod
+    def read_sequence_data_dict(
+        self,
+        root_dir: str,
+        subject_id: str,
+        sequences: Optional[List[str]] = None,
+        format_name: Optional[str] = None,
+        reader_options: Optional[dict] = None,
+    ) -> Dict[str, Optional[ImageData]]:
+        """Read sequences while preserving spacing and source image metadata."""
         pass
 
     @abstractmethod
@@ -65,4 +86,9 @@ class ModalityBase(ABC):
         """
         Returns the default list of sequences expected by this modality.
         """
+        pass
+
+    @abstractmethod
+    def get_default_format(self) -> str:
+        """Return the legacy storage-format default for this modality."""
         pass

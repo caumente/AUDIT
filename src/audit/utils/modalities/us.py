@@ -7,8 +7,11 @@ from typing import Union
 import numpy as np
 import SimpleITK
 from loguru import logger
-from PIL import Image
 
+from audit.io.readers import ImageData
+from audit.io.readers import get_reader
+from audit.io.readers import infer_format
+from audit.io.readers import read_subject_image
 from audit.utils.modalities.base import ModalityBase
 
 
@@ -18,91 +21,72 @@ class USModality(ModalityBase):
     Handles loading and managing 2D US images stored in formats like PNG or JPEG.
     """
 
-    def load_sequence(self, path: str, as_array: bool = False) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
+    def load_sequence(
+        self, path: str, as_array: bool = False, format_name: Optional[str] = None
+    ) -> Optional[Union[SimpleITK.Image, np.ndarray]]:
         """
         Load a 2D US image from disk.
         Supports common 2D formats (.png, .jpg, etc.).
         """
-        if path is None or not os.path.isfile(path):
-            raise ValueError(f"The file at {path} does not exist or is not a valid file.")
-
-        try:
-            # We first try SimpleITK
-            image = SimpleITK.ReadImage(str(path))
-
-            # If the image has >1 channels (e.g. RGB) and we need a single channel:
-            if image.GetNumberOfComponentsPerPixel() > 1:
-                # Convert to grayscale
-                logger.debug(f"Converting RGB US image to grayscale for path: {path}")
-                cast_filter = SimpleITK.VectorIndexSelectionCastImageFilter()
-                cast_filter.SetIndex(0)  # Keep first channel as proxy for grayscale for now.
-                image = cast_filter.Execute(image)
-
-            if as_array:
-                arr = SimpleITK.GetArrayFromImage(image)
-                # Ensure we represent this correctly, typically SimpleITK loads 2D as (Y, X)
-                return arr
-            return image
-        except RuntimeError as e:
-            logger.warning(f"SimpleITK failed to load US file {path}: {e}. Falling back to PIL.")
-            try:
-                # Fallback to PIL
-                pil_img = Image.open(path).convert("L")  # Force grayscale
-                arr = np.array(pil_img)
-                if as_array:
-                    return arr
-                else:
-                    return SimpleITK.GetImageFromArray(arr)
-            except Exception as e2:
-                logger.error(f"Fallback PIL error while loading US file {path}: {e2}")
-                return None
-        except Exception as e:
-            logger.warning(f"Unexpected error while loading US file {path}: {e}")
-            return None
+        if path is None:
+            raise ValueError("A non-empty image path is required.")
+        data = get_reader(format_name or infer_format(path)).read(path)
+        return data.array if as_array else data.image
 
     def read_sequences_dict(
-        self, root_dir: str, subject_id: str, sequences: Optional[List[str]] = None
+        self,
+        root_dir: str,
+        subject_id: str,
+        sequences: Optional[List[str]] = None,
+        format_name: Optional[str] = None,
+        reader_options: Optional[dict] = None,
     ) -> Dict[str, Optional[np.ndarray]]:
         """
-        Read multiple (or single) sequence for an US subject.
-        Since US might just be purely one image, if sequences are given, it tries them.
-        If not, it just tries to load the first valid 2D image file it finds in the subject directory.
+        Read one or more US sequences using the configured subject naming
+        convention. With no sequences, the image is ``<subject>/<subject>.<ext>``.
         """
+        return {
+            key: data.array if data is not None else None
+            for key, data in self.read_sequence_data_dict(
+                root_dir, subject_id, sequences, format_name, reader_options
+            ).items()
+        }
+
+    def read_sequence_data_dict(
+        self,
+        root_dir: str,
+        subject_id: str,
+        sequences: Optional[List[str]] = None,
+        format_name: Optional[str] = None,
+        reader_options: Optional[dict] = None,
+    ) -> Dict[str, Optional[ImageData]]:
         out = {}
         subject_dir = os.path.join(root_dir, subject_id)
 
         if not sequences:
-            # Look for common 2D formats
-            # This is a fallback behavior for single-sequence 2D modalities
-            valid_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"]
-            found_img = None
-            if os.path.isdir(subject_dir):
-                for file in os.listdir(subject_dir):
-                    if any(file.lower().endswith(ext) for ext in valid_exts):
-                        if "_seg" not in file.lower() and "_pred" not in file.lower():
-                            found_img = os.path.join(subject_dir, file)
-                            break
-
-            if found_img:
-                logger.info(f"Dynamically discovered US image for {subject_id}: {found_img}")
-                out["default"] = self.load_sequence(found_img, as_array=True)
-            else:
+            try:
+                out["default"] = read_subject_image(
+                    root_dir,
+                    subject_id,
+                    "",
+                    format_name or self.get_default_format(),
+                    **(reader_options or {}),
+                )
+            except FileNotFoundError:
                 logger.warning(f"No valid US images found dynamically for subject '{subject_id}' at {subject_dir}.")
                 out["default"] = None
         else:
-            # If explicit sequences are provided (e.g. ['_bmode', '_doppler'])
-            valid_exts = [".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".dcm", ".mha", ".nrrd"]
             for seq in sequences:
                 seq_key = seq.replace("_", "")
-                found = False
-                for ext in valid_exts:
-                    img_path = os.path.join(subject_dir, f"{subject_id}{seq}{ext}")
-                    if os.path.isfile(img_path):
-                        out[seq_key] = self.load_sequence(img_path, as_array=True)
-                        found = True
-                        break
-
-                if not found:
+                try:
+                    out[seq_key] = read_subject_image(
+                        root_dir,
+                        subject_id,
+                        seq,
+                        format_name or self.get_default_format(),
+                        **(reader_options or {}),
+                    )
+                except FileNotFoundError:
                     logger.warning(f"Sequence '{seq}' for US subject '{subject_id}' not found in any common format.")
                     out[seq_key] = None
 
@@ -110,18 +94,13 @@ class USModality(ModalityBase):
 
     def get_spacing(self, img: Optional[SimpleITK.Image]) -> np.ndarray:
         """
-        Get pixel spacing of a SimpleITK image. US is usually 2D.
-        Returns a 3-element vector (Z, Y, X) for compatibility with MRI (Z=1).
+        Get pixel spacing in NumPy axis order. US is usually 2D.
         """
         if img is not None:
-            spacing = list(img.GetSpacing())  # Typically (X, Y) for 2D
-            if len(spacing) == 2:
-                return np.array([1.0, spacing[1], spacing[0]])  # (Z, Y, X)
-            elif len(spacing) >= 3:
-                return np.array([spacing[2], spacing[1], spacing[0]])
+            return np.asarray(img.GetSpacing(), dtype=float)[::-1]
 
-        logger.warning("Sequence empty or invalid. Assuming isotropic spacing 2D/3D (1, 1, 1).")
-        return np.array([1.0, 1.0, 1.0])
+        logger.warning("Sequence empty or invalid. Assuming isotropic 2D spacing (1, 1).")
+        return np.ones(2)
 
     def build_image(self, segmentation: Union[np.ndarray, list]) -> SimpleITK.Image:
         """
@@ -167,3 +146,6 @@ class USModality(ModalityBase):
         Returns an empty list as US typically relies on single images without sequence names.
         """
         return []
+
+    def get_default_format(self) -> str:
+        return "auto"

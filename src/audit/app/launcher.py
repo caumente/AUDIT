@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -18,12 +19,21 @@ def run_streamlit_app(config):
     if not app_path.exists():
         raise FileNotFoundError(f"Streamlit app not found at: {app_path}")
 
-    # Build the command to launch Streamlit with the provided config
-    command = f"streamlit run {app_path} --server.fileWatcherType none -- --config {config}"
+    command = [
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(app_path),
+        "--server.fileWatcherType",
+        "none",
+        "--",
+        "--config",
+        str(config),
+    ]
 
-    # Print and execute the command
-    print(f"Running command: {command}")
-    os.system(command)
+    print(f"Running command: {' '.join(command)}")
+    subprocess.run(command, check=True)
 
 
 def main():

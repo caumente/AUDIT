@@ -186,10 +186,10 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import *
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import combine_df
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import merge_list_df
+from audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from audit.metrics.backends.metrics_reloaded.processes.mixed_measures_processes import *
+from audit.metrics.backends.metrics_reloaded.utility.utils import combine_df
+from audit.metrics.backends.metrics_reloaded.utility.utils import merge_list_df
 
 __all__ = [
     "ProcessEvaluation",

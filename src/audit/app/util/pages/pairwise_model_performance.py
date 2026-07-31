@@ -53,7 +53,7 @@ class PairwiseModelPerformance(BasePage):
         proceed = none_check(metrics_paths=metrics_paths, features_paths=features_paths)
         if proceed[0]:
             # Load datasets
-            raw_metrics = read_datasets_from_dict(metrics_paths)
+            raw_metrics = read_datasets_from_dict(metrics_paths, normalize_metrics=True)
             raw_features = read_datasets_from_dict(features_paths)
             df_stats = raw_metrics.drop(columns="region").groupby(["ID", "model", "set"]).mean().reset_index()
 

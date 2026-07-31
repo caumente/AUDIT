@@ -4,7 +4,7 @@ from loguru import logger
 
 class SpatialFeatures:
     """
-    A class to compute spatial features from sequences given magnetic resonance images.
+    Compute spatial features from 2D or 3D medical images.
 
     Attributes:
     ----------
@@ -102,7 +102,6 @@ class SpatialFeatures:
             dimensions = {
                 "height_resolution": int(height),
                 "width_resolution": int(width),
-                "depth_resolution": 1,
             }
         else:
             dimensions = {f"dim_{i}_resolution": int(s) for i, s in enumerate(shape)}

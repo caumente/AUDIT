@@ -1,135 +1,148 @@
-# Configuration Guide
+# Configuration guide
 
-AUDIT uses configuration files to define paths, settings, and parameters for feature extraction, metric evaluation, and 
-app customization. We recommend starting from the example files included in the repository and adapting them to your 
-needs.
+AUDIT uses YAML configuration files for feature extraction, metric evaluation,
+and the app. The files live in `src/audit/configs/`.
 
----
-
-## Configuration files
-
-- **Feature extraction**: _feature_extraction.yaml_
-- **Metric evaluation**: _metric_extraction.yaml_
-- **App settings**: _app.yaml_
-
-All configuration files are stored in the _config/_ directory.
-
----
-
-## Example: Feature Extraction Config
-
-Defines dataset paths, label mappings, features to extract, and longitudinal study settings.
+Every workflow separates the clinical modality from the file format:
 
 ```yaml
-# Paths to datasets
-data_paths:
-  BraTS: '/home/user/AUDIT/datasets/BraTS/BraTS_images'
-  UCSF: '/home/user/AUDIT/datasets/UCSF/UCSF_images'
+modality: MRI
+formats:
+  image: .nii.gz
+  segmentation: .nii.gz
+  prediction: .nii.gz
+```
 
-# Label mapping
+`modality` selects domain behaviour. `formats` selects the storage reader.
+See [Image formats and readers](image_formats.md) for all supported values and
+reader options.
+
+## Feature extraction
+
+```yaml
+data_paths:
+  BraTS: /data/BraTS/images
+
+modality: MRI
+formats:
+  image: .nii.gz
+  segmentation: .nii.gz
+
+sequences:
+  - _t1
+  - _t2
+  - _t1ce
+  - _flair
+
 labels:
   BKG: 0
   EDE: 3
   ENH: 1
   NEC: 2
 
-# Features to extract
 features:
   statistical: true
-  texture: false
+  texture: true
   spatial: true
   tumor: true
 
-# Longitudinal settings
-longitudinal:
-  UCSF:
-    pattern: "_"
-    longitudinal_id: 1
-    time_point: 2
+preprocessing: {}
 
-# Output path
-output_path: '/home/user/AUDIT/outputs/features'
+output_path: ./outputs/features
+logs_path: ./logs/features
+cpu_cores: 8
 ```
 
----
+MRI requires an explicit sequence list. A single-image US dataset normally
+uses `sequences: []`, `modality: US`, and a raster or DICOM format.
 
-## Example: Metric Extraction Config
-
-Defines dataset and prediction paths, label mappings, metrics to compute, and output settings.
+`preprocessing` is passed to the selected modality before feature extraction.
+For example, US currently supports optional min-max normalization:
 
 ```yaml
-# Dataset path
-data_path: '/home/user/AUDIT/datasets/BraTS/BraTS_images'
+preprocessing:
+  normalize: true
+```
 
-# Model predictions
+## Metric extraction
+
+```yaml
+data_path: /data/BraTS/images
+
+modality: MRI
+formats:
+  segmentation: .nii.gz
+  prediction: .nii.gz
+
 model_predictions_paths:
-  nnUnet: '/home/user/AUDIT/datasets/BraTS/BraTS_seg/nnUnet'
+  nnUNet: /data/BraTS/predictions/nnUNet
 
-# Label mapping
 labels:
   BKG: 0
   EDE: 3
   ENH: 1
   NEC: 2
 
-# Metrics to compute
+backend: audit
+
 metrics:
   dice: true
-  jacc: true
-  accu: true
-  prec: true
-  sens: true
-  spec: true
-  haus: true
-  size: true
+  jaccard: true
+  accuracy: true
+  precision: true
+  sensitivity: true
+  specificity: true
+  hausdorff_distance: true
+  predicted_size: true
 
-# Library and output
-package: custom
-calculate_stats: false
-output_path: '/home/user/AUDIT/outputs/metrics'
-filename: 'BraTS'
+output_path: ./outputs/metrics
+filename: BraTS
+logs_path: ./logs/metric
+cpu_cores: 8
 ```
 
----
+The metric names above are the canonical keys for `backend: audit`. pymia and
+Metrics Reloaded expose their own documented metric keys so their additional
+capabilities remain available. Consult the metric availability table before
+switching backends.
 
-## Example: App Config
-
-Defines dataset, feature, and metric paths for the web app.
+## App
 
 ```yaml
+modality: US
+formats:
+  image: .png
+  segmentation: .png
+  prediction: .png
+sequences: []
+
 labels:
   BKG: 0
-  EDE: 3
-  ENH: 1
-  NEC: 2
+  TUMOR: 255
 
-datasets_path: '/home/user/AUDIT/datasets'
-features_path: '/home/user/AUDIT/outputs/features'
-metrics_path: '/home/user/AUDIT/outputs/metrics'
+datasets_path: ./datasets/US
+features_path: ./outputs/features
+metrics_path: ./outputs/metrics
 
 raw_datasets:
-  BraTS: "${datasets_path}/BraTS/BraTS_images"
-  UCSF: "${datasets_path}/UCSF/UCSF_images"
+  BUSI: "${datasets_path}/BUSI/images"
 
 features:
-  BraTS: "${features_path}/extracted_information_BraTS.csv"
-  UCSF: "${features_path}/extracted_information_UCSF.csv"
+  BUSI: "${features_path}/extracted_information_BUSI.csv"
 
 metrics:
-  UCSF: "${metrics_path}/extracted_information_UCSF.csv"
+  BUSI: "${metrics_path}/extracted_information_BUSI.csv"
 
 predictions:
-  UCSF:
-    SegResNet: "${datasets_path}/UCSF/UCSF_seg/SegResNet"
+  BUSI:
+    nnUNet: "${datasets_path}/BUSI/predictions/nnUNet"
 ```
 
----
-
-## Getting Started
-
-- Start from the example configuration files in the repository.
-- Adjust paths and settings to match your environment and project needs.
-- For more details, see the API reference and other documentation sections.
+The app currently uses one global modality, format mapping, and label map.
+Mixed MRI/US datasets and dataset-specific labels are not supported in one
+execution.
 
 !!! tip
-    Consistent configuration ensures reproducible and reliable results.
+    Keep experimental dataset paths in a separate example or local YAML file.
+    The general configuration should describe the reusable workflow rather
+    than a particular experiment.

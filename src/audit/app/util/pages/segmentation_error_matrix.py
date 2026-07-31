@@ -8,10 +8,12 @@ from streamlit_theme import st_theme
 from audit.app.util.commons.checks import none_check
 from audit.app.util.constants.descriptions import SegmentationErrorMatrixPage
 from audit.app.util.pages.base_page import BasePage
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
+from audit.metrics.backends.commons import load_subject_data
 from audit.metrics.error_matrix import errors_per_class
 from audit.metrics.error_matrix import normalize_matrix_per_row
-from audit.utils.external_tools.itk_snap import run_comparison_segmentation_itk_snap
-from audit.utils.sequences.sequences import load_nii_by_subject_id
+from audit.utils.modalities.factory import get_modality
 from audit.visualization.commons import update_segmentation_matrix_plot
 from audit.visualization.confusion_matrices import plt_confusion_matrix
 
@@ -30,6 +32,11 @@ class SegmentationErrorMatrix(BasePage):
         labels_dict = self.config.get("labels")
         predictions = self.config.get("predictions", {})
         raw_datasets = self.config.get("raw_datasets", {})
+        modality_name = self.config.get("modality", "MRI")
+        segmentation_format = resolve_configured_format(self.config, "segmentation", modality_name)
+        prediction_format = resolve_configured_format(self.config, "prediction", modality_name)
+        segmentation_reader_options = resolve_reader_options(self.config, "segmentation")
+        prediction_reader_options = resolve_reader_options(self.config, "prediction")
 
         # Define page layout
         st.subheader(self.descriptions.header)
@@ -71,10 +78,31 @@ class SegmentationErrorMatrix(BasePage):
                 with col1:
                     if selected_id == "All":
                         fig = self.visualize_aggregated(
-                            gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized
+                            gt_path,
+                            pred_path,
+                            subjects_in_path,
+                            labels_dict,
+                            averaged,
+                            normalized,
+                            modality_name,
+                            segmentation_format,
+                            prediction_format,
+                            segmentation_reader_options,
+                            prediction_reader_options,
                         )
                     else:
-                        fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+                        fig = self.visualize_subject_level(
+                            gt_path,
+                            pred_path,
+                            selected_id,
+                            labels_dict,
+                            normalized,
+                            modality_name,
+                            segmentation_format,
+                            prediction_format,
+                            segmentation_reader_options,
+                            prediction_reader_options,
+                        )
                 with col2:
                     update_segmentation_matrix_plot(fig, list(labels_dict.keys()), key="matrix")
                 with col1:
@@ -82,20 +110,46 @@ class SegmentationErrorMatrix(BasePage):
             else:
                 if selected_id == "All":
                     fig = self.visualize_aggregated(
-                        gt_path, pred_path, subjects_in_path, labels_dict, averaged, normalized
+                        gt_path,
+                        pred_path,
+                        subjects_in_path,
+                        labels_dict,
+                        averaged,
+                        normalized,
+                        modality_name,
+                        segmentation_format,
+                        prediction_format,
+                        segmentation_reader_options,
+                        prediction_reader_options,
                     )
                 else:
-                    fig = self.visualize_subject_level(gt_path, pred_path, selected_id, labels_dict, normalized)
+                    fig = self.visualize_subject_level(
+                        gt_path,
+                        pred_path,
+                        selected_id,
+                        labels_dict,
+                        normalized,
+                        modality_name,
+                        segmentation_format,
+                        prediction_format,
+                        segmentation_reader_options,
+                        prediction_reader_options,
+                    )
 
                 st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
             if selected_id != "All":
                 # run itk-snap
-                visualize_itk = st.button("Visualize it in ITK-SNAP")
+                viewer_name = "ITK-SNAP" if modality_name.upper() == "MRI" else "modality viewer"
+                visualize_itk = st.button(f"Visualize it in {viewer_name}")
                 if visualize_itk:
                     try:
-                        run_comparison_segmentation_itk_snap(gt_path, pred_path, selected_id, labels_dict)
-                    except:
+                        opened = get_modality(modality_name).run_comparison_segmentation_viewer(
+                            gt_path, pred_path, selected_id, labels_dict
+                        )
+                        if not opened:
+                            st.info(f"No external comparison viewer is configured for {modality_name}.")
+                    except Exception:
                         st.error("Ups, something went wrong when opening the file in ITK-SNAP", icon="🚨")
 
     @staticmethod
@@ -139,7 +193,17 @@ class SegmentationErrorMatrix(BasePage):
         return cm
 
     @staticmethod
-    def compute_accumulated_confusion_matrix(gt_path, predictions_path, subjects_in_path, labels):
+    def compute_accumulated_confusion_matrix(
+        gt_path,
+        predictions_path,
+        subjects_in_path,
+        labels,
+        modality_name="MRI",
+        segmentation_format=None,
+        prediction_format=None,
+        segmentation_reader_options=None,
+        prediction_reader_options=None,
+    ):
         """
         Compute the accumulated confusion matrix for all subjects.
 
@@ -156,15 +220,35 @@ class SegmentationErrorMatrix(BasePage):
         for subject_id in stqdm(
             subjects_in_path, desc=f"Calculating confusion matrix for {len(subjects_in_path)} subjects"
         ):
-            seg = load_nii_by_subject_id(root_dir=gt_path, subject_id=subject_id, seq="_seg", as_array=True)
-            pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=subject_id, seq="_pred", as_array=True)
+            seg, pred, _ = load_subject_data(
+                gt_path,
+                predictions_path,
+                subject_id,
+                modality_name=modality_name,
+                ground_truth_format=segmentation_format,
+                prediction_format=prediction_format,
+                ground_truth_reader_options=segmentation_reader_options,
+                prediction_reader_options=prediction_reader_options,
+            )
             cm = errors_per_class(seg, pred, list(labels))
             if accumulated is None:
                 accumulated = np.zeros_like(cm)
             accumulated += cm
         return accumulated
 
-    def visualize_subject_level(self, gt_path, predictions_path, selected_id, labels_dict, normalized):
+    def visualize_subject_level(
+        self,
+        gt_path,
+        predictions_path,
+        selected_id,
+        labels_dict,
+        normalized,
+        modality_name="MRI",
+        segmentation_format=None,
+        prediction_format=None,
+        segmentation_reader_options=None,
+        prediction_reader_options=None,
+    ):
         """
         Visualize the confusion matrix for a specific subject.
 
@@ -176,15 +260,36 @@ class SegmentationErrorMatrix(BasePage):
             normalized (bool): Whether to normalize the confusion matrix.
         """
         classes, labels = list(labels_dict.keys()), list(labels_dict.values())
-        seg = load_nii_by_subject_id(root_dir=gt_path, subject_id=selected_id, seq="_seg", as_array=True)
-        pred = load_nii_by_subject_id(root_dir=predictions_path, subject_id=selected_id, seq="_pred", as_array=True)
+        seg, pred, _ = load_subject_data(
+            gt_path,
+            predictions_path,
+            selected_id,
+            modality_name=modality_name,
+            ground_truth_format=segmentation_format,
+            prediction_format=prediction_format,
+            ground_truth_reader_options=segmentation_reader_options,
+            prediction_reader_options=prediction_reader_options,
+        )
 
         cm = self.compute_confusion_matrix(seg, pred, labels, normalized)
         fig = plt_confusion_matrix(cm, classes, theme=self.template, normalized=normalized)
 
         return fig
 
-    def visualize_aggregated(self, gt_path, predictions_path, subjects_in_path, labels_dict, averaged, normalized):
+    def visualize_aggregated(
+        self,
+        gt_path,
+        predictions_path,
+        subjects_in_path,
+        labels_dict,
+        averaged,
+        normalized,
+        modality_name="MRI",
+        segmentation_format=None,
+        prediction_format=None,
+        segmentation_reader_options=None,
+        prediction_reader_options=None,
+    ):
         """
         Visualize the accumulated confusion matrix for all subjects.
 
@@ -198,7 +303,17 @@ class SegmentationErrorMatrix(BasePage):
         """
         classes, labels = list(labels_dict.keys()), list(labels_dict.values())
 
-        accumulated = self.compute_accumulated_confusion_matrix(gt_path, predictions_path, subjects_in_path, labels)
+        accumulated = self.compute_accumulated_confusion_matrix(
+            gt_path,
+            predictions_path,
+            subjects_in_path,
+            labels,
+            modality_name,
+            segmentation_format,
+            prediction_format,
+            segmentation_reader_options,
+            prediction_reader_options,
+        )
 
         if averaged:
             accumulated = (accumulated / len(subjects_in_path)).astype(int)

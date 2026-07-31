@@ -35,7 +35,7 @@ class MultiModelPerformance(BasePage):
         proceed = none_check(metrics_paths=metrics_paths, labels_dict=labels_dict)
         if proceed[0]:
             # Load the data
-            raw_metrics = read_datasets_from_dict(metrics_paths)
+            raw_metrics = read_datasets_from_dict(metrics_paths, normalize_metrics=True)
             agg = self.sidebar.setup_aggregation_button()
 
             # calling main function

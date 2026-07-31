@@ -31,12 +31,12 @@ Calculating multi-threshold/probabilistic pairwise measures
 
 import numpy as np
 
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
+from audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
+from audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
+from audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
+from audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
+from audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
+from audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
 
 __all__ = [
     "ProbabilityPairwiseMeasures",

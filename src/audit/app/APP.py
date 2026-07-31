@@ -75,7 +75,8 @@ class AUDIT:
         st.sidebar.markdown("## Main Menu")
 
         # Sidebar for selecting pages
-        selected_page = st.sidebar.selectbox("Select Page", self.pages, format_func=lambda page: page["title"])
+        selected_title = st.sidebar.selectbox("Select Page", [page["title"] for page in self.pages])
+        selected_page = next(page for page in self.pages if page["title"] == selected_title)
         st.sidebar.markdown("---")
 
         # Run the selected page

@@ -18,11 +18,11 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
-from src.audit.metrics.backends.metrics_reloaded.metrics.calibration_measures import CalibrationMeasures
-from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import MultiClassPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.utility.assignment_localization import AssignmentMapping
+from audit.metrics.backends.metrics_reloaded.metrics.calibration_measures import CalibrationMeasures
+from audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import MultiClassPairwiseMeasures
+from audit.metrics.backends.metrics_reloaded.metrics.prob_pairwise_measures import ProbabilityPairwiseMeasures
+from audit.metrics.backends.metrics_reloaded.utility.assignment_localization import AssignmentMapping
 
 __all__ = [
     "MixedLocSegPairwiseMeasure",

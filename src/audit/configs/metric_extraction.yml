@@ -1,36 +1,36 @@
-# Path to the raw dataset
-data_path: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
+# Reusable MRI/NIfTI template. See configs/examples/curated_busi for US/PNG.
+data_path: '/path/to/dataset_1/images'
 
-# Paths to model predictions
+modality: 'MRI'
+
+formats:
+  image: '.nii.gz'
+  segmentation: '.nii.gz'
+  prediction: '.nii.gz'
+
 model_predictions_paths:
-  nnUnet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/nnUnet'
-  SegResNet: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_seg/SegResNet'
+  modelA: '/path/to/dataset_1/predictions/modelA'
 
-# Mapping of labels to their numeric values
 labels:
   BKG: 0
   EDE: 3
   ENH: 1
   NEC: 2
 
-# Library used for computing all the metrics, e.g., audit, metricsreloaded, pymia
 backend: audit
 
-# List of metrics to compute
+# Canonical names are identical for audit, pymia, and metricsreloaded.
 metrics:
   dice: true
-  jacc: true
-  accu: true
-  prec: true
-  sens: true
-  spec: true
-  haus: true
-  size: true
+  jaccard: true
+  accuracy: true
+  precision: true
+  sensitivity: true
+  specificity: true
+  hausdorff_distance: true
+  predicted_size: true
 
-# Path where output metrics will be saved
-output_path: '/home/usr/AUDIT/outputs/metrics'
-filename: 'BraTS2024_PED'
-logs_path: '/home/usr/AUDIT/logs/metric'
-
-# others
-cpu_cores: 12
+output_path: './outputs/metrics'
+filename: 'dataset_1'
+logs_path: './logs/metric'
+cpu_cores: 8

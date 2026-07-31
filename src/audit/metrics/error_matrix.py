@@ -2,6 +2,9 @@ import numpy as np
 
 
 def errors_per_class(ground_truth, predicted, unique_classes):
+    if ground_truth is None or predicted is None:
+        raise ValueError("Ground truth and prediction are required to compute the error matrix.")
+
     # Find all unique classes present in the ground truth data and predictions
     num_classes = len(unique_classes)
 
@@ -11,6 +14,8 @@ def errors_per_class(ground_truth, predicted, unique_classes):
     # Convert ground truth and predicted to arrays for indexing
     ground_truth = np.array(ground_truth)
     predicted = np.array(predicted)
+    if ground_truth.shape != predicted.shape:
+        raise ValueError(f"Ground truth and prediction shapes differ: {ground_truth.shape} != {predicted.shape}.")
 
     # Calculate indices where ground truth and prediction match
     match_indices = ground_truth == predicted

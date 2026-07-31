@@ -15,7 +15,7 @@ class UnivariatePage(ConstantsAPP):
         self.header = """Univariate feature analysis"""
         self.sub_header = """
             **Description**: The univariate analysis mode provides a comprehensive and interactive visualization of single-variable distributions
-            derived from MRI sequences or ground truth segmentations. This univariate analysis is essential for those
+            derived from medical images or ground truth segmentations. This univariate analysis is essential for those
             users aiming to explore and understand the distribution of individual features in their datasets. The
             dashboard is equipped with interactive controls that allow users to dynamically adjust the visualization
             parameters. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/univariate/) out for more detailed information.
@@ -50,13 +50,13 @@ class MultivariatePage(ConstantsAPP):
         self.header = """Multivariate feature analysis"""
         self.sub_header = """
             **Description**: The multivariate analysis mode allows for an in-depth exploration of the extracted features from
-            magnetic resonance images alongside their corresponding ground truth segmentations. This is achieved
+            medical images alongside their corresponding ground truth segmentations. This is achieved
             through a bidimensional scatter plot that facilitates the visualization of complex relationships between
             different intrinsic features. Check the [official documentation](https://caumente.github.io/AUDIT/analysis_modes/multivariate/) out for more detailed information.
             """
         self.description = """
             Each point in the scatter plot represents a single data instance, allowing users to observe how various
-            features derived from MRI data distribute across different classes. The scatter plot employs two dimensions
+            features derived from medical imaging data distribute across different classes. The scatter plot employs two dimensions
             to plot features against each other. This two-dimensional approach aids in uncovering correlations,
             clusters, and outliers that may not be apparent in a unidimensional analysis. Data points in the scatter
             plot are color-coded to represent different datasets, however, it also allows to color some of the
@@ -227,9 +227,9 @@ class SubjectsExplorationPage(ConstantsAPP):
         """
 
         self.features_explanation = """
-            - __First-order features__: They are statistical measures derived from the pixel intensity values of an MRI image. These features do not consider the spatial arrangement of the pixels, but rather focus on the intensity distribution itself. Examples include: mean, minimum and maximum intensities, standard deviation, skewness, etc.
+            - __First-order features__: They are statistical measures derived from the intensity values of a medical image. These features do not consider the spatial arrangement of the pixels or voxels, but rather focus on the intensity distribution itself. Examples include: mean, minimum and maximum intensities, standard deviation, skewness, etc.
             - __Second-order features__: They focus on the texture of the image, which involves the spatial relationship between pixels. That is, a texture is defined by measuring patterns, repetitions, and variations in pixel intensity. Main second-order features include: entropy, correlation, or contrast.
-            - __Spatial features__: They refer to geometric properties of objects within the MRI image, such as the spatial resolution of the sequences or the organ position within the image.
+            - __Spatial features__: They refer to geometric properties of objects within the image, such as its spatial resolution or the organ position within it.
             - __Tumor features__: They describe the shape and structure of specific regions, especially abnormal regions such as tumors. For instance, tumor size and tumor location, among others.
             - __Metadata (optional)__: They characterize a dataset, including demographic information, patients' age, gender, or location. This information should have been provided by the user as a mapping file at the time of extracting the features.
             """

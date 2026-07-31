@@ -3,11 +3,14 @@ from multiprocessing import Lock
 from multiprocessing import Manager
 from multiprocessing import Pool
 
+import numpy as np
 import pandas as pd
 from colorama import Fore
 from loguru import logger
 
 from audit.features.pipelines.factory import get_feature_pipeline
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_tqdm
 from audit.utils.modalities.factory import get_modality
@@ -48,49 +51,55 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
     numeric_label = params.get("numeric_label")
     label_names = params.get("label_names")
     modality_name = params.get("modality", "MRI")
+    image_format = params.get("image_format")
+    segmentation_format = params.get("segmentation_format", image_format)
+    image_reader_options = params.get("image_reader_options", {})
+    segmentation_reader_options = params.get("segmentation_reader_options", {})
+    preprocessing_options = params.get("preprocessing_options", {})
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
 
     modality = get_modality(modality_name)
 
-    # read sequences and segmentation
-    sequences = modality.read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
-
-    # Try loading segmentation using default modality logic, or fallback to sequences if None provided
-    seg_dict = modality.read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=["_seg"])
-    seg = seg_dict.get("seg")
-
-    # calculating spacing
-    # Retrieve reference sequence image for spacing
-    ref_dict = (
-        modality.read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=[seq_reference])
-        if seq_reference
-        else None
+    # Read arrays and metadata through the storage-format reader selected in
+    # configuration. Modality remains responsible only for domain behaviour.
+    sequence_data = modality.read_sequence_data_dict(
+        root_dir=path_images,
+        subject_id=subject_id,
+        sequences=available_sequences,
+        format_name=image_format,
+        reader_options=image_reader_options,
     )
-
-    # SimpleITK image proxy isn't returned by read_sequences_dict (it returns arrays),
-    # so we'll build an image proxy from the array just to extract spacing if not supported natively.
-    # More correct: Since get_spacing takes SimpleITK.Image, and read_sequences_dict returns np.ndarray,
-    # we need to adapt here by loading it directly, or building it.
-
-    # Since Modality handles spacing we need a proxy image
-    try:
-        ref_arr = (
-            ref_dict.get(seq_reference.replace("_", ""))
-            if ref_dict
-            else next(iter(sequences.values()))
-            if sequences
+    sequences = {
+        key: (
+            modality.preprocess(data.array, **preprocessing_options)
+            if data is not None and preprocessing_options
+            else data.array
+            if data is not None
             else None
         )
-        ref_img = modality.build_image(ref_arr) if ref_arr is not None else None
-        sequences_spacing = modality.get_spacing(img=ref_img)
-    except Exception:
-        sequences_spacing = modality.get_spacing(img=None)
+        for key, data in sequence_data.items()
+    }
 
-    try:
-        seg_img = modality.build_image(seg) if seg is not None else None
-        seg_spacing = modality.get_spacing(img=seg_img)
-    except Exception:
-        seg_spacing = modality.get_spacing(img=None)
+    seg_data = modality.read_sequence_data_dict(
+        root_dir=path_images,
+        subject_id=subject_id,
+        sequences=["_seg"],
+        format_name=segmentation_format,
+        reader_options=segmentation_reader_options,
+    ).get("seg")
+    seg = seg_data.array if seg_data is not None else None
+
+    reference_key = seq_reference.replace("_", "") if seq_reference else None
+    reference_data = sequence_data.get(reference_key) if reference_key is not None else None
+    if reference_data is None and sequence_data:
+        reference_data = next((data for data in sequence_data.values() if data is not None), None)
+    first_sequence = next((sequence for sequence in sequences.values() if sequence is not None), None)
+    sequences_spacing = (
+        reference_data.spacing
+        if reference_data is not None
+        else np.ones(first_sequence.ndim if first_sequence is not None else 1)
+    )
+    seg_spacing = seg_data.spacing if seg_data is not None else np.ones(seg.ndim if seg is not None else 1)
 
     pipeline_class = get_feature_pipeline(modality_name)
     pipeline = pipeline_class(features_to_extract=features_to_extract, modality_name=modality_name, cpu_cores=cpu_cores)
@@ -133,6 +142,11 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
     features_to_extract = [key for key, value in config_file["features"].items() if value]
     modality_name = config_file.get("modality", "MRI")
+    image_format = resolve_configured_format(config_file, "image", modality_name)
+    segmentation_format = resolve_configured_format(config_file, "segmentation", modality_name)
+    image_reader_options = resolve_reader_options(config_file, "image")
+    segmentation_reader_options = resolve_reader_options(config_file, "segmentation")
+    preprocessing_options = config_file.get("preprocessing", {})
 
     modality = get_modality(modality_name)
     available_sequences = config_file.get("sequences")
@@ -163,6 +177,11 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     "features_to_extract": features_to_extract,
                     "available_sequences": available_sequences,
                     "modality": modality_name,
+                    "image_format": image_format,
+                    "segmentation_format": segmentation_format,
+                    "image_reader_options": image_reader_options,
+                    "segmentation_reader_options": segmentation_reader_options,
+                    "preprocessing_options": preprocessing_options,
                 }
 
                 subject_info_df = process_subject(data, params, cpu_cores)
@@ -189,6 +208,11 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                         "features_to_extract": features_to_extract,
                         "available_sequences": available_sequences,
                         "modality": modality_name,
+                        "image_format": image_format,
+                        "segmentation_format": segmentation_format,
+                        "image_reader_options": image_reader_options,
+                        "segmentation_reader_options": segmentation_reader_options,
+                        "preprocessing_options": preprocessing_options,
                     }
                     results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 

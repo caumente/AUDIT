@@ -1,0 +1,35 @@
+# Concrete US/PNG example used for the Curated_BUSI thesis experiment.
+modality: 'US'
+
+formats:
+  image: '.png'
+  segmentation: '.png'
+  prediction: '.png'
+
+sequences: []
+
+labels:
+  BKG: 0
+  TUMOR: 255
+
+datasets_path: './datasets/US'
+features_path: './outputs/features/thesis'
+metrics_path: './outputs/metrics/thesis'
+
+raw_datasets:
+  Curated_BUSI: "${datasets_path}/Curated_BUSI/Curated_BUSI_images"
+
+features:
+  Curated_BUSI: "${features_path}/extracted_information_Curated_BUSI.csv"
+
+metrics:
+  Curated_BUSI: "${metrics_path}/extracted_information_Curated_BUSI_multitask.csv"
+
+predictions:
+  Curated_BUSI:
+    ST: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/ST"
+    ST_DO: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/ST_DO"
+    MT: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/MT"
+    MT_DO: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/MT_DO"
+    MT_PR: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/MT_PR"
+    MT_DO_PR: "${datasets_path}/Curated_BUSI/Curated_BUSI_seg/MT_DO_PR"

@@ -34,18 +34,18 @@ import pandas as pd
 from scipy.optimize import linear_sum_assignment as lsa
 from scipy.spatial.distance import cdist
 
-from src.audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import area_box
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import box_ior
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import box_iou
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import com_from_box
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import compute_box
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import compute_center_of_mass
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import guess_input_style
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import intersection_boxes
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import point_in_box
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import point_in_mask
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import union_boxes
+from audit.metrics.backends.metrics_reloaded.metrics.pairwise_measures import BinaryPairwiseMeasures
+from audit.metrics.backends.metrics_reloaded.utility.utils import area_box
+from audit.metrics.backends.metrics_reloaded.utility.utils import box_ior
+from audit.metrics.backends.metrics_reloaded.utility.utils import box_iou
+from audit.metrics.backends.metrics_reloaded.utility.utils import com_from_box
+from audit.metrics.backends.metrics_reloaded.utility.utils import compute_box
+from audit.metrics.backends.metrics_reloaded.utility.utils import compute_center_of_mass
+from audit.metrics.backends.metrics_reloaded.utility.utils import guess_input_style
+from audit.metrics.backends.metrics_reloaded.utility.utils import intersection_boxes
+from audit.metrics.backends.metrics_reloaded.utility.utils import point_in_box
+from audit.metrics.backends.metrics_reloaded.utility.utils import point_in_mask
+from audit.metrics.backends.metrics_reloaded.utility.utils import union_boxes
 
 __all__ = [
     "AssignmentMapping",

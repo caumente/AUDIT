@@ -21,7 +21,7 @@ allowing users to select those that best fit their specific evaluation needs.
 
 To extract these metrics, use the exact `Attribute name` under the `metrics` section of your configuration file.
 
-### Overlap Metrics
+### Overlap metrics
 
 | Metric Name                     | Attribute Name (Config) |
 |---------------------------------|-------------------------|
@@ -37,7 +37,8 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | Surface Overlap                 | `so`                    |
 | Volume Similarity               | `vs`                    |
 
-### Distance Metrics
+### Distance metrics
+
 | Metric Name                     | Attribute Name (Config) |
 |---------------------------------|-------------------------|
 | Average Distance                | `avd`                   |
@@ -47,7 +48,8 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | Probabilistic Distance          | `prob`                  |
 | Variation Of Information        | `vi`                    |
 
-### Classical Metrics
+### Classical metrics
+
 | Metric Name                     | Attribute Name (Config) |
 |---------------------------------|-------------------------|
 | Accuracy                        | `accu`                  |
@@ -64,13 +66,16 @@ To extract these metrics, use the exact `Attribute name` under the `metrics` sec
 | True Negative Count             | `tn`                    |
 | True Positive Count             | `tp`                    |
 
+## Excluded regression measures
 
-### Regression Metrics
-| Metric Name                     | Attribute Name (Config) |
-|---------------------------------|-------------------------|
-| Coefficient Of Determination    | `cd`                    |
-| Mean Absolute Error             | `mae`                   |
-| Mean Squared Error              | `mse`                   |
-| Root Mean Squared Error         | `rmse`                  |
-| Normalized Root Mean Squared Error | `nrmse`              |
+pymia also implements coefficient of determination (`R²`), MAE, MSE, RMSE,
+and normalized RMSE. AUDIT does not expose them as segmentation metrics. For
+binary masks, MAE and MSE collapse to the same pixel error rate, RMSE is only
+its square root, normalized RMSE is redundant for a 0–1 range, and `R²` is
+strongly driven by foreground prevalence. Accuracy and the overlap metrics are
+more interpretable for this workflow.
 
+Mahalanobis distance remains available because pymia calculates it from the
+foreground coordinates: it measures centroid displacement relative to the
+regions' joint covariance. It should nevertheless be interpreted cautiously
+for very small or geometrically degenerate regions.

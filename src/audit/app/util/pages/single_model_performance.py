@@ -39,7 +39,7 @@ class SingleModelPerformance(BasePage):
         if proceed[0]:
             # Load the data
             features_df = read_datasets_from_dict(features_paths)
-            metrics_df = read_datasets_from_dict(metrics_paths)
+            metrics_df = read_datasets_from_dict(metrics_paths, normalize_metrics=True)
 
             col1, col2 = st.columns([2, 2], gap="small")
             with col1:

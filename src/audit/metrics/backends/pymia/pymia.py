@@ -4,16 +4,26 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pymia.evaluation.evaluator as eval_
-import SimpleITK as sitk
 from colorama import Fore
 from loguru import logger
 from pymia.evaluation.metric import metric
 from pymia.evaluation.writer import CSVStatisticsWriter
 
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
+from audit.metrics.backends.commons import normalize_empty_region_metric
 from audit.metrics.backends.commons import standardize_output
+from audit.metrics.backends.metric_names import normalize_metric_config
+from audit.metrics.backends.metric_names import normalize_metric_names
+from audit.metrics.backends.metric_names import validate_metric_names
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_print
 from audit.utils.commons.strings import fancy_tqdm
+
+# pymia 0.3.2 still references the NumPy 1.x alias when a distance metric
+# encounters an empty mask. Keep the compatibility local to this adapter.
+if not hasattr(np, "Inf"):
+    np.Inf = np.inf
 
 
 def _pivot_and_standardize(raw: list) -> pd.DataFrame:
@@ -24,36 +34,80 @@ def _pivot_and_standardize(raw: list) -> pd.DataFrame:
     return standardize_output(df)
 
 
-def perform_evaluation(pymia_evaluator, path_gt, path_pred, subject):
-    path_gt = os.path.join(str(path_gt), subject, f"{subject}_seg.nii.gz")
-    path_pred = os.path.join(str(path_pred), subject, f"{subject}_pred.nii.gz")
+def perform_evaluation(
+    pymia_evaluator,
+    path_gt,
+    path_pred,
+    subject,
+    modality_name: str = "MRI",
+    ground_truth_format: str = None,
+    prediction_format: str = None,
+    ground_truth_reader_options: dict = None,
+    prediction_reader_options: dict = None,
+):
+    from audit.metrics.backends.commons import load_subject_data
+    from audit.utils.modalities.factory import get_modality
+
+    modality = get_modality(modality_name)
 
     try:
-        if not os.path.exists(path_gt):
-            raise FileNotFoundError(f'Ground truth file "{path_gt}" does not exist')
-        if not os.path.exists(path_pred):
-            raise FileNotFoundError(f'Prediction file "{path_pred}" does not exist')
+        gt_arr, pred_arr, spacing = load_subject_data(
+            path_gt,
+            path_pred,
+            subject,
+            modality_name=modality_name,
+            ground_truth_format=ground_truth_format,
+            prediction_format=prediction_format,
+            ground_truth_reader_options=ground_truth_reader_options,
+            prediction_reader_options=prediction_reader_options,
+        )
 
-        ground_truth = sitk.ReadImage(path_gt)
-        prediction = sitk.ReadImage(path_pred)
+        # Pymia evaluates SimpleITK images. The reader layer already validated
+        # shape and supplied spacing aligned with NumPy axes.
+        if gt_arr.dtype not in (np.uint8, np.int32):
+            gt_arr = gt_arr.astype(np.int32)
+        if pred_arr.dtype not in (np.uint8, np.int32):
+            pred_arr = pred_arr.astype(np.int32)
+
+        ground_truth = modality.build_image(gt_arr)
+        prediction = modality.build_image(pred_arr)
+        ground_truth.SetSpacing(tuple(spacing[::-1]))
+        prediction.SetSpacing(tuple(spacing[::-1]))
         pymia_evaluator.evaluate(prediction, ground_truth, subject)
-    except Exception as e:
-        print(f"{subject} -> {e}")
+        for label_value, label_name in pymia_evaluator.labels.items():
+            label_values = label_value if isinstance(label_value, tuple) else [label_value]
+            ground_truth_present = bool(np.isin(gt_arr, label_values).any())
+            prediction_present = bool(np.isin(pred_arr, label_values).any())
+            for result in pymia_evaluator.results:
+                if result.id_ == subject and result.label == label_name:
+                    result.value = normalize_empty_region_metric(
+                        result.metric,
+                        result.value,
+                        ground_truth_present,
+                        prediction_present,
+                    )
+    except Exception as exc:
+        raise RuntimeError(f"Pymia evaluation failed for subject '{subject}': {exc}") from exc
 
     return pymia_evaluator
 
 
 def aggregate_results(pymia_evaluator, model_name: str) -> list:
-    return [
-        {
-            "ID": result.id_,
-            "region": result.label,
-            "metric": result.metric,
-            "value": result.value,
-            "model": model_name,
-        }
-        for result in pymia_evaluator.results
-    ]
+    aggregated = []
+    for result in pymia_evaluator.results:
+        value = result.value
+        if np.isscalar(value) and not np.isfinite(value):
+            value = np.nan
+        aggregated.append(
+            {
+                "ID": result.id_,
+                "region": result.label,
+                "metric": result.metric,
+                "value": value,
+                "model": model_name,
+            }
+        )
+    return aggregated
 
 
 def compute_statistics(pymia_evaluator, config, model_name: str):
@@ -79,13 +133,8 @@ def compute_statistics(pymia_evaluator, config, model_name: str):
 
 def instantiate_pymia_metrics(selected_metrics: list) -> list:
     """Map config metric keys to pymia metric objects."""
+    selected_metrics = normalize_metric_names(selected_metrics, "pymia")
     metric_map = {
-        # Regression
-        "cd": (metric.CoefficientOfDetermination, {}),
-        "mae": (metric.MeanAbsoluteError, {}),
-        "mse": (metric.MeanSquaredError, {}),
-        "rmse": (metric.RootMeanSquaredError, {}),
-        "nrmse": (metric.NormalizedRootMeanSquaredError, {}),
         # Overlap
         "ari": (metric.AdjustedRandIndex, {}),
         "auc": (metric.AreaUnderCurve, {}),
@@ -143,8 +192,15 @@ def extract_pymia_metrics(config_file) -> pd.DataFrame:
             processed_labels[value] = key
 
     path_ground_truth_dataset = config_file["data_path"]
-    metrics_to_extract = [key for key, value in config_file["metrics"].items() if value]
+    metrics_config = normalize_metric_config(config_file["metrics"], "pymia")
+    metrics_to_extract = [key for key, value in metrics_config.items() if value]
+    validate_metric_names(metrics_to_extract, "pymia")
     subjects_list = list_dirs(path_ground_truth_dataset)
+    modality_name = config_file.get("modality", "MRI")
+    ground_truth_format = resolve_configured_format(config_file, "segmentation", modality_name)
+    prediction_format = resolve_configured_format(config_file, "prediction", modality_name)
+    ground_truth_reader_options = resolve_reader_options(config_file, "segmentation")
+    prediction_reader_options = resolve_reader_options(config_file, "prediction")
 
     pymia_metrics = instantiate_pymia_metrics(metrics_to_extract)
     evaluator = eval_.SegmentationEvaluator(pymia_metrics, processed_labels)
@@ -165,7 +221,17 @@ def extract_pymia_metrics(config_file) -> pd.DataFrame:
                     fancy_print(f"Processed {n} subjects", Fore.CYAN, "🔹")
 
                 logger.info(f"Processing subject: {subject_id}")
-                evaluator = perform_evaluation(evaluator, path_ground_truth_dataset, path_predictions, subject_id)
+                evaluator = perform_evaluation(
+                    evaluator,
+                    path_ground_truth_dataset,
+                    path_predictions,
+                    subject_id,
+                    modality_name=modality_name,
+                    ground_truth_format=ground_truth_format,
+                    prediction_format=prediction_format,
+                    ground_truth_reader_options=ground_truth_reader_options,
+                    prediction_reader_options=prediction_reader_options,
+                )
 
         # collect this model's results, then clear the evaluator for the next model
         all_raw_metrics.extend(aggregate_results(evaluator, model_name))

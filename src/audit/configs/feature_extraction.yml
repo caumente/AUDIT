@@ -1,46 +1,33 @@
-# Paths to all the datasets
+# Reusable MRI/NIfTI template. See configs/examples/curated_busi for US/PNG.
 data_paths:
-  BraTS2020: '/home/usr/AUDIT/datasets/BraTS2020/BraTS2020_images'
-  BraTS2024_PED: '/home/usr/AUDIT/datasets/BraTS2024_PED/BraTS2024_PED_images'
-  BraTS2024_SSA: '/home/usr/AUDIT/datasets/BraTS2024_SSA/BraTS2024_SSA_images'
-  UCSF: '/home/usr/AUDIT/datasets/UCSF/UCSF_images'
-  LUMIERE: '/home/usr/AUDIT/datasets/LUMIERE/LUMIERE_images'
+  dataset_1: '/path/to/dataset_1/images'
 
-# Sequences available
+modality: 'MRI'
+
+formats:
+  image: '.nii.gz'
+  segmentation: '.nii.gz'
+
 sequences:
   - '_t1'
   - '_t2'
   - '_t1ce'
   - '_flair'
 
-# Mapping of labels to their numeric values
 labels:
   BKG: 0
   EDE: 3
   ENH: 1
   NEC: 2
 
-# List of features to extract
 features:
   statistical: true
   texture: true
   spatial: true
   tumor: true
 
-# Longitudinal study settings
-longitudinal:
-  UCSF:
-    pattern: "_"            # Pattern used for splitting filename
-    longitudinal_id: 1      # Index position for the subject ID after splitting the filename. Starting by 0
-    time_point: 2           # Index position for the time point after splitting the filename. Starting by 0
-  LUMIERE:
-    pattern: "-"
-    longitudinal_id: 1
-    time_point: 3
+preprocessing: {}
 
-# Path where extracted features will be saved
-output_path: '/home/usr/AUDIT/outputs/features'
-logs_path: '/home/usr/AUDIT/logs/features'
-
-# others
+output_path: './outputs/features'
+logs_path: './logs/features'
 cpu_cores: 8

@@ -3,19 +3,17 @@ from multiprocessing import Lock
 from multiprocessing import Manager
 from multiprocessing import Pool
 
+import numpy as np
 import pandas as pd
 from colorama import Fore
 from loguru import logger
 
-from audit.features.spatial import SpatialFeatures
-from audit.features.statistical import StatisticalFeatures
-from audit.features.texture import TextureFeatures
-from audit.features.tumor import TumorFeatures
+from audit.features.pipelines.factory import get_feature_pipeline
+from audit.io.readers import resolve_configured_format
+from audit.io.readers import resolve_reader_options
 from audit.utils.commons.file_manager import list_dirs
 from audit.utils.commons.strings import fancy_tqdm
-from audit.utils.sequences.sequences import get_spacing
-from audit.utils.sequences.sequences import load_nii_by_subject_id
-from audit.utils.sequences.sequences import read_sequences_dict
+from audit.utils.modalities.factory import get_modality
 
 
 @logger.catch
@@ -52,45 +50,69 @@ def process_subject(data: pd.DataFrame, params: dict, cpu_cores: int) -> pd.Data
     features_to_extract = params.get("features_to_extract")
     numeric_label = params.get("numeric_label")
     label_names = params.get("label_names")
+    modality_name = params.get("modality", "MRI")
+    image_format = params.get("image_format")
+    segmentation_format = params.get("segmentation_format", image_format)
+    image_reader_options = params.get("image_reader_options", {})
+    segmentation_reader_options = params.get("segmentation_reader_options", {})
+    preprocessing_options = params.get("preprocessing_options", {})
     spatial_features, tumor_features, stats_features, texture_feats = {}, {}, {}, {}
 
-    # read sequences and segmentation
-    sequences = read_sequences_dict(root_dir=path_images, subject_id=subject_id, sequences=available_sequences)
-    seg = load_nii_by_subject_id(root_dir=path_images, subject_id=subject_id, as_array=True)
+    modality = get_modality(modality_name)
 
-    # calculating spacing
-    sequences_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, seq_reference))
-    seg_spacing = get_spacing(img=load_nii_by_subject_id(path_images, subject_id, "_seg"))
+    # Read arrays and metadata through the storage-format reader selected in
+    # configuration. Modality remains responsible only for domain behaviour.
+    sequence_data = modality.read_sequence_data_dict(
+        root_dir=path_images,
+        subject_id=subject_id,
+        sequences=available_sequences,
+        format_name=image_format,
+        reader_options=image_reader_options,
+    )
+    sequences = {
+        key: (
+            modality.preprocess(data.array, **preprocessing_options)
+            if data is not None and preprocessing_options
+            else data.array
+            if data is not None
+            else None
+        )
+        for key, data in sequence_data.items()
+    }
 
-    # extract first order (statistical) information from sequences
-    if "statistical" in features_to_extract:
-        stats_features = {
-            key: StatisticalFeatures(seq[seq > 0]).extract_features()
-            for key, seq in sequences.items()
-            if seq is not None
-        }
+    seg_data = modality.read_sequence_data_dict(
+        root_dir=path_images,
+        subject_id=subject_id,
+        sequences=["_seg"],
+        format_name=segmentation_format,
+        reader_options=segmentation_reader_options,
+    ).get("seg")
+    seg = seg_data.array if seg_data is not None else None
 
-    # extract second order (texture) information from sequences
-    if "texture" in features_to_extract:
-        texture_feats = {
-            key: TextureFeatures(seq, remove_empty_planes=True).extract_features()
-            for key, seq in sequences.items()
-            if seq is not None
-        }
+    reference_key = seq_reference.replace("_", "") if seq_reference else None
+    reference_data = sequence_data.get(reference_key) if reference_key is not None else None
+    if reference_data is None and sequence_data:
+        reference_data = next((data for data in sequence_data.values() if data is not None), None)
+    first_sequence = next((sequence for sequence in sequences.values() if sequence is not None), None)
+    sequences_spacing = (
+        reference_data.spacing
+        if reference_data is not None
+        else np.ones(first_sequence.ndim if first_sequence is not None else 1)
+    )
+    seg_spacing = seg_data.spacing if seg_data is not None else np.ones(seg.ndim if seg is not None else 1)
 
-    # calculate spatial features (dimensions and center mass)
-    if "spatial" in features_to_extract:
-        sf = SpatialFeatures(sequence=sequences.get(seq_reference.replace("_", "")), spacing=sequences_spacing)
-        spatial_features = sf.extract_features()
+    pipeline_class = get_feature_pipeline(modality_name)
+    pipeline = pipeline_class(features_to_extract=features_to_extract, modality_name=modality_name, cpu_cores=cpu_cores)
 
-    # calculate tumor features
-    if "tumor" in features_to_extract:
-        tf = TumorFeatures(segmentation=seg, spacing=seg_spacing, mapping_names=dict(zip(numeric_label, label_names)))
-        tumor_features = tf.extract_features(sf.center_mass.values() if "spatial" in features_to_extract else {})
-
-    # Add info to the main df
-    subject_info_df = store_subject_information(
-        subject_id, spatial_features, tumor_features, stats_features, texture_feats
+    subject_info_df = pipeline.extract(
+        subject_id=subject_id,
+        sequences=sequences,
+        segmentation=seg,
+        sequences_spacing=sequences_spacing,
+        seg_spacing=seg_spacing,
+        seq_reference=seq_reference,
+        numeric_label=numeric_label,
+        label_names=label_names,
     )
 
     if cpu_cores == 1:
@@ -119,8 +141,20 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     # get configuration
     label_names, numeric_label = list(config_file["labels"].keys()), list(config_file["labels"].values())
     features_to_extract = [key for key, value in config_file["features"].items() if value]
+    modality_name = config_file.get("modality", "MRI")
+    image_format = resolve_configured_format(config_file, "image", modality_name)
+    segmentation_format = resolve_configured_format(config_file, "segmentation", modality_name)
+    image_reader_options = resolve_reader_options(config_file, "image")
+    segmentation_reader_options = resolve_reader_options(config_file, "segmentation")
+    preprocessing_options = config_file.get("preprocessing", {})
+
+    modality = get_modality(modality_name)
     available_sequences = config_file.get("sequences")
-    seq_reference = available_sequences[0]
+    if available_sequences is None:
+        available_sequences = modality.get_default_sequences()
+
+    seq_reference = available_sequences[0] if available_sequences else None
+
     subjects_list = list_dirs(path_images)
     cpu_cores = check_multiprocessing(config_file)
 
@@ -142,6 +176,12 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                     "seq_reference": seq_reference,
                     "features_to_extract": features_to_extract,
                     "available_sequences": available_sequences,
+                    "modality": modality_name,
+                    "image_format": image_format,
+                    "segmentation_format": segmentation_format,
+                    "image_reader_options": image_reader_options,
+                    "segmentation_reader_options": segmentation_reader_options,
+                    "preprocessing_options": preprocessing_options,
                 }
 
                 subject_info_df = process_subject(data, params, cpu_cores)
@@ -167,6 +207,12 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
                         "seq_reference": seq_reference,
                         "features_to_extract": features_to_extract,
                         "available_sequences": available_sequences,
+                        "modality": modality_name,
+                        "image_format": image_format,
+                        "segmentation_format": segmentation_format,
+                        "image_reader_options": image_reader_options,
+                        "segmentation_reader_options": segmentation_reader_options,
+                        "preprocessing_options": preprocessing_options,
                     }
                     results.append(pool.apply_async(process_subject, args=(shared_data, params, cpu_cores)))
 
@@ -183,48 +229,6 @@ def extract_features(path_images: str, config_file: dict, dataset_name: str) -> 
     data = load_and_merge_metadata(data, config_file, dataset_name)
 
     return data.sort_values(by="ID")
-
-
-def store_subject_information(
-    subject_id: str, spatial_features: dict, tumor_features: dict, stats_features: dict, texture_feats: dict
-) -> pd.DataFrame:
-    """
-    Stores the extracted features for a single subject in a DataFrame.
-
-    Args:
-        subject_id (str): The ID of the subject.
-        spatial_features (dict): A dictionary containing spatial features extracted from the subject's images.
-        tumor_features (dict): A dictionary containing tumor features extracted from the subject's segmentation.
-        stats_features (dict): A dictionary containing statistical features extracted from the subject's images.
-        texture_feats (dict): A dictionary containing texture features extracted from the subject's images.
-
-    Returns:
-        pd.DataFrame: A DataFrame with the subject's ID and all extracted features, structured as a single row.
-    """
-
-    # storing information about subject
-    subject_info = {"ID": subject_id}
-
-    # including spatial information
-    subject_info.update(spatial_features)
-
-    # including tumor information
-    subject_info.update(tumor_features)
-
-    # including stats information
-    for seq, dict_stats in stats_features.items():
-        prefixed_stats = {f"{seq}_{k}": v for k, v in dict_stats.items()}
-        subject_info.update(prefixed_stats)
-
-    # including texture information
-    for seq, dict_stats in texture_feats.items():
-        prefixed_textures = {f"{seq}_{k}": v for k, v in dict_stats.items()}
-        subject_info.update(prefixed_textures)
-
-    # from dict to dataframe
-    subject_info_df = pd.DataFrame(subject_info, index=[0])
-
-    return subject_info_df
 
 
 def extract_longitudinal_info(config: dict, df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
@@ -247,15 +251,41 @@ def extract_longitudinal_info(config: dict, df: pd.DataFrame, dataset_name: str)
         pd.DataFrame: The updated DataFrame with new columns `longitudinal_id` and `time_point`.
     """
 
-    longitudinal = config.get("longitudinal", {}).get(dataset_name, None)
-    if longitudinal:
+    longitudinal_global = config.get("longitudinal")
+
+    # Check if the key exists but is empty/malformed
+    if not longitudinal_global or not isinstance(longitudinal_global, dict):
+        if "longitudinal" in config:
+            logger.warning(
+                "The 'longitudinal' key exists in the configuration but contains no valid data. Skipping longitudinal extraction."
+            )
+        df["longitudinal_id"] = ""
+        df["time_point"] = 0
+        return df
+
+    longitudinal = longitudinal_global.get(dataset_name)
+
+    if longitudinal and isinstance(longitudinal, dict):
         pattern = longitudinal.get("pattern")
         longitudinal_id = longitudinal.get("longitudinal_id")
         time_point = longitudinal.get("time_point")
-        df[["longitudinal_id", "time_point"]] = (
-            df["ID"].str.split(pattern, expand=True).iloc[:, [longitudinal_id, time_point]]
-        )
-        df["time_point"] = df["time_point"].astype(int)
+
+        if pattern is not None and longitudinal_id is not None and time_point is not None:
+            try:
+                df[["longitudinal_id", "time_point"]] = (
+                    df["ID"].str.split(pattern, expand=True).iloc[:, [longitudinal_id, time_point]]
+                )
+                df["time_point"] = df["time_point"].astype(int)
+            except Exception as e:
+                logger.error(f"Error parsing longitudinal info for {dataset_name} using pattern '{pattern}': {e}")
+                df["longitudinal_id"] = ""
+                df["time_point"] = 0
+        else:
+            logger.warning(
+                f"Incomplete longitudinal configuration for dataset '{dataset_name}'. Missing 'pattern', 'longitudinal_id', or 'time_point'."
+            )
+            df["longitudinal_id"] = ""
+            df["time_point"] = 0
     else:
         df["longitudinal_id"] = ""
         df["time_point"] = 0

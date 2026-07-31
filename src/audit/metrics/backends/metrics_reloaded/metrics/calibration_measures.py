@@ -18,14 +18,14 @@ import numpy as np
 from scipy.special import gamma
 
 # from metrics.pairwise_measures import CacheFunctionOutput
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import median_heuristic
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import one_hot_encode
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
+from audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
+from audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_less
+from audit.metrics.backends.metrics_reloaded.utility.utils import max_x_at_y_more
+from audit.metrics.backends.metrics_reloaded.utility.utils import median_heuristic
+from audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_less
+from audit.metrics.backends.metrics_reloaded.utility.utils import min_x_at_y_more
+from audit.metrics.backends.metrics_reloaded.utility.utils import one_hot_encode
+from audit.metrics.backends.metrics_reloaded.utility.utils import trapezoidal_integration
 
 __all__ = [
     "CalibrationMeasures",

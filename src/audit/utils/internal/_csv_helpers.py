@@ -2,6 +2,28 @@ import os
 
 import pandas as pd
 
+METRIC_COLUMN_ALIASES = {
+    # Legacy AUDIT output
+    "DICE": "dice",
+    "HAUS": "hausdorff_distance",
+    "JACC": "jaccard",
+    "ACCU": "accuracy",
+    "PREC": "precision",
+    "SPEC": "specificity",
+    "SENS": "sensitivity",
+    "SIZE": "predicted_size",
+}
+
+
+def normalize_metric_columns(data: pd.DataFrame) -> pd.DataFrame:
+    """Translate legacy/backend output columns to AUDIT's public vocabulary."""
+    rename = {
+        source: target
+        for source, target in METRIC_COLUMN_ALIASES.items()
+        if source in data.columns and target not in data.columns
+    }
+    return data.rename(columns=rename)
+
 
 def concatenate_csv_files(path: str, output_file: str):
     """
@@ -18,7 +40,9 @@ def concatenate_csv_files(path: str, output_file: str):
     print(f"Concatenated CSV files saved to: {output_file}")
 
 
-def read_datasets_from_dict(name_path_dict: dict, col_name: str = "set") -> pd.DataFrame:
+def read_datasets_from_dict(
+    name_path_dict: dict, col_name: str = "set", normalize_metrics: bool = False
+) -> pd.DataFrame:
     """
     Reads multiple datasets from a dictionary of name-root_dir pairs and concatenates them into a single DataFrame.
 
@@ -34,6 +58,8 @@ def read_datasets_from_dict(name_path_dict: dict, col_name: str = "set") -> pd.D
     out = []
     for name, path in name_path_dict.items():
         data = pd.read_csv(path)
+        if normalize_metrics:
+            data = normalize_metric_columns(data)
         data[col_name] = name
         out.append(data)
     out = pd.concat(out)

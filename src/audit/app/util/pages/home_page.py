@@ -77,7 +77,8 @@ class HomePage(BasePage):
         st.write(
             """
             AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence, is a tool designed to provide
-            researchers and developers an interactive way to better analyze and explore MRI datasets and segmentation models.
+            researchers and developers an interactive way to better analyze and explore medical imaging datasets and
+            segmentation models.
             Given its functionalities to extract the most relevant features and metrics from your several data sources, it
             allows for uncovering biases both intra and inter-dataset as well as within the model predictions. Some of the main
             capabilities of AUDIT are presented below:
@@ -85,7 +86,7 @@ class HomePage(BasePage):
         )
         st.markdown(
             """
-            - **Data management**: Easily work and preprocess MRIs from various sources.
+            - **Data management**: Easily work with and preprocess medical images from various sources and modalities.
             - **Feature extraction**: Extract relevant features from the images and their segmentations for analysis.
             - **Model robustness**: Assess model generalization by evaluating its performance across several experiments
                                     and conditions.

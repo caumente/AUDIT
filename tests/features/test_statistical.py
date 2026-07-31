@@ -7,7 +7,7 @@ import pytest
 from scipy.stats import kurtosis
 from scipy.stats import skew
 
-from src.audit.features.statistical import StatisticalFeatures
+from src.audit.features.extractors.statistical import StatisticalFeatures
 
 
 @pytest.fixture

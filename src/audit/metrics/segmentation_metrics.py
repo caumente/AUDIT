@@ -5,6 +5,8 @@ from numpy import logical_and as l_and
 from numpy import logical_not as l_not
 from scipy.spatial.distance import directed_hausdorff
 
+from audit.metrics.backends.metric_names import normalize_metric_names
+
 
 def one_hot_encoding(segmentation, labels, skip_background=True):
     """
@@ -85,9 +87,10 @@ def calculate_metrics(
     """
     assert segmentation.shape == ground_truth.shape, "Predicted segmentation and ground truth do not have the same size"
 
-    if skip_background and "BKG" in regions:
-        regions.remove("BKG")
+    if skip_background:
+        regions = [region for region in regions if region != "BKG"]
 
+    metrics = normalize_metric_names(metrics)
     metrics_list = []
     for n, r in enumerate(regions):
         output_metrics = dict(ID=subject, region=r)
@@ -101,18 +104,18 @@ def calculate_metrics(
 
         # compute selected metrics
         available_metrics = {
-            "haus": lambda: hausdorff_distance(gt, seg),
+            "hausdorff_distance": lambda: hausdorff_distance(gt, seg, spacing=spacing),
             "dice": lambda: dice_score(tp, fp, fn, gt, seg),
-            "sens": lambda: sensitivity(tp, fn),
-            "spec": lambda: specificity(tn, fp),
-            "accu": lambda: accuracy(tp, tn, fp, fn),
-            "jacc": lambda: jaccard_index(tp, fp, fn, gt, seg),
-            "prec": lambda: precision(tp, fp),
-            "size": lambda: Counter(seg.flatten()).get(1, np.nan) * spacing.prod(),
+            "sensitivity": lambda: sensitivity(tp, fn),
+            "specificity": lambda: specificity(tn, fp),
+            "accuracy": lambda: accuracy(tp, tn, fp, fn),
+            "jaccard": lambda: jaccard_index(tp, fp, fn, gt, seg),
+            "precision": lambda: precision(tp, fp),
+            "predicted_size": lambda: Counter(seg.flatten()).get(1, 0) * spacing.prod(),
         }
         for metric in metrics:
             if metric in available_metrics:
-                output_metrics[metric.upper()] = available_metrics[metric]()
+                output_metrics[metric] = available_metrics[metric]()
 
         metrics_list.append(output_metrics)
 
@@ -124,12 +127,8 @@ def sensitivity(tp: float, fn: float) -> float:
     The sensitivity is intuitively the ability of the classifier to find all tumor voxels.
     """
 
-    if tp == 0:
-        sens = np.nan
-    else:
-        sens = tp / (tp + fn)
-
-    return sens
+    denominator = tp + fn
+    return np.nan if denominator == 0 else tp / denominator
 
 
 def specificity(tn: float, fp: float) -> float:
@@ -137,9 +136,8 @@ def specificity(tn: float, fp: float) -> float:
     The specificity is intuitively the ability of the classifier to find all non-tumor voxels.
     """
 
-    spec = tn / (tn + fp)
-
-    return spec
+    denominator = tn + fp
+    return np.nan if denominator == 0 else tn / denominator
 
 
 def precision(tp: float, fp: float) -> float:
@@ -153,12 +151,8 @@ def precision(tp: float, fp: float) -> float:
     Returns:
     - prec (float): Precision score.
     """
-    if tp == 0:
-        prec = np.nan
-    else:
-        prec = tp / (tp + fp)
-
-    return prec
+    denominator = tp + fp
+    return 0.0 if denominator == 0 else tp / denominator
 
 
 def accuracy(tp: float, tn: float, fp: float, fn: float) -> float:
@@ -174,9 +168,8 @@ def accuracy(tp: float, tn: float, fp: float, fn: float) -> float:
     Returns:
     - accu (float): Accuracy score.
     """
-    accu = (tp + tn) / (tp + tn + fp + fn)
-
-    return accu
+    denominator = tp + tn + fp + fn
+    return np.nan if denominator == 0 else (tp + tn) / denominator
 
 
 def dice_score(tp: float, fp: float, fn: float, gt: np.ndarray, seg: np.ndarray) -> float:
@@ -223,7 +216,7 @@ def jaccard_index(tp: float, fp: float, fn: float, gt: np.ndarray, seg: np.ndarr
     return jac
 
 
-def hausdorff_distance(gt: np.ndarray, seg: np.ndarray) -> float:
+def hausdorff_distance(gt: np.ndarray, seg: np.ndarray, spacing: np.ndarray = None) -> float:
     """
     Computes the Hausdorff distance.
 
@@ -246,6 +239,14 @@ def hausdorff_distance(gt: np.ndarray, seg: np.ndarray) -> float:
     if np.sum(seg) == 0:
         return np.nan
 
-    hd = directed_hausdorff(np.argwhere(seg), np.argwhere(gt))[0]
+    spacing = np.ones(gt.ndim, dtype=float) if spacing is None else np.asarray(spacing, dtype=float)
+    if spacing.size != gt.ndim:
+        raise ValueError(f"Spacing dimension {spacing.size} does not match segmentation dimension {gt.ndim}.")
+
+    gt_coordinates = np.argwhere(gt) * spacing
+    seg_coordinates = np.argwhere(seg) * spacing
+    forward = directed_hausdorff(seg_coordinates, gt_coordinates)[0]
+    backward = directed_hausdorff(gt_coordinates, seg_coordinates)[0]
+    hd = max(forward, backward)
 
     return hd

@@ -25,11 +25,11 @@ from scipy.optimize import linear_sum_assignment as lsa
 from scipy.spatial.distance import cdist
 from skimage.morphology import skeletonize
 
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import MorphologyOps
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import compute_center_of_mass
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import compute_skeleton
-from src.audit.metrics.backends.metrics_reloaded.utility.utils import one_hot_encode
+from audit.metrics.backends.metrics_reloaded.utility.utils import CacheFunctionOutput
+from audit.metrics.backends.metrics_reloaded.utility.utils import MorphologyOps
+from audit.metrics.backends.metrics_reloaded.utility.utils import compute_center_of_mass
+from audit.metrics.backends.metrics_reloaded.utility.utils import compute_skeleton
+from audit.metrics.backends.metrics_reloaded.utility.utils import one_hot_encode
 
 __all__ = [
     "MultiClassPairwiseMeasures",
@@ -224,6 +224,7 @@ class BinaryPairwiseMeasures(object):
             "ec": (self.normalised_expected_cost, "ECn"),
             "ba": (self.balanced_accuracy, "BalAcc"),
             "cohens_kappa": (self.cohens_kappa, "CohensKappa"),
+            "wck": (self.weighted_cohens_kappa, "WeightedCohensKappa"),
             "lr+": (self.positive_likelihood_ratio, "LR+"),
             "iou": (self.intersection_over_union, "IoU"),
             "fbeta": (self.fbeta, "FBeta"),
@@ -578,6 +579,16 @@ class BinaryPairwiseMeasures(object):
         cohens_kappa = numerator / denominator
         return cohens_kappa
 
+    def weighted_cohens_kappa(self):
+        """Return weighted Cohen's kappa for the binary one-vs-rest task.
+
+        With the default unit cost for the two off-diagonal errors, weighted
+        and unweighted Cohen's kappa are identical for a binary label. The
+        dedicated key is retained because Metrics Reloaded documents ``wck``
+        and because it keeps configuration compatible with multiclass usage.
+        """
+        return self.cohens_kappa()
+
     def positive_likelihood_ratio(self):
         """
         Calculates the positive likelihood ratio
@@ -867,10 +878,12 @@ class BinaryPairwiseMeasures(object):
         :return: avdr
 
         """
-        if self.n_pos_ref() == 0:
+        reference_size = float(self.n_pos_ref())
+        prediction_size = float(self.n_pos_pred())
+        if reference_size == 0:
             warnings.warn("Empty reference - absolute volume difference ratio not defined")
             return np.nan
-        avdr = np.abs(self.n_pos_ref() - self.n_pos_pred()) / self.n_pos_ref()
+        avdr = abs(reference_size - prediction_size) / reference_size
         return avdr
 
     @CacheFunctionOutput

@@ -6,6 +6,13 @@ from pathlib import Path
 import yaml
 from loguru import logger
 
+from audit.io.readers import normalize_format
+from audit.io.readers import resolve_reader_options
+from audit.metrics.backends.metric_names import LEGACY_METRIC_ALIASES
+from audit.metrics.backends.metric_names import normalize_metric_config
+from audit.metrics.backends.metric_names import validate_metric_names
+from audit.utils.modalities.factory import get_modality
+
 
 def load_config_file(path: str) -> dict:
     """
@@ -28,13 +35,22 @@ def load_config_file(path: str) -> dict:
             elif isinstance(value, dict):
                 replace_variables(value, variables)
 
-    # Resolve the absolute root_dir based on the current file's path
-    base_dir = Path(__file__).resolve().parent.parent.parent  # Adjust the depth according to your project
-    absolute_path = base_dir / path
+    requested_path = Path(path).expanduser()
+    package_dir = Path(__file__).resolve().parent.parent.parent
 
-    # Validate if the file exists
+    if requested_path.is_absolute():
+        absolute_path = requested_path
+    else:
+        user_path = Path.cwd() / requested_path
+        packaged_path = package_dir / requested_path
+        absolute_path = user_path if user_path.exists() else packaged_path
+
     if not absolute_path.exists():
-        raise FileNotFoundError(f"Config file not found: {absolute_path}")
+        raise FileNotFoundError(
+            "Config file not found. Checked user path "
+            f"'{Path.cwd() / requested_path}' and packaged path "
+            f"'{package_dir / requested_path}'."
+        )
 
     # Load the YAML file
     with open(absolute_path, "r") as file:
@@ -52,7 +68,16 @@ def init_app_yaml(dest: Path):
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     yaml_content = """\
-# Sequences available. First of them will be used to compute properties like spacing
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
+
+# Storage formats are independent from modality
+formats:
+  image: '.nii.gz'
+  segmentation: '.nii.gz'
+  prediction: '.nii.gz'
+
+# Sequences available. Optional if modality is not MRI.
 sequences:
   - '_t1'
   - '_t2'
@@ -109,7 +134,15 @@ data_paths:
   dataset_1: '/path/to/dataset_1/images'
   dataset_2: '/path/to/dataset_2/images'
 
-# Sequences available
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
+
+# Storage formats are independent from modality
+formats:
+  image: '.nii.gz'
+  segmentation: '.nii.gz'
+
+# Sequences available. Optional if modality is not MRI.
 sequences:
   - '_t1'
   - '_t2'
@@ -129,6 +162,9 @@ features:
   texture: true
   spatial: true
   tumor: true
+
+# Optional modality-specific preprocessing arguments
+preprocessing: {}
 
 # Longitudinal study settings
 longitudinal:
@@ -155,6 +191,15 @@ def init_metric_extraction_yaml(dest: Path):
     yaml_content = """\
 # Path to the raw dataset
 data_path: '/path/to/dataset_2/images'
+
+# Imaging Modality (e.g., MRI, US)
+modality: 'MRI'
+
+# Storage formats are independent from modality
+formats:
+  image: '.nii.gz'
+  segmentation: '.nii.gz'
+  prediction: '.nii.gz'
 
 # Paths to model predictions
 model_predictions_paths:
@@ -244,10 +289,16 @@ def check_feature_extraction_config(config: dict) -> None:
     if not config.get("labels"):
         logger.error("Missing labels key in the feature_extraction.yml file")
         sys.exit(1)
-
-    if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extraction.yml file")
+    if not isinstance(config.get("preprocessing", {}), dict):
+        logger.error("'preprocessing' must be a mapping in the feature_extraction.yml file")
         sys.exit(1)
+
+    # Modality and sequence enforcement
+    modality = _check_modality_and_formats(config, required_format_keys=("image", "segmentation"))
+    if modality.upper() == "MRI":
+        if not config.get("sequences"):
+            logger.error("Missing sequences key in the feature_extraction.yml file. It is required for MRI.")
+            sys.exit(1)
 
 
 def check_metric_extraction_config(config: dict) -> None:
@@ -286,17 +337,30 @@ def check_metric_extraction_config(config: dict) -> None:
         logger.error("Missing labels key in the metric_extraction.yml file")
         sys.exit(1)
 
+    if not config.get("backend"):
+        logger.error("Missing backend key in the metric_extraction.yml file")
+        sys.exit(1)
+
     if not config.get("metrics"):
         logger.error("Missing metrics key in the metric_extraction.yml file")
         sys.exit(1)
-
-    if not config.get("backend"):
-        logger.error("Missing backend key in the metric_extraction.yml file")
+    try:
+        backend = config["backend"]
+        legacy_names = sorted(set(config["metrics"]) & set(LEGACY_METRIC_ALIASES)) if backend == "audit" else []
+        if legacy_names:
+            replacements = ", ".join(f"{name} -> {LEGACY_METRIC_ALIASES[name]}" for name in legacy_names)
+            logger.warning(f"Deprecated AUDIT metric names in configuration: {replacements}")
+        config["metrics"] = normalize_metric_config(config["metrics"], backend)
+        validate_metric_names([key for key, enabled in config["metrics"].items() if enabled], backend)
+    except ValueError as exc:
+        logger.error(str(exc))
         sys.exit(1)
 
     if not config.get("filename"):
         logger.error("Missing filename key in the metric_extraction.yml file")
         sys.exit(1)
+
+    _check_modality_and_formats(config, required_format_keys=("segmentation", "prediction"))
 
 
 def check_app_config(config: dict) -> None:
@@ -341,12 +405,62 @@ def check_app_config(config: dict) -> None:
 
     # Ensure features, labels, and sequences are not empty
     if not config.get("labels"):
-        logger.error("Missing labels key in the feature_extraction.yml file")
+        logger.error("Missing labels key in the app.yml file")
         sys.exit(1)
 
-    if not config.get("sequences"):
-        logger.error("Missing sequences key in the feature_extraction.yml file")
+    # Modality and sequence enforcement
+    modality = _check_modality_and_formats(config, required_format_keys=("image", "segmentation", "prediction"))
+    if modality.upper() == "MRI":
+        if not config.get("sequences"):
+            logger.error("Missing sequences key in the app.yml file. It is required for MRI.")
+            sys.exit(1)
+
+
+def _check_modality_and_formats(config: dict, required_format_keys: tuple[str, ...]) -> str:
+    modality = config.get("modality", "MRI")
+    try:
+        get_modality(modality)
+    except (AttributeError, ValueError) as exc:
+        logger.error(str(exc))
         sys.exit(1)
+
+    for key in required_format_keys:
+        try:
+            resolve_reader_options(config, key)
+        except ValueError as exc:
+            logger.error(str(exc))
+            sys.exit(1)
+
+    formats = config.get("formats")
+    if formats is None:
+        logger.warning(
+            "Missing 'formats' configuration. Using legacy defaults; add explicit image/segmentation/prediction formats."
+        )
+        return modality
+    if isinstance(formats, str):
+        try:
+            normalize_format(formats)
+        except ValueError as exc:
+            logger.error(str(exc))
+            sys.exit(1)
+        return modality
+    if not isinstance(formats, dict):
+        logger.error("'formats' must be a format string or a mapping.")
+        sys.exit(1)
+
+    for key in required_format_keys:
+        value = formats.get(key)
+        if value is None and key == "prediction":
+            value = formats.get("segmentation")
+        if value is None:
+            logger.error(f"Missing formats.{key} in configuration.")
+            sys.exit(1)
+        try:
+            normalize_format(value)
+        except ValueError as exc:
+            logger.error(str(exc))
+            sys.exit(1)
+    return modality
 
 
 def configure_logging(log_filename: str):

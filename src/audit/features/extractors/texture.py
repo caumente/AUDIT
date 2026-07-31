@@ -2,6 +2,7 @@ import numpy as np
 from skimage.feature import graycomatrix
 from skimage.feature import graycoprops
 
+from audit.utils.sequences.sequences import crop_nonzero_region
 from audit.utils.sequences.sequences import fit_brain_boundaries
 
 
@@ -55,11 +56,19 @@ class TextureFeatures:
             return np.nan
 
         sequence = self.sequence.copy()
+        # TODO: each modality and organ might have their own particularities. Excluding empty/constant planes
         if self.remove_empty_planes:
-            sequence = fit_brain_boundaries(self.sequence)
+            sequence = crop_nonzero_region(self.sequence)
+            # sequence = fit_brain_boundaries(self.sequence)
 
-        # Normalize the image to values between 0 and 255
-        image_array = (255 * (sequence - np.min(sequence)) / (np.max(sequence) - np.min(sequence))).astype(np.uint8)
+        # Normalize the image to values between 0 and 255. A non-zero
+        # constant image has a valid (uniform) GLCM and must not divide by 0.
+        sequence_min = np.min(sequence)
+        sequence_range = np.max(sequence) - sequence_min
+        if sequence_range == 0:
+            image_array = np.zeros_like(sequence, dtype=np.uint8)
+        else:
+            image_array = (255 * (sequence - sequence_min) / sequence_range).astype(np.uint8)
 
         # Define distances and angles for GLCM calculation
         distances = [1]
@@ -68,18 +77,38 @@ class TextureFeatures:
         # Initialize a list to store the texture values for each plane
         texture_values = []
 
-        # Iterate over each 2D plane in the Z dimension
-        for z in range(image_array.shape[0]):
-            plane = image_array[z, :, :]
+        dims = len(image_array.shape)
 
-            # Compute GLCM for the current plane
+        # Iterate over each 2D plane in the Z dimension if 3D, otherwise just process the single plane
+        if dims >= 3:
+            for z in range(image_array.shape[0]):
+                plane = image_array[z, :, :]
+
+                # TODO: each modality and organ might have their own particularities. Excluding empty/constant planes
+                # if np.all(plane == 0):
+                #     continue
+                # if np.all(plane == plane.flat[0]): possible solution when values are the same in a slice but not zero (CT)
+                #     continue
+
+                # Compute GLCM for the current plane
+                glcm = graycomatrix(plane, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
+
+                # Compute the texture feature using skimage.feature.graycoprops
+                feature_value = graycoprops(glcm, prop=texture).mean()
+
+                # Store the texture value
+                texture_values.append(feature_value)
+        elif dims == 2:
+            plane = image_array
+
+            # Compute GLCM for the single 2D plane. An all-zero normalized
+            # plane can represent a non-zero constant source image.
             glcm = graycomatrix(plane, distances=distances, angles=angles, levels=256, symmetric=True, normed=True)
-
-            # Compute the texture feature using skimage.feature.graycoprops
             feature_value = graycoprops(glcm, prop=texture).mean()
-
-            # Store the texture value of the current plane
             texture_values.append(feature_value)
+
+        if not texture_values:
+            return np.array([np.nan])
 
         return np.array(texture_values)
 

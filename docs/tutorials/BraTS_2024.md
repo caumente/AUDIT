@@ -681,7 +681,7 @@ performance of models BraTS_3A and BraTS_3B on the UCSF subset.
 
 
 > ![Pairwise patient-level performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-light)
-> ![Pairwise patient-level performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_pairwise_per_patient_d.png#only-dark)
+> ![Pairwise patient-level performance analysis for BraTS25_3A and BraTS25_3B models](./../assets/tutorials/brats2024_pairwise_per_patient_l.png#only-dark)
 > *Figure 8:* Comparison results between models BraTS25_3A and BraTS25_3B at the subject level.
 
  
@@ -697,5 +697,4 @@ for those patients for which performance was poor, to understand what the weakne
 Throughout this tutorial we have presented some of the features that AUDIT provides. It not only allows analyzing 
 differences in distributions, but its strength lies in model evaluation and low-level comparison—analyses that often 
 go unnoticed when presenting results in the field of medical imaging.
-
 

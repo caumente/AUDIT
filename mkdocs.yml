@@ -45,6 +45,7 @@ nav:
     - Installation: getting_started/installation.md
     - Project structure: getting_started/project_structure.md
     - Configuration file: getting_started/configuration.md
+    - Image formats and readers: getting_started/image_formats.md
     - Run backend: getting_started/run_backend.md
     - Run APP: getting_started/run_app.md
     - Additional notes: getting_started/additional_notes.md
@@ -57,6 +58,7 @@ nav:
       - Spatial features: API_reference/features/spatial.md
     - Metric extraction:
       - API_reference/metrics/index.md
+      - Availability by backend: API_reference/metrics/availability.md
       - AUDIT custom: API_reference/metrics/audit_metrics.md
       - Metrics Reloaded: API_reference/metrics/metrics_reloaded.md
       - Pymia: API_reference/metrics/pymia_metrics.md

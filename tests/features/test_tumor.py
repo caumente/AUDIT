@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 import numpy as np
 import pytest
 
-from src.audit.features.tumor import TumorFeatures
+from src.audit.features.extractors.tumor import TumorFeatures
 
 
 @pytest.fixture

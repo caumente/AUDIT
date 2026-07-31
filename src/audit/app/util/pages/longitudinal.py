@@ -33,7 +33,7 @@ class Longitudinal(BasePage):
         if proceed[0]:
             # Reading feature data
             features_df = read_datasets_from_dict(features_paths)
-            metrics_df = read_datasets_from_dict(metrics_paths)
+            metrics_df = read_datasets_from_dict(metrics_paths, normalize_metrics=True)
             merged = self.merge_features_metrics(features_df, metrics_df)
 
             if not merged.empty:
@@ -71,19 +71,16 @@ class Longitudinal(BasePage):
     @staticmethod
     def merge_features_metrics(features_df, metrics_df):
         features_df = features_df.loc[~features_df["longitudinal_id"].isna(), :]
-        col_map = {
-            "SIZE": "audit",
-            "numb_pred": "metrics_reloaded",
-            "pred_vol": "pymia",
-        }
-
-        col = next((c for c in col_map if c in metrics_df.columns), None)
-        if col:
+        size_column = next(
+            (name for name in ("predicted_size", "pred_vol", "numb_pred") if name in metrics_df.columns),
+            None,
+        )
+        if size_column is not None:
             metrics_df = (
-                metrics_df.groupby(["ID", "model", "set"])[col]
+                metrics_df.groupby(["ID", "model", "set"])[size_column]
                 .sum()
                 .reset_index()
-                .rename(columns={col: "lesion_size_pred"})
+                .rename(columns={size_column: "lesion_size_pred"})
             )
         elif "lesion_size_pred" in metrics_df.columns:
             metrics_df = metrics_df.groupby(["ID", "model", "set"])["lesion_size_pred"].sum().reset_index()

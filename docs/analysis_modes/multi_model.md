@@ -109,13 +109,13 @@ AUDIT natively supports the following metrics:
 | Metric           | Description                                                                                       | Interpretation              |
 |:------------------|:--------------------------------------------------------------------------------------------------|:-----------------------------|
 | `dice`           | Dice coefficient; measures the overlap between predicted and ground truth masks.                  | Higher is better            |
-| `jacc`           | Jaccard Index (Intersection over Union); similar to Dice but penalizes false positives more.      | Higher is better            |
-| `accu`           | Accuracy; proportion of correctly classified voxels across all classes.                           | Higher is better            |
-| `prec`           | Precision; proportion of predicted positives that are true positives (i.e., few false positives). | Higher is better            |
-| `sens`           | Sensitivity (Recall); proportion of true positives detected (i.e., few false negatives).          | Higher is better            |
-| `spec`           | Specificity; proportion of true negatives correctly identified.                                   | Higher is better            |
-| `haus`           | Hausdorff distance (95% percentile); measures the worst-case boundary error.                      | Lower is better             |
-| `lesion_size`    | Total volume of the predicted lesion, in mm³.                                                     | Application-dependent       |
+| `jaccard`        | Jaccard Index (Intersection over Union); similar to Dice but penalizes false positives more.      | Higher is better            |
+| `accuracy`       | Accuracy; proportion of correctly classified voxels across all classes.                           | Higher is better            |
+| `precision`      | Precision; proportion of predicted positives that are true positives (i.e., few false positives). | Higher is better            |
+| `sensitivity`    | Sensitivity (Recall); proportion of true positives detected (i.e., few false negatives).          | Higher is better            |
+| `specificity`    | Specificity; proportion of true negatives correctly identified.                                   | Higher is better            |
+| `hausdorff_distance` | Hausdorff distance (100th percentile); measures the worst-case boundary error.                 | Lower is better             |
+| `predicted_size` | Physical size of the predicted region (volume in 3D or area in 2D).                              | Application-dependent       |
 
 Each metric offers insight into different aspects of model performance:
 
@@ -125,7 +125,7 @@ Each metric offers insight into different aspects of model performance:
 - **Lesion size** serves as a complementary indicator to understand under- or over-segmentation.
 
 !!! warning
-    Some metrics (especially `dice`, `haus`, or `lesion_size`) may behave differently across regions with different sizes.  
+    Some metrics (especially `dice`, `hausdorff_distance`, or `predicted_size`) may behave differently across regions with different sizes.
     Small structures are more sensitive to minor errors, so always interpret values in context.
 
 ---

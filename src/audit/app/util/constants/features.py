@@ -1,12 +1,16 @@
 class Features:
     def __init__(self, config):
-        self.sequences = (
-            ["T1", "T1ce", "T2", "FLAIR"]
-            if config is None
-            else [s[1:] if s.startswith("_") else s for s in config.get("sequences")]
-        )
-        self.lesion_regions = list(config.get("labels").keys())
-        self.planes = ["Axial", "Coronal", "Sagittal"]
+        config = config or {}
+        self.modality = config.get("modality", "MRI").upper()
+        sequences_param = config.get("sequences")
+        if sequences_param is None:
+            self.sequences = ["T1", "T1ce", "T2", "FLAIR"] if self.modality == "MRI" else [""]
+        else:
+            self.sequences = [s[1:] if s.startswith("_") else s for s in sequences_param]
+            if not self.sequences and self.modality != "MRI":
+                self.sequences = [""]
+        self.lesion_regions = list(config.get("labels", {}).keys())
+        self.planes = ["Axial", "Coronal", "Sagittal"] if self.modality == "MRI" else ["Height", "Width"]
         self.categories = ["Statistical", "Texture", "Spatial", "Tumor"]
         self.metadata_cols = config.get("metadata_cols", [])
 
@@ -39,7 +43,11 @@ class Features:
             "Kurtosis",
         ]
         return {
-            f"{metric} ({sequence})": f"{sequence.lower()}_{metric.lower().replace('.', '').replace(' ', '_').replace('-', '_')}"
+            f"{metric} ({sequence})"
+            if sequence
+            else metric: f"{sequence.lower()}_{metric.lower().replace('.', '').replace(' ', '_').replace('-', '_')}"
+            if sequence
+            else metric.lower().replace(".", "").replace(" ", "_").replace("-", "_")
             for metric in metrics
             for sequence in self.sequences
         }
@@ -49,10 +57,14 @@ class Features:
         Generate spatial features dynamically based on planes
         """
 
-        features = {f"{dim} plane resolution": f"{dim.lower()}_plane_resolution" for dim in self.planes}
-        features.update(
-            {f"{plane} plane center of mass": f"{plane.lower()}_plane_center_of_mass" for plane in self.planes}
-        )
+        if self.modality == "MRI":
+            features = {f"{dim} plane resolution": f"{dim.lower()}_plane_resolution" for dim in self.planes}
+            features.update(
+                {f"{plane} plane center of mass": f"{plane.lower()}_plane_center_of_mass" for plane in self.planes}
+            )
+        else:
+            features = {f"{dim} resolution": f"{dim.lower()}_resolution" for dim in self.planes}
+            features.update({f"{dim} center of mass": f"{dim.lower()}_center_of_mass" for dim in self.planes})
         return features
 
     def _generate_texture_features(self):
@@ -63,7 +75,11 @@ class Features:
         textures = ["contrast", "correlation", "dissimilarity", "energy", "homogeneity", "ASM"]
 
         return {
-            f"{metric} {texture} ({sequence})": f"{sequence.lower()}_{metric.lower()}_{texture.lower()}"
+            f"{metric} {texture} ({sequence})"
+            if sequence
+            else f"{metric} {texture}": f"{sequence.lower()}_{metric.lower()}_{texture.lower()}"
+            if sequence
+            else f"{metric.lower()}_{texture.lower()}"
             for metric in metrics
             for texture in textures
             for sequence in self.sequences
@@ -77,10 +93,7 @@ class Features:
         tumor_features = {}
 
         tumor_features.update(
-            {
-                f"Number of tumor slices ({plane})": f"{plane.lower()}_tumor_slices".replace(" ", "_")
-                for plane in self.planes
-            }
+            {f"Number of tumor slices ({plane})": f"{plane.lower()}_tumor_slices" for plane in self.planes}
         )
 
         tumor_features.update(
@@ -109,9 +122,11 @@ class Features:
 
         tumor_features.update(
             {
-                f"{plane} plane tumor center of mass ({region_renamed.get(region, region)})": f"{plane.lower()}_{region_renamed.get(region, region).lower()}_center_mass".replace(
-                    " ", "_"
-                )
+                (
+                    f"{plane} plane tumor center of mass ({region_renamed.get(region, region)})"
+                    if self.modality == "MRI"
+                    else f"{plane} tumor center of mass ({region_renamed.get(region, region)})"
+                ): f"{plane.lower()}_{region_renamed.get(region, region).lower()}_center_mass"
                 for region in self.lesion_regions
                 for plane in self.planes
             }

@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 import numpy as np
 import pytest
 
-from src.audit.features.spatial import SpatialFeatures
+from src.audit.features.extractors.spatial import SpatialFeatures
 
 
 @pytest.fixture

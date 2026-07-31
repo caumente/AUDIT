@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "auditapp"
-version = "0.1.2"
+version = "0.2.0"
 description = "AUDIT, Analysis & evalUation Dashboard of artIficial inTelligence"
 authors = ["Carlos Aumente Maestro <carlosaumente@gmail.com>"]
 license = "Apache-2.0"
@@ -15,6 +15,7 @@ keywords=[
     'medical image analysis',
     'deep learning',
     'mri',
+    'ultrasound',
     'model evaluation',
     'dashboard'
 ]
@@ -25,7 +26,7 @@ classifiers=[
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: Apache Software License',
     'Natural Language :: English',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.10',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
     'Topic :: Scientific/Engineering :: Image Processing',
@@ -45,6 +46,7 @@ numpy = "2.2.1"
 pandas = "2.2.3"
 pillow = "10.4.0"
 plotly = "5.22.0"
+pyarrow = "19.0.0"
 pymia = "0.3.2"
 pyyaml = "6.0.2"
 scikit-image = "0.25.0"
